@@ -1,11 +1,36 @@
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
 import { randomUUID } from 'node:crypto';
-import { MetadataService, parsePlaylistEntry } from '../electron/metadata';
+import {
+  MetadataService,
+  parsePlaylistEntry,
+  commonToolArgs,
+  toolEnvironment,
+} from '../electron/metadata';
 import { youtubeSource } from '../shared/youtube';
 import { CancelledError, runProcess } from '../electron/processes';
-const tools = { ytdlp: '', ffmpeg: '', ffprobe: '', deno: '' };
+const tools = { ytdlp: '', ffmpeg: '', ffprobe: '', node: process.execPath };
 const url = 'https://www.youtube.com/playlist?list=PL1234567890abcdef';
+
+test('runtime usa caminho explícito do Node, desativa descoberta e isola o ambiente do subprocesso', async () => {
+  const toolsWithSpaces = { ...tools, node: '/Aplicativo com espaços/Vora.exe' };
+  const args = commonToolArgs(toolsWithSpaces);
+  assert.ok(args.indexOf('--no-js-runtimes') < args.indexOf('--js-runtimes'));
+  assert.equal(args[args.indexOf('--js-runtimes') + 1], 'node:/Aplicativo com espaços/Vora.exe');
+  const previous = process.env.ELECTRON_RUN_AS_NODE;
+  const env = toolEnvironment();
+  assert.equal(env.ELECTRON_RUN_AS_NODE, '1');
+  assert.equal(env.NODE_OPTIONS, undefined);
+  assert.equal(process.env.ELECTRON_RUN_AS_NODE, previous);
+  assert.equal(
+    (
+      await runProcess(process.execPath, ['-e', 'console.log(process.env.ELECTRON_RUN_AS_NODE)'], {
+        env,
+      })
+    ).trim(),
+    '1',
+  );
+});
 async function complete(service: MetadataService, id: string) {
   for (let i = 0; i < 100; i++) {
     if (service.page(id, 0).state !== 'loading') return;
@@ -191,7 +216,8 @@ test('prévia leve funciona sem formatos, usa cache e análise de execução per
   assert.ok(full.audio);
   assert.equal(requests.length, 2);
   assert.ok(!requests[1].includes('--ignore-no-formats-error'));
-  assert.ok(!requests[1].includes('--no-js-runtimes'));
+  assert.equal(requests[1].filter((arg) => arg === '--no-js-runtimes').length, 1);
+  assert.ok(requests[1].includes(`node:${process.execPath}`));
 });
 
 test('prévia recusa dados de outro vídeo e não inventa duração ou imagem externa', async () => {

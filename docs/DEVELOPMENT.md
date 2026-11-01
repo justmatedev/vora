@@ -2,7 +2,7 @@
 
 [Voltar ao projeto](../README.md)
 
-Requisitos: Node.js **22.12 ou superior**, npm e ambiente gráfico Linux ou Windows x64. Para preparar os arquivos `.tar.xz` no Linux, instale `tar` com suporte a xz. O usuário final não precisa de Node.js, Python, FFmpeg ou Deno instalados separadamente.
+Requisitos: Node.js **22.12 ou superior**, npm e ambiente gráfico Linux ou Windows x64. Para preparar os arquivos `.tar.xz` no Linux, instale `tar` com suporte a xz. O usuário final não precisa de Node.js, Python ou FFmpeg instalados separadamente.
 
 ```sh
 npm ci
@@ -10,7 +10,7 @@ npm run tools:fetch
 npm run dev
 ```
 
-`tools:fetch` baixa os executáveis oficiais de yt-dlp e Deno e o build LGPL de FFmpeg/ffprobe do BtbN. As URLs, versões e checksums estão em `resources/tools.lock.json`; os downloads são verificados antes da instalação. O Electron é preparado por `predev` (ou manualmente com `npm run electron:install`).
+`tools:fetch` baixa os executável oficial de yt-dlp e o build LGPL de FFmpeg/ffprobe do BtbN. As URLs, versões e checksums estão em `resources/tools.lock.json`; os downloads são verificados antes da instalação. O Electron é preparado por `predev` (ou manualmente com `npm run electron:install`).
 
 A interface usa atualização automática no desenvolvimento. Alterações no processo principal ou preload são recompiladas, mas exigem reiniciar `npm run dev`. `npm run dev:ui` permite inspecionar somente a interface no navegador; análise e download requerem o aplicativo Electron.
 
@@ -70,3 +70,7 @@ Os testes de interface não substituem um teste real de download. Para validaç�
 A interface não tem acesso ao Node.js. O preload expõe apenas operações específicas, com origem e frame verificados no processo principal. Os processos externos são executados sem shell e os IDs de formato são conferidos contra a análise do próprio item, realizada antes da execução. O aplicativo empacotado usa protocolo local próprio e CSP. Não são carregados módulos JavaScript remotos durante o uso.
 
 O YouTube pode alterar formatos, exigir autenticação ou recusar solicitações. O aplicativo informa essas falhas; não promete disponibilidade permanente. Atualize yt-dlp com sua distribuição EJS e teste novamente quando necessário.
+
+## Runtime do yt-dlp
+
+O runtime JavaScript é o Node.js já incluído no Electron. O aplicativo passa o caminho absoluto de seu próprio executável ao yt-dlp e define `ELECTRON_RUN_AS_NODE=1` somente para esses subprocessos. Não depende de Node ou Deno instalados no sistema. O teste Electron verifica a detecção do runtime pelo yt-dlp real.

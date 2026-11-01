@@ -64,7 +64,7 @@ try {
       if (asset.kind === 'zip') await extract(archive, { dir: unpacked });
       else await promisify(execFile)('tar', ['-xJf', archive, '-C', unpacked]);
       const files = await walk(unpacked);
-      for (const executable of asset.name === 'ffmpeg' ? ['ffmpeg', 'ffprobe'] : ['deno']) {
+      for (const executable of ['ffmpeg', 'ffprobe']) {
         const file = files.find((path) => basename(path) === executable + suffix);
         if (!file) throw new Error(`Executável ausente no arquivo: ${executable}`);
         await copyFile(file, join(stage, executable + suffix));
@@ -78,7 +78,6 @@ try {
   }
   const licenses = [
     ['yt-dlp', 'https://raw.githubusercontent.com/yt-dlp/yt-dlp/2026.10.26/LICENSE'],
-    ['Deno', 'https://raw.githubusercontent.com/denoland/deno/v2.9.8/LICENSE.md'],
     ['FFmpeg-LGPL-2.1', 'https://raw.githubusercontent.com/FFmpeg/FFmpeg/n8.1.3/COPYING.LGPLv2.1'],
   ];
   for (const [name, url] of licenses) await download(url, join(stage, 'licenses', `${name}.txt`));
@@ -89,7 +88,7 @@ try {
       throw new Error(`Aviso de terceiros alterado: ${notice.file}`);
     await copyFile(path, join(stage, 'licenses', notice.file));
   }
-  for (const executable of ['yt-dlp', 'deno', 'ffmpeg', 'ffprobe']) {
+  for (const executable of ['yt-dlp', 'ffmpeg', 'ffprobe']) {
     const filename = executable + suffix,
       path = join(stage, filename);
     await chmod(path, 0o755);

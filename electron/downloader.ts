@@ -8,14 +8,14 @@ import { friendlyError } from './media';
 import { CancelledError, runProcess } from './processes';
 import { parseProgress, PROGRESS_ARGUMENTS, TransferTracker } from './progress';
 import { publishUnique } from './files';
-import { commonToolArgs } from './metadata';
+import { commonToolArgs, toolEnvironment } from './metadata';
 import { RecoveryStore, SESSION_MARKER, type DownloadSession } from './recovery';
 
 export interface ToolPaths {
   ytdlp: string;
   ffmpeg: string;
   ffprobe: string;
-  deno: string;
+  node: string;
 }
 
 export function downloadArguments(info: VideoInfo, request: DownloadRequest): string[] {
@@ -144,6 +144,7 @@ export class Downloader {
           ],
           {
             signal,
+            env: toolEnvironment(),
             timeout: 24 * 60 * 60 * 1000,
             onLine,
             maxOutput: 32 * 1024 * 1024,

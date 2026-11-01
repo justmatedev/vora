@@ -26,7 +26,7 @@ const tools = {
   ytdlp: '/not-used/ytdlp',
   ffmpeg: '/not-used/ffmpeg',
   ffprobe: '/not-used/ffprobe',
-  deno: '/not-used/deno',
+  node: process.execPath,
 };
 
 test('destino removido retorna orientação para escolher outra pasta', async () => {

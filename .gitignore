@@ -39,3 +39,7 @@ blob-report/
 *.swp
 *.swo
 *~
+
+# Ferramentas de manutenção Python
+__pycache__/
+*.py[cod]

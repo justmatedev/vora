@@ -1,3 +1,14 @@
+# Runtime embutido e fontes correspondentes — 1 de novembro de 2026
+
+- Com autorização do mantenedor, Deno separado substituído pelo Node.js incluído no Electron. O runtime é passado ao yt-dlp por caminho absoluto; ELECTRON_RUN_AS_NODE é aplicado apenas ao ambiente dos subprocessos. Node continua desabilitado na interface.
+- 75 testes do núcleo passaram no Linux, incluindo seleção explícita do runtime, caminho com espaços e isolamento do ambiente. Quatro testes com ferramentas reais e um teste Electron passaram. O teste Electron também confirma que o yt-dlp reconhece o Node do próprio aplicativo.
+- Análise online real de Big Buck Bunny (aqz-KE-bpKQ) usando o Node do Electron retornou sete opções compatíveis, dez originais e áudio disponível. Nenhum arquivo desse vídeo foi baixado nesta consulta.
+- Fontes FFmpeg da revisão 8dca1586f468bfcbb78ae3ed618af1361d9f140a e receitas 5031c6f1082414e53688d39e521849905071070d preservadas, com logs das variantes originais e cache oficial contendo 129 arquivos de dependências. Avisos coletados também de cabeçalhos quando não havia LICENSE separado. Manifestos registram origem e SHA-256.
+- Fontes preparadas para anexação ao rascunho em cinco arquivos mais SOURCES-SHA256SUMS. Os materiais de desenvolvimento são separados dos instaladores. O cache inclui variantes opcionais não usadas nos nossos binários.
+- Workflow de pacotes ampliado para verificar Node/yt-dlp no pacote de cada sistema e ausência de Deno. Nova geração dos pacotes e validação do AppImage em andamento; teste manual do instalador Windows continua pendente.
+
+---
+
 # Preparação dos pacotes para Release — 1 de novembro de 2026
 
 - Ajustes de URL e documentação enviados no commit `fdef5a5`.

@@ -13,6 +13,7 @@ export interface RunOptions {
   maxOutput?: number;
   onSpawn?: (pid: number) => Promise<void> | void;
   captureOutput?: boolean;
+  env?: NodeJS.ProcessEnv;
 }
 
 /** Resolves only after the child and its process tree have stopped. */
@@ -31,6 +32,7 @@ export function runProcess(
       detached: process.platform !== 'win32',
       stdio: ['ignore', 'pipe', 'pipe'],
       shell: false,
+      env: options.env,
     });
     let output = '',
       errors = '',

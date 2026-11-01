@@ -14,7 +14,7 @@ O campo `private: true` impede publicação acidental no npm; a visibilidade no 
 
 O workflow **Verificações** roda em pushes, pull requests e por acionamento manual. Confere testes do núcleo e build no Linux/Windows, além da interface no Linux. Não consulta o YouTube nem baixa os binários de mídia nesses jobs.
 
-O workflow **Gerar pacotes** é manual, na aba Actions. Ele prepara as ferramentas fixadas, executa os testes do núcleo e gera AppImage no Linux e NSIS no Windows. Os artefatos ficam disponíveis por 14 dias e incluem SHA256SUMS. Não há publicação automática de Releases nem assinatura digital. A geração automatizada de Linux e Windows passou na [execução 41352682628](https://github.com/justmatedev/vora/actions/runs/41352682628), no commit `b8523ff`. A execução gera artefatos de teste; a publicação continua condicionada às pendências de THIRD_PARTY.md e à validação dos aplicativos.
+O workflow **Gerar pacotes** é manual, na aba Actions. Após empacotar, verifica no sistema nativo se o yt-dlp reconhece o Node do aplicativo e se Deno está ausente. Ele prepara as ferramentas fixadas, executa os testes do núcleo e gera AppImage no Linux e NSIS no Windows. Os artefatos ficam disponíveis por 14 dias e incluem SHA256SUMS. Não há publicação automática de Releases nem assinatura digital. A geração automatizada de Linux e Windows passou na [execução 41352682628](https://github.com/justmatedev/vora/actions/runs/41352682628), no commit `b8523ff`. A execução gera artefatos de teste; a publicação continua condicionada às pendências de THIRD_PARTY.md e à validação dos aplicativos.
 
 O CI do commit `b8523ff` passou nos três jobs: núcleo/build Linux, núcleo/build Windows e interface Linux. [Registro da execução](https://github.com/justmatedev/vora/actions/runs/41352683014). Isso não inclui teste do instalador Windows ou dos binários de mídia.
 
@@ -31,3 +31,11 @@ Os workflows seguem a [documentação de CI Node.js do GitHub](https://docs.gith
 7. Crie uma tag como `v0.5.1` para o commit validado e uma Release no GitHub, com notas de versão, AppImage, instalador e SHA256SUMS. Use rascunho enquanto a revisão estiver pendente.
 
 As versões dos binários estão em `resources/tools.lock.json`. Os assets datados do FFmpeg podem expirar; uma falha no download exige atualização deliberada de versão, URL e checksum, sem substituição silenciosa por `latest`.
+
+## Preservar as fontes do FFmpeg
+
+Os materiais da versão 0.5.1 foram reunidos da execução oficial BtbN `41199749965`, artefato `download-cache` ID `13042311561`, receitas `5031c6f1082414e53688d39e521849905071070d` e FFmpeg `8dca1586f468bfcbb78ae3ed618af1361d9f140a`. Os logs dos jobs `124536872122` (Linux) e `124536872118` (Windows) registram a configuração original.
+
+Para uma manutenção futura, baixe esses materiais pela API do GitHub/gh e execute `scripts/prepare-ffmpeg-sources.py` com os argumentos `--cache`, `--recipes`, `--ffmpeg-source`, `--linux-log`, `--windows-log` e `--output`. Essa ferramenta de manutenção requer Python 3.12 ou superior; o aplicativo e o build normal não requerem Python. O script lê os arquivos como dados e gera o inventário, avisos e partes do cache, sem executar o código baixado.
+
+Preserve os arquivos de fonte na Release, separados dos instaladores, junto com `SOURCES-SHA256SUMS`. As instruções de reunião das partes e reconstrução estão no README do arquivo `Vora-0.5.1-ffmpeg-build-materials.tar.gz`. Atualizações de FFmpeg exigem repetir a coleta para a nova revisão e atualizar os manifestos e avisos. As fontes da versão anterior devem continuar disponíveis para quem recebeu seus binários.

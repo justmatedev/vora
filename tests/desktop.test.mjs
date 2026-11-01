@@ -61,6 +61,46 @@ test(
         versions.tools.every((tool) => tool.version && !tool.error),
         JSON.stringify(versions.tools),
       );
+      assert.ok(versions.tools.some((tool) => tool.name === 'Node.js (Electron)'));
+      assert.ok(!versions.tools.some((tool) => tool.name === 'Deno'));
+      const runtime = await application.evaluate(async ({ app }) => {
+        const { execFile } = process.getBuiltinModule('node:child_process');
+        const { join } = process.getBuiltinModule('node:path');
+        const directory = app.isPackaged
+          ? join(process.resourcesPath, 'tools')
+          : join(
+              app.getAppPath(),
+              'resources',
+              'tools',
+              process.platform === 'win32' ? 'win-x64' : 'linux-x64',
+            );
+        const executable = join(directory, process.platform === 'win32' ? 'yt-dlp.exe' : 'yt-dlp');
+        const stderr = await new Promise((resolve) => {
+          execFile(
+            executable,
+            [
+              '--ignore-config',
+              '--no-js-runtimes',
+              '--js-runtimes',
+              `node:${process.execPath}`,
+              '--verbose',
+            ],
+            {
+              timeout: 20_000,
+              windowsHide: true,
+              env: {
+                ...process.env,
+                ELECTRON_RUN_AS_NODE: '1',
+                NODE_OPTIONS: undefined,
+                NODE_PATH: undefined,
+              },
+            },
+            (_error, _stdout, stderr) => resolve(stderr),
+          );
+        });
+        return { version: process.versions.node, stderr };
+      });
+      assert.ok(runtime.stderr.includes(`JS runtimes: node-${runtime.version}`), runtime.stderr);
       const message = await page.evaluate(async () => {
         try {
           await window.vora.analyze('file:///etc/passwd');

@@ -20,7 +20,7 @@ const tools = {
   ytdlp: tool('yt-dlp'),
   ffmpeg: tool('ffmpeg'),
   ffprobe: tool('ffprobe'),
-  deno: tool('deno'),
+  node: process.execPath,
 };
 async function until(check) {
   const deadline = Date.now() + 30_000;

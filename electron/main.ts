@@ -17,7 +17,7 @@ import { Downloader, type ToolPaths } from './downloader';
 import { runProcess } from './processes';
 import { SettingsStore } from './settings';
 import { RecoveryStore } from './recovery';
-import { MetadataService } from './metadata';
+import { MetadataService, toolEnvironment } from './metadata';
 import { DesktopNotifier } from './notifications';
 import { QueueManager } from './queue';
 import { youtubeSource } from '../shared/youtube';
@@ -50,7 +50,7 @@ function toolPaths(): ToolPaths {
     ytdlp: executable('yt-dlp'),
     ffmpeg: executable('ffmpeg'),
     ffprobe: executable('ffprobe'),
-    deno: executable('deno'),
+    node: process.execPath,
   };
 }
 async function completedPath(id: string) {
@@ -324,14 +324,17 @@ else {
               ['yt-dlp', tools.ytdlp, '--version'],
               ['FFmpeg', tools.ffmpeg, '-version'],
               ['ffprobe', tools.ffprobe, '-version'],
-              ['Deno', tools.deno, '--version'],
+              ['Node.js (Electron)', tools.node, '--version'],
             ].map(async ([name, executable, argument]) => {
               try {
                 return {
                   name,
-                  version: (await runProcess(executable, [argument], { timeout: 10_000 })).split(
-                    /\r?\n/,
-                  )[0],
+                  version: (
+                    await runProcess(executable, [argument], {
+                      timeout: 10_000,
+                      env: toolEnvironment(),
+                    })
+                  ).split(/\r?\n/)[0],
                 };
               } catch {
                 return { name, error: 'Não encontrado ou indisponível' };

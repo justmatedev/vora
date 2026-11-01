@@ -31,7 +31,7 @@ A versão atual é **0.5.1**, para **Linux e Windows x64**. Os instaladores aind
 | Linux   | `Vora-0.5.1-linux-x86_64.AppImage` |
 | Windows | `Vora-0.5.1-windows-x64-setup.exe` |
 
-Os pacotes incluem yt-dlp, FFmpeg/ffprobe e Deno. O usuário final não precisa instalar essas ferramentas ou Node.js separadamente. O AppImage pode exigir FUSE ou a opção `--appimage-extract-and-run`. O instalador Windows não possui assinatura digital.
+Os pacotes incluem yt-dlp e FFmpeg/ffprobe, usando o Node.js incluído no Electron. O usuário final não precisa instalar essas ferramentas ou Node.js separadamente. O AppImage pode exigir FUSE ou a opção `--appimage-extract-and-run`. O instalador Windows não possui assinatura digital.
 
 A versão Linux empacotada foi verificada. A validação nativa Windows da versão 0.5.1 está pendente; veja [VALIDATION.md](docs/VALIDATION.md).
 
@@ -66,6 +66,6 @@ Para relatar problemas ou sugerir melhorias, [abra uma issue](https://github.com
 
 Suporte a vídeos públicos e playlists públicas finitas. Sem macOS, login/cookies, canais, mixes automáticos, lives em andamento ou downloads simultâneos. Atualização manual por nova versão do aplicativo. Mudanças no YouTube podem exigir atualização das ferramentas.
 
-O código do Vora é disponibilizado sob a [licença MIT](LICENSE), com copyright de **justmatedev**. As dependências e os executáveis incluídos conservam suas próprias licenças; consulte [THIRD_PARTY.md](THIRD_PARTY.md), incluindo as pendências registradas antes da distribuição pública.
+O código do Vora é disponibilizado sob a [licença MIT](LICENSE), com copyright de **justmatedev**. As dependências e os executáveis incluídos conservam suas próprias licenças; consulte [THIRD_PARTY.md](THIRD_PARTY.md) e os materiais de fontes disponibilizados junto às Releases.
 
 O nome Vora foi escolhido para uso pessoal; a disponibilidade comercial não foi verificada.

@@ -13,5 +13,17 @@
     "file": "FFmpeg-GPL-3.0.txt",
     "url": "https://raw.githubusercontent.com/FFmpeg/FFmpeg/n8.1.3/COPYING.GPLv3",
     "sha256": "8ceb4b9ee5adedde47b31e975c1d90c73ad27b6b165a1dcd80c7c545eb65b903"
+  },
+  {
+    "file": "FFmpeg-THIRD_PARTY_NOTICES.txt",
+    "url": "https://github.com/BtbN/FFmpeg-Builds/actions/runs/41199749965",
+    "generatedBy": "scripts/prepare-ffmpeg-sources.py",
+    "sha256": "e82955e62befb887874b37697b7dc9b8f81f7ac0d9b39fa6667155edaf4919c3"
+  },
+  {
+    "file": "FFmpeg-SOURCES.json",
+    "url": "https://github.com/BtbN/FFmpeg-Builds/actions/runs/41199749965",
+    "generatedBy": "scripts/prepare-ffmpeg-sources.py",
+    "sha256": "c23bfdeeb5e215f140e75df3d335a435b5e36ae36d8926432fa60455c37ac31d"
   }
 ]

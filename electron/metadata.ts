@@ -5,6 +5,16 @@ import { CancelledError, runProcess } from './processes';
 import type { PlaylistEntry, PlaylistPage, PlaylistSummary, QueuePreview } from '../shared/types';
 import type { ToolPaths } from './downloader';
 
+/** Inherited by the Electron executable that yt-dlp launches as its Node runtime. */
+export function toolEnvironment(): NodeJS.ProcessEnv {
+  return {
+    ...process.env,
+    ELECTRON_RUN_AS_NODE: '1',
+    NODE_OPTIONS: undefined,
+    NODE_PATH: undefined,
+  };
+}
+
 export function commonToolArgs(tools: ToolPaths) {
   return [
     '--ignore-config',
@@ -16,8 +26,9 @@ export function commonToolArgs(tools: ToolPaths) {
     '25',
     '--retries',
     '2',
+    '--no-js-runtimes',
     '--js-runtimes',
-    `deno:${tools.deno}`,
+    `node:${tools.node}`,
     '--ffmpeg-location',
     tools.ffmpeg,
   ];
@@ -152,7 +163,11 @@ export class MetadataService {
           '--',
           url,
         ],
-        { signal: controller.signal, timeout: lightweight ? 45_000 : 120_000 },
+        {
+          signal: controller.signal,
+          timeout: lightweight ? 45_000 : 120_000,
+          env: toolEnvironment(),
+        },
       );
       if (controller.signal.aborted) throw new CancelledError();
       const raw = JSON.parse(data) as RawVideo;
@@ -209,6 +224,7 @@ export class MetadataService {
         ],
         {
           signal: listing.controller.signal,
+          env: toolEnvironment(),
           timeout: 15 * 60 * 1000,
           captureOutput: false,
           onLine: (line) => {

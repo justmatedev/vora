@@ -152,7 +152,7 @@ test('download com diário publica somente a mídia, informa tamanho e limpa reg
     const events: JobEvent[] = [];
     const recovery = new RecoveryStore(join(root, 'profile', 'recoveries.json'));
     const service = new Downloader(
-      { ytdlp: '', ffmpeg: '', ffprobe: '', deno: '' },
+      { ytdlp: '', ffmpeg: '', ffprobe: '', node: process.execPath },
       (event) => events.push(event),
       async (_executable, args) => {
         if (args.includes('--dump-single-json'))

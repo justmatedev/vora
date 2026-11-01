@@ -2,6 +2,9 @@
 
 ## Não publicado
 
+- yt-dlp passa a usar o Node.js incluído no Electron; Deno separado removido dos pacotes.
+- Fontes exatas, receitas e avisos das dependências do FFmpeg preservados com manifestos e checksums para acompanhar a Release.
+
 - Testes de recuperação sincronizados para evitar leitura de processo antes da inicialização e gravação concorrente entre sessões simuladas.
 
 - Avisos de React, React DOM, scheduler, Lucide e Inter incluídos no empacotamento; avisos agregados do yt-dlp e textos LGPLv3/GPLv3 fixados com checksums.
