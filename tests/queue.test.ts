@@ -1,6 +1,6 @@
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
-import { mkdtemp, readFile, rm, writeFile, readdir } from 'node:fs/promises';
+import { mkdtemp, readFile, rm, writeFile, readdir, copyFile } from 'node:fs/promises';
 import { tmpdir } from 'node:os';
 import { join, dirname } from 'node:path';
 import { QueueManager, requestForItem } from '../electron/queue';
@@ -469,6 +469,8 @@ test('prévias carregam com fila pausada, uma por vez, e persistem sem iniciar d
     assert.equal(maximum, 1);
     assert.equal(downloads, 0);
     assert.equal(s.manager.snapshot().mode, 'paused');
+    // A restarted instance must not share the journal with a live preview worker.
+    await s.manager.shutdown();
     const restored = new QueueManager(
       join(s.root, 'queue.json'),
       s.deps,
@@ -834,8 +836,12 @@ test('reinício restaura espera como interrompida; encerrar cancela temporizador
     await s.manager.add([{ url: urls[0] }], DEFAULT_PREFERENCES, s.root);
     await s.manager.start();
     await until(() => s.manager.snapshot().items[0].status === 'retrying');
+    // Flush the saved retry state and restore a copy, simulating a separate session.
+    await s.manager.pause();
+    const restoredPath = join(s.root, 'restored.json');
+    await copyFile(join(s.root, 'queue.json'), restoredPath);
     const restored = new QueueManager(
-      join(s.root, 'queue.json'),
+      restoredPath,
       s.deps,
       () => {},
       () => {},

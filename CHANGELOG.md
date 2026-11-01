@@ -2,6 +2,8 @@
 
 ## Não publicado
 
+- Testes de recuperação sincronizados para evitar leitura de processo antes da inicialização e gravação concorrente entre sessões simuladas.
+
 - Avisos de React, React DOM, scheduler, Lucide e Inter incluídos no empacotamento; avisos agregados do yt-dlp e textos LGPLv3/GPLv3 fixados com checksums.
 - Identificação corrigida da licença do build FFmpeg incluído (LGPLv3), com pendências de fontes e dependências documentadas.
 

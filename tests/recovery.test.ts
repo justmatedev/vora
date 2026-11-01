@@ -33,10 +33,16 @@ test('recuperação aguarda processo órfão encerrar antes de permitir limpeza'
     const journal = join(root, 'recoveries.json');
     const store = new RecoveryStore(journal),
       session = await store.create(root, info);
-    child = spawn(process.execPath, ['-e', 'setInterval(()=>{},1000)', session.path], {
-      stdio: 'ignore',
-    });
-    await once(child, 'spawn');
+    child = spawn(
+      process.execPath,
+      ['-e', 'process.send("ready"); setInterval(()=>{},1000)', session.path],
+      {
+        stdio: ['ignore', 'ignore', 'ignore', 'ipc'],
+      },
+    );
+    // Wait for Node to execute the script before inspecting its command line.
+    // The spawn event alone can precede exec completing on Linux.
+    await once(child, 'message');
     await store.recordProcess(session, child.pid!);
     const restarted = new RecoveryStore(journal);
     await restarted.load();
