@@ -1,3 +1,13 @@
+# Preparação dos pacotes para Release — 1 de novembro de 2026
+
+- Ajustes de URL e documentação enviados no commit `fdef5a5`.
+- Build passou com preparo dos avisos de React, React DOM, scheduler, Lucide e Inter. Licenças e manifesto adicionados aos recursos do aplicativo.
+- Avisos agregados do yt-dlp e textos LGPLv3/GPLv3 fixados em resources/notices, com origem e SHA-256. Ferramentas de Linux e Windows passaram na verificação local com os novos avisos.
+- Corrigida a identificação do build FFmpeg: LGPLv3, conforme configuração `--enable-version3` e LICENSE.txt do asset.
+- Permanecem pendentes os materiais listados em THIRD_PARTY.md e a validação nativa Windows do pacote novo. Preparar artefatos de teste não significa publicar uma Release validada.
+
+---
+
 # Repositório GitHub — 1 de novembro de 2026
 
 - Repositório publicado em https://github.com/justmatedev/vora, com branch main. Primeiro commit: `fa69509`.

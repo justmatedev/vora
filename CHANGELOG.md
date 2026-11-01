@@ -2,6 +2,9 @@
 
 ## Não publicado
 
+- Avisos de React, React DOM, scheduler, Lucide e Inter incluídos no empacotamento; avisos agregados do yt-dlp e textos LGPLv3/GPLv3 fixados com checksums.
+- Identificação corrigida da licença do build FFmpeg incluído (LGPLv3), com pendências de fontes e dependências documentadas.
+
 - Metadados e documentação ligados ao repositório justmatedev/vora, com badge do CI e instruções de clone.
 
 - Código do Vora sob licença MIT, com autoria de justmatedev.

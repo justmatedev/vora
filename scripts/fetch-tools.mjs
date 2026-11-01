@@ -82,6 +82,13 @@ try {
     ['FFmpeg-LGPL-2.1', 'https://raw.githubusercontent.com/FFmpeg/FFmpeg/n8.1.3/COPYING.LGPLv2.1'],
   ];
   for (const [name, url] of licenses) await download(url, join(stage, 'licenses', `${name}.txt`));
+  const notices = JSON.parse(await readFile('resources/notices/sources.json', 'utf8'));
+  for (const notice of notices) {
+    const path = join('resources/notices', notice.file);
+    if ((await sha256(path)) !== notice.sha256)
+      throw new Error(`Aviso de terceiros alterado: ${notice.file}`);
+    await copyFile(path, join(stage, 'licenses', notice.file));
+  }
   for (const executable of ['yt-dlp', 'deno', 'ffmpeg', 'ffprobe']) {
     const filename = executable + suffix,
       path = join(stage, filename);

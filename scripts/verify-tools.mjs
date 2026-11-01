@@ -17,8 +17,20 @@ try {
     if ((await sha256(join(root, filename))) !== manifest.files[filename])
       throw new Error(`Binário alterado: ${filename}`);
   }
-  for (const name of ['yt-dlp.txt', 'Deno.txt', 'FFmpeg-LGPL-2.1.txt', 'THIRD_PARTY.md'])
+  for (const name of [
+    'yt-dlp.txt',
+    'Deno.txt',
+    'FFmpeg-LGPL-2.1.txt',
+    'FFmpeg-LGPL-3.0.txt',
+    'FFmpeg-GPL-3.0.txt',
+    'yt-dlp-THIRD_PARTY_LICENSES.txt',
+    'THIRD_PARTY.md',
+  ])
     await access(join(root, 'licenses', name));
+  const notices = JSON.parse(await readFile('resources/notices/sources.json', 'utf8'));
+  for (const notice of notices)
+    if ((await sha256(join(root, 'licenses', notice.file))) !== notice.sha256)
+      throw new Error(`Aviso de terceiros alterado: ${notice.file}`);
   console.log(`Binários e licenças verificados: ${target}`);
 } catch (error) {
   console.error(
