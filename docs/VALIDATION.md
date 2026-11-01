@@ -1,11 +1,20 @@
+# Repositório GitHub — 1 de novembro de 2026
+
+- Repositório publicado em https://github.com/justmatedev/vora, com branch main. Primeiro commit: `fa69509`.
+- CI inicial aprovado: núcleo e build no Ubuntu 24.04 e Windows 2022, além de interface no Linux. [Execução](https://github.com/justmatedev/vora/actions/runs/41351613421).
+- Metadados do pacote, links do README, instruções de clone e badge do CI atualizados com a URL real.
+- Ainda sem Release ou nova geração de instaladores. Permanecem pendentes os materiais de terceiros para distribuição e a validação nativa do instalador Windows atual. O sucesso do CI não substitui essa validação.
+
+---
+
 # Preparação do repositório — após 0.5.1
 
 - Autoria definida como justmatedev; código do Vora sob MIT, com LICENSE incluído nos próximos empacotamentos. Componentes de terceiros conservam suas licenças e pendências de distribuição.
 - README reorganizado, guias separados, capturas demonstrativas versionáveis, histórico e modelos de contribuição adicionados.
-- Workflows preparados para núcleo/build Linux e Windows, interface Linux e geração manual de pacotes com checksums. YAML e links locais verificados; execução remota no GitHub ainda pendente.
+- Na preparação inicial, workflows e links locais foram verificados. O resultado remoto posterior está registrado acima.
 - 74 testes do núcleo e build/TypeScript passaram no Linux. O gerador de checksums foi verificado com dois arquivos de teste em diretório temporário.
 - Nenhuma mudança na interface ou no executor. Os pacotes 0.5.1 existentes não foram regenerados nesta etapa.
-- Repositório remoto ainda não criado; campos de URL e links de Releases aguardam o endereço real. A pasta .git disponibilizada neste ambiente não é um repositório Git utilizável; nenhum commit ou push foi feito.
+- Na preparação inicial, ainda não havia repositório remoto ou Git local utilizável neste ambiente. A publicação posterior está registrada acima.
 
 ---
 

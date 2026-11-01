@@ -1,5 +1,7 @@
 # Vora
 
+[![Verificações](https://github.com/justmatedev/vora/actions/workflows/ci.yml/badge.svg)](https://github.com/justmatedev/vora/actions/workflows/ci.yml)
+
 **Áudio e vídeo, do seu jeito.**
 
 Aplicativo desktop de código aberto desenvolvido por **justmatedev** para baixar áudio e vídeo do YouTube no Linux e Windows. Cole um link, escolha o formato e acompanhe seus downloads em uma fila. Interface em português, tema escuro e processamento no seu computador.
@@ -22,7 +24,7 @@ A captura da fila usa dados de teste.
 
 ## Download
 
-A versão atual é **0.5.1**, para **Linux e Windows x64**. Os pacotes ainda não estão publicados em um repositório remoto. Quando este projeto estiver no GitHub, estarão na seção **Releases**:
+A versão atual é **0.5.1**, para **Linux e Windows x64**. Os instaladores ainda não foram publicados. Quando disponíveis, estarão na seção [Releases](https://github.com/justmatedev/vora/releases). Os nomes esperados para esta versão são:
 
 | Sistema | Arquivo                            |
 | ------- | ---------------------------------- |
@@ -38,6 +40,8 @@ A versão Linux empacotada foi verificada. A validação nativa Windows da vers�
 Requisitos: Node.js **22.12 ou superior**, npm e ambiente gráfico Linux ou Windows x64.
 
 ```sh
+git clone https://github.com/justmatedev/vora.git
+cd vora
 npm ci
 npm run tools:fetch
 npm run dev
@@ -56,7 +60,7 @@ Stack: **Electron + React + TypeScript + Vite**, com ferramentas executadas loca
 
 ## Sugestões e contribuições
 
-Para relatar problemas ou sugerir melhorias, abra uma issue com a versão do Vora, seu sistema e os passos para reproduzir. Combine mudanças maiores antes de implementá-las. Para enviar código, siga o [guia de desenvolvimento](docs/DEVELOPMENT.md), execute os testes relevantes e disponibilize sua contribuição sob a licença MIT do projeto.
+Para relatar problemas ou sugerir melhorias, [abra uma issue](https://github.com/justmatedev/vora/issues/new/choose) com a versão do Vora, seu sistema e os passos para reproduzir. Combine mudanças maiores antes de implementá-las. Para enviar código, siga o [guia de desenvolvimento](docs/DEVELOPMENT.md), execute os testes relevantes e disponibilize sua contribuição sob a licença MIT do projeto.
 
 ## Limites e licença
 

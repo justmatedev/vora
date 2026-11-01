@@ -2,11 +2,11 @@
 
 ## Preparar o repositório
 
-Autor: **justmatedev**. O endereço do repositório ainda não foi definido. Quando ele existir, adicione `repository`, `homepage` e `bugs` ao `package.json` com os endereços reais e atualize a seção de download do README com o link de Releases.
+Autor: **justmatedev**. Repositório: [justmatedev/vora](https://github.com/justmatedev/vora). Os campos `repository`, `homepage` e `bugs` do `package.json` apontam para esse endereço. Os instaladores serão disponibilizados em [Releases](https://github.com/justmatedev/vora/releases).
 
 O código do Vora usa MIT, registrada em `LICENSE`, `package.json` e `package-lock.json`; o aviso é incluído no empacotamento. Não altere as licenças dos componentes de terceiros. Revise as pendências de distribuição pública descritas em [THIRD_PARTY.md](../THIRD_PARTY.md).
 
-Antes do primeiro push, revise os arquivos que serão enviados com `git status` e `git diff --cached`. Não inclua `.env`, credenciais, perfis do aplicativo, binários ou instaladores. O `.gitignore` não remove arquivos já rastreados. As imagens em `docs/images/` são capturas da interface com dados demonstrativos.
+Antes de cada push, revise os arquivos que serão enviados com `git status` e `git diff --cached`. Não inclua `.env`, credenciais, perfis do aplicativo, binários ou instaladores. O `.gitignore` não remove arquivos já rastreados. As imagens em `docs/images/` são capturas da interface com dados demonstrativos.
 
 O campo `private: true` impede publicação acidental no npm; a visibilidade no GitHub é configurada separadamente. A criação do repositório e o envio não são feitos pelos scripts deste projeto.
 
@@ -14,7 +14,9 @@ O campo `private: true` impede publicação acidental no npm; a visibilidade no 
 
 O workflow **Verificações** roda em pushes, pull requests e por acionamento manual. Confere testes do núcleo e build no Linux/Windows, além da interface no Linux. Não consulta o YouTube nem baixa os binários de mídia nesses jobs.
 
-O workflow **Gerar pacotes** é manual, na aba Actions. Ele prepara as ferramentas fixadas, executa os testes do núcleo e gera AppImage no Linux e NSIS no Windows. Os artefatos ficam disponíveis por 14 dias e incluem SHA256SUMS. Não há publicação automática de Releases nem assinatura digital. A primeira execução real dos workflows no GitHub ainda precisa ser validada.
+O workflow **Gerar pacotes** é manual, na aba Actions. Ele prepara as ferramentas fixadas, executa os testes do núcleo e gera AppImage no Linux e NSIS no Windows. Os artefatos ficam disponíveis por 14 dias e incluem SHA256SUMS. Não há publicação automática de Releases nem assinatura digital. A geração de pacotes pelo GitHub ainda precisa ser executada e validada.
+
+A primeira execução de **Verificações**, no commit `fa69509`, passou nos três jobs: núcleo/build Linux, núcleo/build Windows e interface Linux. [Registro da execução](https://github.com/justmatedev/vora/actions/runs/41351613421). Isso não inclui teste do instalador Windows ou dos binários de mídia.
 
 Os workflows seguem a [documentação de CI Node.js do GitHub](https://docs.github.com/en/actions/tutorials/build-and-test-code/nodejs). Uma geração bem-sucedida não substitui teste manual do aplicativo instalado.
 

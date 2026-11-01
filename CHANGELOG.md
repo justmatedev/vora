@@ -2,6 +2,8 @@
 
 ## Não publicado
 
+- Metadados e documentação ligados ao repositório justmatedev/vora, com badge do CI e instruções de clone.
+
 - Código do Vora sob licença MIT, com autoria de justmatedev.
 - Apresentação do repositório, guias de uso e desenvolvimento, capturas demonstrativas e autoria de justmatedev.
 - Verificações automáticas e geração manual de pacotes pelo GitHub Actions.
