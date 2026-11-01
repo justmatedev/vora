@@ -1,6 +1,6 @@
 # Histórico de mudanças
 
-## 0.6.0 — em preparação
+## 0.6.0 — 2026-11-01
 
 - Verificação automática de novas versões e painel de atualizações nas configurações.
 - Download e instalação por clique, com progresso, notas da versão e alternativa manual.

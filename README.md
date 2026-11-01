@@ -24,20 +24,20 @@ A captura da fila usa dados de teste.
 
 ## Download
 
-A versão estável publicada é **0.5.1**, para **Linux e Windows x64**. Baixe os instaladores na [Release 0.5.1](https://github.com/justmatedev/vora/releases/tag/v0.5.1):
+A versão estável publicada é **0.6.0**, para **Linux e Windows x64**. Baixe os instaladores na [Release 0.6.0](https://github.com/justmatedev/vora/releases/tag/v0.6.0):
 
 | Sistema | Arquivo                                                                                                             |
 | ------- | ------------------------------------------------------------------------------------------------------------------- |
-| Linux   | [AppImage Linux](https://github.com/justmatedev/vora/releases/download/v0.5.1/Vora-0.5.1-linux-x86_64.AppImage)     |
-| Windows | [Instalador Windows](https://github.com/justmatedev/vora/releases/download/v0.5.1/Vora-0.5.1-windows-x64-setup.exe) |
+| Linux   | [AppImage Linux](https://github.com/justmatedev/vora/releases/download/v0.6.0/Vora-0.6.0-linux-x86_64.AppImage)     |
+| Windows | [Instalador Windows](https://github.com/justmatedev/vora/releases/download/v0.6.0/Vora-0.6.0-windows-x64-setup.exe) |
 
 Os pacotes incluem yt-dlp e FFmpeg/ffprobe, usando o Node.js incluído no Electron. O usuário final não precisa instalar essas ferramentas ou Node.js separadamente. O AppImage pode exigir FUSE ou a opção `--appimage-extract-and-run`. O instalador Windows não possui assinatura digital.
 
-O AppImage passou na validação automatizada no Linux. O mantenedor confirmou o teste manual do instalador no Windows, sem falhas relatadas; veja [VALIDATION.md](docs/VALIDATION.md).
+O AppImage passou na validação automatizada no Linux. O mantenedor confirmou os testes manuais no Linux e Windows; o ciclo de atualização foi validado com versões isoladas de teste. Veja os detalhes em [VALIDATION.md](docs/VALIDATION.md).
 
 ## Atualizações no aplicativo
 
-A versão **0.6.0**, em preparação, verifica novas versões ao abrir e oferece **Configurações → Atualizações**. O download depende do botão **Baixar atualização** e a instalação de **Reiniciar e atualizar**, com a fila pausada e sem trabalho ativo. Fechar normalmente o Vora não instala uma atualização baixada.
+A partir da versão **0.6.0**, o Vora verifica novas versões ao abrir e oferece **Configurações → Atualizações**. O download depende do botão **Baixar atualização** e a instalação de **Reiniciar e atualizar**, com a fila pausada e sem trabalho ativo. Fechar normalmente o Vora não instala uma atualização baixada.
 
 Quem usa **0.5.1 ou anterior** precisa instalar manualmente a primeira versão com o recurso. As próximas poderão ser atualizadas dentro do app. No Linux, use o AppImage em uma pasta onde você tenha permissão de escrita; a atualização preserva seu nome e caminho. Se a atualização interna estiver indisponível, há acesso à página de versões.
 
