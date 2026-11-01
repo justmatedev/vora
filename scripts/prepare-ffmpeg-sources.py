@@ -16,6 +16,13 @@ from pathlib import Path
 FFMPEG_COMMIT = "8dca1586f468bfcbb78ae3ed618af1361d9f140a"
 RECIPES_COMMIT = "5031c6f1082414e53688d39e521849905071070d"
 UPSTREAM_RUN = 41199749965
+EXPECTED = {
+    "cache": "3b8689a9e3e86d4f5258b5f88a7154d2df22b1559cbc8db65e66e999a05f3f2b",
+    "recipes": "7442423e0b0889394821fb5846ea73287ce9df2bb986b1062600027189a22f38",
+    "ffmpeg_source": "41336f04ec329b4e8472fb4aa2862b18a24aa2d1647c3a81a94ff88c3818dc03",
+    "linux_log": "09e87150c2861ce614cd5572ad9d59205c20ea160dc51db2426047c5a9ec823a",
+    "windows_log": "63f477361a6db0e21b4865e499ae579c8e84a502edfff85451b46bd423e34333",
+}
 
 
 def digest(path):
@@ -71,6 +78,9 @@ def main():
     for name in ["cache", "recipes", "ffmpeg-source", "linux-log", "windows-log", "output"]:
         parser.add_argument(f"--{name}", type=Path, required=True)
     args = parser.parse_args()
+    for name, expected in EXPECTED.items():
+        if digest(getattr(args, name)) != expected:
+            raise ValueError(f"Material diferente da coleta revisada: {name}. Confira a origem antes de atualizar os hashes.")
     args.output.mkdir(parents=True, exist_ok=True)
     work = args.output / "work"
     work.mkdir(exist_ok=True)
