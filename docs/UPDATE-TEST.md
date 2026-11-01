@@ -33,6 +33,8 @@ A saída fica em `release/update-cycle-linux` ou `release/update-cycle-win32`. D
 
 O script modifica somente uma cópia gerada dentro de `release`. O código de produção continua com seu nome, versão e feed público do GitHub. Não edite o provider de produção para executar este teste.
 
+Antes de liberar cada kit, o gerador confere a árvore de dependências dentro do pacote e o feed local. Dependências instaladas no computador de desenvolvimento não podem suprir arquivos ausentes do instalador.
+
 O workflow manual **Kit de teste de atualização**, na aba Actions, gera os kits Linux e Windows como artefatos. No Linux, também executa a substituição e o reinício reais com Playwright e publica relatório e capturas. No Windows, gera os instaladores nativamente; a instalação e o reinício devem ser conferidos pelo roteiro acima.
 
 Para executar a validação automatizada no Linux com uma sessão gráfica disponível:

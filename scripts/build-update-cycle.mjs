@@ -1,8 +1,9 @@
 // Builds two isolated apps from a copy. Production version, identity and feed stay untouched.
-import { cp, mkdir, readFile, writeFile, readdir, rm, symlink, chmod } from 'node:fs/promises';
+import { cp, mkdir, readFile, writeFile, readdir, rm, chmod } from 'node:fs/promises';
 import { spawn } from 'node:child_process';
 import { join, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
+import { checkCyclePackage } from './check-update-cycle-package.mjs';
 
 const root = fileURLToPath(new URL('..', import.meta.url));
 const platform = process.argv[2] || process.platform;
@@ -36,11 +37,12 @@ const tools = platform === 'linux' ? 'linux-x64' : 'win-x64';
 await cp(join(root, 'resources/tools', tools), join(project, 'resources/tools', tools), {
   recursive: true,
 });
-await symlink(
-  join(root, 'node_modules'),
-  join(project, 'node_modules'),
-  process.platform === 'win32' ? 'junction' : 'dir',
-);
+// The npm 11 collector used by CI loses transitive dependencies behind a linked
+// node_modules directory. A real copy keeps package resolution inside this project.
+await cp(join(root, 'node_modules'), join(project, 'node_modules'), {
+  recursive: true,
+  dereference: true,
+});
 
 async function replace(path, before, after) {
   const content = await readFile(join(project, path), 'utf8');
@@ -74,6 +76,11 @@ await replace(
   'src/App.tsx',
   '<Logo />',
   '<Logo /><strong style={{color: "#A78BFA", fontSize: 12}}>AMBIENTE DE VALIDAÇÃO</strong>',
+);
+await replace(
+  'index.html',
+  '<title>Vora — áudio e vídeo, do seu jeito.</title>',
+  '<title>VoraUpdateTest — ambiente de validação</title>',
 );
 const pkg = JSON.parse(await readFile(join(project, 'package.json'), 'utf8'));
 pkg.name = 'vora-update-test';
@@ -137,11 +144,12 @@ for (const [label, value] of [
     'never',
     `--config.directories.output=${build}`,
   ]);
+  await checkCyclePackage(build, platform, value);
   const target = join(output, label);
   await rm(target, { recursive: true, force: true });
   await mkdir(target);
   for (const name of await readdir(build)) {
-    if (/\.(AppImage|exe|blockmap|yml)$/.test(name))
+    if (/\.(AppImage|exe|blockmap)$/.test(name) || /^latest(?:-linux)?\.yml$/.test(name))
       await cp(join(build, name), join(target, name));
   }
 }
@@ -162,6 +170,7 @@ exec env ELECTRON_RUN_AS_NODE=1 APPIMAGE_EXTRACT_AND_RUN=1 ./initial/VoraUpdateT
   await writeFile(
     join(output, 'iniciar-servidor.cmd'),
     `@echo off\r
+setlocal\r
 cd /d "%~dp0"\r
 set "VORA_TEST_DIR=%LOCALAPPDATA%\\Programs\\VoraUpdateTest"\r
 if not exist "%VORA_TEST_DIR%\\VoraUpdateTest.exe" set "VORA_TEST_DIR=%LOCALAPPDATA%\\Programs\\vora-update-test"\r
