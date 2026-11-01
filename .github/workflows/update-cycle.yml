@@ -42,6 +42,7 @@ jobs:
           name: vora-update-test-${{ matrix.target }}
           if-no-files-found: error
           retention-days: 14
+          compression-level: 0
           path: |
             release/update-cycle-${{ matrix.target }}/initial/*
             release/update-cycle-${{ matrix.target }}/updates/*
@@ -57,3 +58,4 @@ jobs:
           path: |
             test-results/update-cycle/*.json
             test-results/update-cycle/*.png
+            test-results/update-cycle/*.log

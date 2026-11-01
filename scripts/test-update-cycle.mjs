@@ -3,8 +3,9 @@ import assert from 'node:assert/strict';
 import { mkdtemp, mkdir, cp, readFile, writeFile, rm, chmod } from 'node:fs/promises';
 import { createHash } from 'node:crypto';
 import { createServer } from 'node:net';
+import { spawn } from 'node:child_process';
 import { join, resolve } from 'node:path';
-import { _electron, chromium } from 'playwright';
+import { chromium } from 'playwright';
 import { startUpdateServer } from './update-cycle-server.mjs';
 
 if (process.platform !== 'linux')
@@ -67,7 +68,8 @@ await new Promise((accept) => portProbe.listen(0, '127.0.0.1', accept));
 const port = portProbe.address().port;
 await new Promise((accept) => portProbe.close(accept));
 const { server, requests } = await startUpdateServer(join(kit, 'updates'));
-let application, browser;
+let application, browser, initialBrowser;
+let processLog = '';
 const env = {
   ...process.env,
   APPIMAGE_EXTRACT_AND_RUN: '1',
@@ -91,14 +93,42 @@ async function until(action, description, timeout = 90_000) {
   }
   throw new Error(`Tempo esgotado: ${description}; ${last?.message || ''}`);
 }
+async function connectVersion(version) {
+  const connection = await chromium.connectOverCDP(`http://127.0.0.1:${port}`, { timeout: 1500 });
+  try {
+    const candidate = connection
+      .contexts()
+      .flatMap((context) => context.pages())
+      .find((page) => page.url().startsWith('vora://'));
+    if (
+      candidate &&
+      (await candidate.evaluate(() => window.vora.updates())).currentVersion === version
+    )
+      return { connection, page: candidate };
+  } catch {
+    /* The renderer may still be loading or the previous process may be quitting. */
+  }
+  await connection.close();
+}
 try {
-  application = await _electron.launch({
-    executablePath: current,
-    args: [`--user-data-dir=${profile}`, '--no-sandbox', '--disable-gpu', '--ozone-platform=x11'],
-    env,
-    timeout: 60_000,
+  // Start the real packaged app without Playwright's Electron launch hooks. CDP
+  // reconnects to both instances, including the one started by app.relaunch().
+  application = spawn(
+    current,
+    [`--user-data-dir=${profile}`, '--no-sandbox', '--disable-gpu', '--ozone-platform=x11'],
+    { env, stdio: ['ignore', 'pipe', 'pipe'] },
+  );
+  for (const stream of [application.stdout, application.stderr]) {
+    stream.on('data', (chunk) => {
+      processLog = (processLog + chunk).slice(-64_000);
+    });
+  }
+  application.on('error', (error) => {
+    processLog += error.stack;
   });
-  const page = await application.firstWindow();
+  const initial = await until(() => connectVersion('0.6.0'), 'inicialização do AppImage 0.6.0');
+  initialBrowser = initial.connection;
+  const page = initial.page;
   console.log('AppImage inicial aberto; conferindo consulta e download por clique.');
   await page.getByRole('button', { name: 'Configurações', exact: true }).click();
   assert.equal((await page.evaluate(() => window.vora.updates())).currentVersion, '0.6.0');
@@ -130,30 +160,12 @@ try {
   assert.ok(requests.some(({ name }) => name.endsWith('.AppImage')));
   console.log('Download confirmado; instalando e aguardando a nova versão abrir.');
   await page.getByRole('button', { name: 'Reiniciar e atualizar', exact: true }).click();
-  const updated = await until(async () => {
-    const connection = await chromium.connectOverCDP(`http://127.0.0.1:${port}`, { timeout: 1500 });
-    try {
-      const candidate = connection
-        .contexts()
-        .flatMap((context) => context.pages())
-        .find((page) => page.url().startsWith('vora://'));
-      if (
-        candidate &&
-        (await candidate.evaluate(() => window.vora.updates())).currentVersion === '0.6.1'
-      ) {
-        browser = connection;
-        return candidate;
-      }
-    } catch {
-      /* New renderer is still loading. */
-    }
-    await connection.close();
-  }, 'reinício real na versão 0.6.1');
+  const next = await until(() => connectVersion('0.6.1'), 'reinício real na versão 0.6.1');
+  browser = next.connection;
+  const updated = next.page;
   const nextQueue = await updated.evaluate(() => window.vora.queue());
-  assert.deepEqual(
-    nextQueue.items.map(({ id, status }) => ({ id, status })),
-    initialQueue.items.map(({ id, status }) => ({ id, status })),
-  );
+  assert.deepEqual(nextQueue.items, initialQueue.items);
+  assert.deepEqual(nextQueue.groups, initialQueue.groups);
   assert.equal(nextQueue.mode, 'paused');
   assert.deepEqual(await updated.evaluate(() => window.vora.settings()), settings);
   assert.equal(await hash(completed), savedFileHash);
@@ -188,16 +200,21 @@ try {
   await writeFile(join(output, 'report.json'), JSON.stringify(report, null, 2));
   console.log(JSON.stringify(report, null, 2));
   await updated.close();
+} catch (error) {
+  await writeFile(join(output, 'failure.log'), `${error.stack}\n\n${processLog}`);
+  console.error(processLog.slice(-6000));
+  throw error;
 } finally {
-  if (browser) {
-    for (const context of browser.contexts()) {
+  for (const connection of [browser, initialBrowser].filter(Boolean)) {
+    for (const context of connection.contexts()) {
       for (const page of context.pages()) {
         if (page.url().startsWith('vora://')) await page.close().catch(() => {});
       }
     }
   }
   await browser?.close().catch(() => {});
-  await application?.close().catch(() => {});
+  await initialBrowser?.close().catch(() => {});
+  if (application && application.exitCode === null) application.kill('SIGTERM');
   await new Promise((accept) => server.close(accept));
   // Keep the two screenshots/report, remove only this generated session and cache.
   await rm(directory, { recursive: true, force: true });
