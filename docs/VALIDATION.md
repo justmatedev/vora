@@ -1,11 +1,14 @@
 # Preparação dos pacotes para Release — 1 de novembro de 2026
 
 - Ajustes de URL e documentação enviados no commit `fdef5a5`.
-- 74 testes do núcleo e quatro testes com ferramentas reais passaram no Linux. Corrigida a sincronização dos testes de recuperação: aguardar o processo iniciar efetivamente e evitar duas sessões simuladas gravando o mesmo journal. Falhas intermitentes do CI anterior foram investigadas.
+- 74 testes do núcleo e quatro testes com ferramentas reais passaram no Linux. Corrigida a sincronização dos testes de recuperação: aguardar o processo iniciar efetivamente e evitar duas sessões simuladas gravando o mesmo journal. Falhas intermitentes do CI anterior foram investigadas; os três jobs do CI corrigido passaram no commit `b8523ff` (execução 41352683014).
 - Primeiro workflow de pacotes revelou conversão de quebras de linha dos avisos no Windows e publicação implícita do electron-builder no CI. Adicionados .gitattributes para preservar os bytes e `--publish never` nos comandos de empacotamento.
 - Build passou com preparo dos avisos de React, React DOM, scheduler, Lucide e Inter. Licenças e manifesto adicionados aos recursos do aplicativo.
 - Avisos agregados do yt-dlp e textos LGPLv3/GPLv3 fixados em resources/notices, com origem e SHA-256. Ferramentas de Linux e Windows passaram na verificação local com os novos avisos.
 - Corrigida a identificação do build FFmpeg: LGPLv3, conforme configuração `--enable-version3` e LICENSE.txt do asset.
+- AppImage Linux e instalador Windows gerados com sucesso no GitHub Actions, execução 41352682628, commit `b8523ff`. Checksums dos dois artefatos conferidos e reunidos em manifesto único.
+- O AppImage exato gerado no CI passou no teste real de Electron (inicialização, IPC, restauração e ferramentas). Conteúdo conferido: MIT, avisos das cinco bibliotecas, três textos fixados e avisos Chromium. Isso não representa uma nova rodada completa de downloads online.
+- Release v0.5.1 preparada como rascunho com artefatos de teste, sem publicação pública.
 - Permanecem pendentes os materiais listados em THIRD_PARTY.md e a validação nativa Windows do pacote novo. Preparar artefatos de teste não significa publicar uma Release validada.
 
 ---

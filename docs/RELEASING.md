@@ -14,9 +14,9 @@ O campo `private: true` impede publicação acidental no npm; a visibilidade no 
 
 O workflow **Verificações** roda em pushes, pull requests e por acionamento manual. Confere testes do núcleo e build no Linux/Windows, além da interface no Linux. Não consulta o YouTube nem baixa os binários de mídia nesses jobs.
 
-O workflow **Gerar pacotes** é manual, na aba Actions. Ele prepara as ferramentas fixadas, executa os testes do núcleo e gera AppImage no Linux e NSIS no Windows. Os artefatos ficam disponíveis por 14 dias e incluem SHA256SUMS. Não há publicação automática de Releases nem assinatura digital. A geração de pacotes pelo GitHub ainda precisa ser executada e validada.
+O workflow **Gerar pacotes** é manual, na aba Actions. Ele prepara as ferramentas fixadas, executa os testes do núcleo e gera AppImage no Linux e NSIS no Windows. Os artefatos ficam disponíveis por 14 dias e incluem SHA256SUMS. Não há publicação automática de Releases nem assinatura digital. A geração automatizada de Linux e Windows passou na [execução 41352682628](https://github.com/justmatedev/vora/actions/runs/41352682628), no commit `b8523ff`. A execução gera artefatos de teste; a publicação continua condicionada às pendências de THIRD_PARTY.md e à validação dos aplicativos.
 
-A primeira execução de **Verificações**, no commit `fa69509`, passou nos três jobs: núcleo/build Linux, núcleo/build Windows e interface Linux. [Registro da execução](https://github.com/justmatedev/vora/actions/runs/41351613421). Isso não inclui teste do instalador Windows ou dos binários de mídia.
+O CI do commit `b8523ff` passou nos três jobs: núcleo/build Linux, núcleo/build Windows e interface Linux. [Registro da execução](https://github.com/justmatedev/vora/actions/runs/41352683014). Isso não inclui teste do instalador Windows ou dos binários de mídia.
 
 Os workflows seguem a [documentação de CI Node.js do GitHub](https://docs.github.com/en/actions/tutorials/build-and-test-code/nodejs). Uma geração bem-sucedida não substitui teste manual do aplicativo instalado.
 
