@@ -1,5 +1,7 @@
 # Versão 0.6.0 — atualizações internas em validação
 
+- Em 1 de novembro de 2026, o mantenedor confirmou teste manual do AppImage 0.6.0 sem falhas relatadas. A distribuição Linux e os cenários não foram especificados; esse relato não confirma, por si só, o ciclo de atualização entre duas versões.
+
 - Gerenciador de atualizações no processo principal, ponte tipada e painel React com consulta, notas, progresso, download e instalação explícitos. Provider público GitHub fixado no repositório Vora; sem feed ou caminho arbitrário vindo da interface.
 - 84 testes do núcleo passaram no Linux. Incluem bloqueio de instalação com trabalho ativo, comandos concorrentes, falha de preparação/instalação, retomada das prévias e substituição do AppImage preservando o original em falhas de cópia/permissão.
 - Dois testes de integração usam electron-updater real com servidor HTTP local e payloads de teste: consulta sem download automático, download por clique, instalação somente sem trabalho ativo e recusa de SHA-512 incorreto. Não executam um instalador NSIS real nem encerram o aplicativo do usuário.
