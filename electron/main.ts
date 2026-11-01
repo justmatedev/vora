@@ -21,6 +21,9 @@ import { MetadataService, toolEnvironment } from './metadata';
 import { DesktopNotifier } from './notifications';
 import { QueueManager } from './queue';
 import { youtubeSource } from '../shared/youtube';
+import { UpdateManager, RELEASES_URL } from './updates';
+import { createUpdater } from './update-adapter';
+import { appImageAvailability } from './appimage-update';
 import type { AppInfo, JobEvent } from '../shared/types';
 
 protocol.registerSchemesAsPrivileged([
@@ -34,6 +37,8 @@ let settings: SettingsStore;
 let recovery: RecoveryStore;
 let metadata: MetadataService;
 let queue: QueueManager;
+let updates: UpdateManager | undefined;
+let pendingIpc = 0;
 let allowClose = false,
   askingClose = false;
 const devUrl = !app.isPackaged ? process.env.VORA_DEV_URL : undefined;
@@ -75,10 +80,20 @@ function trusted(event: Electron.IpcMainInvokeEvent) {
 function handle(channel: string, handler: (...args: any[]) => unknown) {
   ipcMain.handle(channel, async (event, ...args) => {
     if (!trusted(event)) throw new Error('Origem não autorizada.');
+    const updateCommand = channel === 'vora:updates' || channel.startsWith('vora:update-');
+    if (updates?.installing && !updateCommand)
+      throw new Error('O Vora está preparando a atualização. Aguarde reiniciar.');
+    if (!updateCommand) {
+      pendingIpc++;
+      updates?.activityChanged();
+    }
     try {
       return await handler(...args);
     } catch (error) {
       throw new Error((error as Error).message);
+    } finally {
+      if (!updateCommand) pendingIpc--;
+      updates?.activityChanged();
     }
   });
 }
@@ -139,10 +154,44 @@ else {
               if (item.queueItemId === id) await recovery.remove(item.id);
           },
         },
-        (snapshot) => send('vora:queue', snapshot),
+        (snapshot) => {
+          send('vora:queue', snapshot);
+          updates?.activityChanged();
+        },
         (event) => send('vora:job', event),
       );
       await queue.load();
+      updates = new UpdateManager(createUpdater(), {
+        version: app.getVersion(),
+        disabledReason: !app.isPackaged
+          ? 'No modo de desenvolvimento, use a página de versões. A atualização interna funciona no aplicativo instalado.'
+          : !['win32', 'linux'].includes(process.platform)
+            ? 'Atualização interna indisponível neste sistema. Use a página de versões.'
+            : process.platform === 'linux' && !process.env.APPIMAGE
+              ? 'Abra o Vora pelo AppImage para usar a atualização interna. Você também pode baixar pela página de versões.'
+              : undefined,
+        availability: async () =>
+          process.platform === 'linux' ? appImageAvailability(process.env.APPIMAGE) : undefined,
+        busy: () =>
+          pendingIpc > 0 ||
+          queue.busy ||
+          downloader.busy ||
+          queue.snapshot().mode !== 'paused' ||
+          metadata.listingBusy,
+        prepare: async () => {
+          if ((await recovery.list()).some((item) => item.running))
+            throw new Error('Um processo anterior ainda está em andamento.');
+          await queue.pausePreviews();
+          await metadata.cancelAll();
+          await queue.pause();
+          allowClose = true;
+        },
+        recover: () => {
+          allowClose = false;
+          queue.resumePreviews();
+        },
+        notify: (snapshot) => send('vora:update', snapshot),
+      });
       const dist = resolve(app.getAppPath(), 'dist');
       protocol.handle('vora', (request) => {
         const url = new URL(request.url);
@@ -221,6 +270,11 @@ else {
           });
       });
       handle('vora:settings', () => settings.get());
+      handle('vora:updates', () => updates!.snapshot());
+      handle('vora:update-check', () => updates!.check());
+      handle('vora:update-download', () => updates!.download());
+      handle('vora:update-install', () => updates!.install());
+      handle('vora:update-releases', () => shell.openExternal(RELEASES_URL));
       handle('vora:notifications-enabled', (enabled) => settings.setNotificationsEnabled(enabled));
       handle('vora:notification-test', () => notifier.test());
       handle('vora:save-preferences', (preferences) => settings.setPreferences(preferences));
@@ -344,6 +398,11 @@ else {
         }),
       );
       await window.loadURL(devUrl ?? 'vora://app/index.html');
+      const updateTimer = setTimeout(() => {
+        void updates!.check();
+      }, 10_000);
+      updateTimer.unref();
+      app.once('before-quit', () => clearTimeout(updateTimer));
     })
     .catch((error) => {
       console.error(error);

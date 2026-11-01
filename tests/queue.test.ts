@@ -969,3 +969,38 @@ test('cancelamento após publicação não perde o registro do arquivo concluíd
     await s.close();
   }
 });
+
+test('preparar atualização suspende e drena as prévias; falha permite retomá-las sem executar a fila', async () => {
+  let calls = 0;
+  const s = await setup({
+    preview: async (url, signal) => {
+      calls++;
+      if (calls === 1)
+        await new Promise<void>((_resolve, reject) => {
+          signal.addEventListener('abort', () => reject(new CancelledError()), { once: true });
+        });
+      return video(url);
+    },
+  });
+  try {
+    await s.manager.add([{ url: urls[0] }], DEFAULT_PREFERENCES, s.root);
+    await until(() => calls === 1);
+    await s.manager.pausePreviews();
+    await s.manager.add([{ url: urls[1] }], DEFAULT_PREFERENCES, s.root);
+    assert.equal(calls, 1);
+    assert.equal(s.manager.snapshot().items[0].previewState, 'pending');
+    s.manager.resumePreviews();
+    await until(() => s.manager.snapshot().items.every((item) => item.previewState === 'ready'));
+    await s.manager.pausePreviews();
+    const saved = JSON.parse(await readFile(join(s.root, 'queue.json'), 'utf8'));
+    assert.equal(calls, 3);
+    assert.ok(saved.items.every((item: any) => item.status === 'waiting'));
+    assert.deepEqual(
+      saved.items.map((item: any) => item.url),
+      urls.slice(0, 2),
+    );
+    assert.equal(s.manager.snapshot().mode, 'paused');
+  } finally {
+    await s.close();
+  }
+});

@@ -661,3 +661,90 @@ test(
     }
   },
 );
+
+test(
+  'atualizações: aviso, download explícito, progresso, bloqueio e alternativa manual',
+  { timeout: 60_000 },
+  async () => {
+    const server = await preview({ preview: { host: '127.0.0.1', port: 4173, strictPort: true } });
+    let browser;
+    try {
+      browser = await chromium.launch({
+        executablePath: process.env.VORA_TEST_BROWSER || undefined,
+        headless: true,
+        args: process.env.VORA_TEST_BROWSER ? ['--no-sandbox', '--disable-dev-shm-usage'] : [],
+      });
+      const page = await browser.newPage({ viewport: { width: 800, height: 600 } });
+      await page.addInitScript(queueFixture);
+      await page.goto('http://127.0.0.1:4173');
+      await page.getByRole('heading', { name: 'Adicione um link para começar' }).waitFor();
+      await page.evaluate(() =>
+        window.__test.setUpdate({
+          status: 'available',
+          version: '0.7.0',
+          notes: 'Notas longas de teste '.repeat(50),
+        }),
+      );
+      await page.getByRole('button', { name: 'Nova versão disponível', exact: true }).click();
+      const dialog = page.getByRole('dialog', { name: 'Configurações', exact: true });
+      await dialog.getByText('Vora 0.7.0 disponível.', { exact: true }).waitFor();
+      assert.deepEqual(await page.evaluate(() => window.__test.updateActions), []);
+      await dialog.getByText('O que mudou', { exact: true }).click();
+      await dialog.getByRole('button', { name: 'Baixar atualização', exact: true }).click();
+      await dialog
+        .getByRole('progressbar', { name: 'Download da atualização', exact: true })
+        .waitFor();
+      await dialog.getByText('42% · 1.0 MB/s', { exact: true }).waitFor();
+      await page.keyboard.press('Escape');
+      await page.getByRole('button', { name: 'Baixando atualização', exact: true }).waitFor();
+      await page.evaluate(() =>
+        window.__test.setUpdate({ status: 'downloaded', canInstall: false }),
+      );
+      await page.getByRole('button', { name: 'Atualização pronta', exact: true }).click();
+      assert.equal(
+        await dialog
+          .getByRole('button', { name: 'Reiniciar e atualizar', exact: true })
+          .isDisabled(),
+        true,
+      );
+      await dialog.getByText(/Pause a fila e aguarde/).waitFor();
+      assert.ok(!(await page.evaluate(() => window.__test.updateActions)).includes('install'));
+      await page.evaluate(() =>
+        window.__test.setUpdate({ status: 'downloaded', canInstall: true }),
+      );
+      await page.waitForFunction(
+        () =>
+          [...document.querySelectorAll('button')].find((button) =>
+            button.textContent.includes('Reiniciar e atualizar'),
+          )?.disabled === false,
+      );
+      await mkdir('test-results', { recursive: true });
+      await page.screenshot({ path: 'test-results/vora-atualizacoes.png', animations: 'disabled' });
+      assert.equal(
+        await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth),
+        true,
+      );
+      await dialog.getByRole('button', { name: 'Reiniciar e atualizar', exact: true }).click();
+      await dialog.getByText('Preparando a atualização e o reinício…', { exact: true }).waitFor();
+      assert.deepEqual(await page.evaluate(() => window.__test.updateActions), [
+        'download',
+        'install',
+      ]);
+      await page.evaluate(() =>
+        window.__test.setUpdate({ status: 'error', message: 'Falha de conexão.' }),
+      );
+      await dialog.getByRole('button', { name: 'Tentar novamente', exact: true }).click();
+      await dialog.getByRole('button', { name: 'Baixar atualização', exact: true }).waitFor();
+      await page.evaluate(() =>
+        window.__test.setUpdate({ status: 'unavailable', message: 'Pasta sem permissão.' }),
+      );
+      await dialog.getByRole('button', { name: 'Ver versões no GitHub', exact: true }).click();
+      assert.ok((await page.evaluate(() => window.__test.updateActions)).includes('releases'));
+      await page.keyboard.press('Escape');
+      await page.getByRole('heading', { name: 'Adicione um link para começar' }).waitFor();
+    } finally {
+      await browser?.close();
+      await server.httpServer.close();
+    }
+  },
+);

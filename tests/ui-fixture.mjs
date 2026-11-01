@@ -9,6 +9,12 @@ export function queueFixture() {
   };
   let destination = '/home/teste/Downloads';
   let notificationsEnabled = JSON.parse(localStorage.getItem('test-notifications') ?? 'true');
+  let update = { status: 'idle', currentVersion: '0.6.0', canInstall: false };
+  const updateListeners = new Set();
+  const setUpdate = (value) => {
+    update = { ...update, ...value };
+    updateListeners.forEach((callback) => callback(JSON.parse(JSON.stringify(update))));
+  };
   const snapshot = JSON.parse(localStorage.getItem('test-queue') || 'null') || {
     groups: [],
     items: [],
@@ -146,6 +152,8 @@ export function queueFixture() {
     jobListeners.forEach((callback) => callback({ ...event, itemId: item.id }));
   }
   window.__test = {
+    updateActions: [],
+    setUpdate,
     actions: [],
     holdPlaylist: false,
     analyzed: [],
@@ -215,6 +223,32 @@ export function queueFixture() {
     window.__test.actions.push({ id, action });
   };
   window.vora = {
+    updates: async () => copy(update),
+    checkForUpdates: async () => {
+      window.__test.updateActions.push('check');
+      setUpdate({
+        status: 'available',
+        version: '0.7.0',
+        notes: 'Melhorias de teste',
+        message: undefined,
+      });
+    },
+    downloadUpdate: async () => {
+      window.__test.updateActions.push('download');
+      setUpdate({ status: 'downloading', percent: 42, bytesPerSecond: 1024 ** 2 });
+    },
+    installUpdate: async () => {
+      if (!update.canInstall) throw new Error('Pause a fila antes de instalar.');
+      window.__test.updateActions.push('install');
+      setUpdate({ status: 'installing', canInstall: false });
+    },
+    openReleases: async () => {
+      window.__test.updateActions.push('releases');
+    },
+    onUpdate: (callback) => {
+      updateListeners.add(callback);
+      return () => updateListeners.delete(callback);
+    },
     settings: async () => ({ destination, preferences, notificationsEnabled }),
     setNotificationsEnabled: async (value) => {
       notificationsEnabled = value;
@@ -386,7 +420,7 @@ export function queueFixture() {
       listings.delete(id);
     },
     info: async () => ({
-      version: '0.5.1',
+      version: '0.6.0',
       tools: [
         { name: 'yt-dlp', version: '2026.10.26' },
         { name: 'FFmpeg', version: '8.1.3' },

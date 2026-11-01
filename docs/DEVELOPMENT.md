@@ -26,8 +26,8 @@ No Linux:
 ```sh
 npm run tools:fetch -- linux
 npm run dist:linux
-chmod +x release/Vora-0.5.1-linux-x86_64.AppImage
-./release/Vora-0.5.1-linux-x86_64.AppImage
+chmod +x release/Vora-0.6.0-linux-x86_64.AppImage
+./release/Vora-0.6.0-linux-x86_64.AppImage
 ```
 
 O AppImage depende das bibliotecas de desktop do sistema e, conforme a distribuição, de FUSE. É possível executar com `--appimage-extract-and-run` quando FUSE não estiver disponível. O build FFmpeg Linux escolhido exige glibc compatível com o build upstream. Valide no Linux de destino.
@@ -52,6 +52,7 @@ npm run build
 npx playwright install chromium
 npm run test:ui          # fluxos da interface com ponte simulada, sem acessar o YouTube
 npm run test:media       # executáveis reais: fila, playlist local, MP3 e preservação de codecs
+npm run test:updates     # atualizador real com feed HTTP local e checksum inválido
 npm run test:desktop     # Electron real, protocolo local, IPC e ferramentas
 ```
 
@@ -74,3 +75,11 @@ O YouTube pode alterar formatos, exigir autenticação ou recusar solicitações
 ## Runtime do yt-dlp
 
 O runtime JavaScript é o Node.js já incluído no Electron. O aplicativo passa o caminho absoluto de seu próprio executável ao yt-dlp e define `ELECTRON_RUN_AS_NODE=1` somente para esses subprocessos. Não depende de Node ou Deno instalados no sistema. O teste Electron verifica a detecção do runtime pelo yt-dlp real.
+
+## Atualizador
+
+A integração usa electron-updater 6.8.12 com provider GitHub fixado em justmatedev/vora. autoDownload e autoInstallOnAppQuit são false; prereleases e downgrades também ficam desabilitados. A ponte não recebe URLs de feed ou caminhos de instalador da interface. Em desenvolvimento, o atualizador fica indisponível, sem forçar configurações de produção.
+
+UpdateManager é testado com adaptador controlado. `npm run test:updates` usa o downloader e a verificação SHA-512 reais com servidor local e payloads de teste; não instala o aplicativo do usuário. No Linux, a substituição preserva o nome do AppImage e prepara uma cópia no mesmo diretório antes do rename. O workflow de pacotes confere os metadados e o canal embutido em cada sistema.
+
+O ciclo completo com instalador/reinício deve ser validado em ambiente nativo antes de promover uma versão: os testes de servidor local não equivalem à execução de um instalador NSIS real ou ao reinício de um AppImage real.

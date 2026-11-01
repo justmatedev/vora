@@ -66,3 +66,13 @@ O registro de recuperação fica em `recoveries.json` na pasta de dados do Vora 
 Pastas antigas sem registro, inclusive temporários deixados pela versão 0.1, não são removidas automaticamente. A recuperação é aplicada aos downloads criados por esta versão.
 
 Configurações e versões das ferramentas ficam no botão de ajustes. A última pasta é persistida em `settings.json` na pasta de dados do aplicativo do sistema. O Vora consulta o YouTube diretamente; não usa servidor próprio.
+
+## Atualização do Vora (a partir de 0.6.0)
+
+O aplicativo verifica novas versões dez segundos após abrir. Em Configurações → Atualizações, você também pode verificar manualmente. São consultadas apenas versões estáveis publicadas no repositório do Vora; rascunhos e pré-lançamentos não são oferecidos. Falhas nessa consulta não interrompem os downloads da fila.
+
+Ao encontrar uma versão, o Vora avisa no topo. Abra as configurações para ler as mudanças e escolher Baixar atualização. O progresso aparece no painel, e você pode fechá-lo enquanto o download continua. Baixar não instala e fechar normalmente o aplicativo também não instala.
+
+Quando estiver pronta, pause a fila, aguarde o item ativo e outras operações terminarem e clique em Reiniciar e atualizar. A fila pendente e suas configurações são salvas. No Windows, o instalador pode solicitar permissão do sistema conforme o tipo de instalação. No Linux, o AppImage é substituído no mesmo caminho, preservando atalhos; a cópia é preparada ao lado do arquivo antes da substituição. Se a pasta não permitir gravação, use Ver versões no GitHub e faça a troca manual.
+
+O recurso funciona no aplicativo empacotado: instalador NSIS no Windows e AppImage no Linux. Em npm run dev e na pasta Linux descompactada, utilize a página de versões. Quem está na versão 0.5.1 precisa instalar manualmente a primeira versão com esse recurso. A atualização não altera os arquivos de mídia já salvos.

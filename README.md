@@ -24,7 +24,7 @@ A captura da fila usa dados de teste.
 
 ## Download
 
-A versão atual é **0.5.1**, para **Linux e Windows x64**. Baixe os instaladores na [Release 0.5.1](https://github.com/justmatedev/vora/releases/tag/v0.5.1):
+A versão estável publicada é **0.5.1**, para **Linux e Windows x64**. Baixe os instaladores na [Release 0.5.1](https://github.com/justmatedev/vora/releases/tag/v0.5.1):
 
 | Sistema | Arquivo                                                                                                             |
 | ------- | ------------------------------------------------------------------------------------------------------------------- |
@@ -34,6 +34,12 @@ A versão atual é **0.5.1**, para **Linux e Windows x64**. Baixe os instaladore
 Os pacotes incluem yt-dlp e FFmpeg/ffprobe, usando o Node.js incluído no Electron. O usuário final não precisa instalar essas ferramentas ou Node.js separadamente. O AppImage pode exigir FUSE ou a opção `--appimage-extract-and-run`. O instalador Windows não possui assinatura digital.
 
 O AppImage passou na validação automatizada no Linux. O mantenedor confirmou o teste manual do instalador no Windows, sem falhas relatadas; veja [VALIDATION.md](docs/VALIDATION.md).
+
+## Atualizações no aplicativo
+
+A versão **0.6.0**, em preparação, verifica novas versões ao abrir e oferece **Configurações → Atualizações**. O download depende do botão **Baixar atualização** e a instalação de **Reiniciar e atualizar**, com a fila pausada e sem trabalho ativo. Fechar normalmente o Vora não instala uma atualização baixada.
+
+Quem usa **0.5.1 ou anterior** precisa instalar manualmente a primeira versão com o recurso. As próximas poderão ser atualizadas dentro do app. No Linux, use o AppImage em uma pasta onde você tenha permissão de escrita; a atualização preserva seu nome e caminho. Se a atualização interna estiver indisponível, há acesso à página de versões.
 
 ## Começar a desenvolver
 
@@ -64,7 +70,7 @@ Para relatar problemas ou sugerir melhorias, [abra uma issue](https://github.com
 
 ## Limites e licença
 
-Suporte a vídeos públicos e playlists públicas finitas. Sem macOS, login/cookies, canais, mixes automáticos, lives em andamento ou downloads simultâneos. Atualização manual por nova versão do aplicativo. Mudanças no YouTube podem exigir atualização das ferramentas.
+Suporte a vídeos públicos e playlists públicas finitas. Sem macOS, login/cookies, canais, mixes automáticos, lives em andamento ou downloads simultâneos. A atualização interna está sendo introduzida na versão 0.6.0. Mudanças no YouTube podem exigir atualização das ferramentas.
 
 O código do Vora é disponibilizado sob a [licença MIT](LICENSE), com copyright de **justmatedev**. As dependências e os executáveis incluídos conservam suas próprias licenças; consulte [THIRD_PARTY.md](THIRD_PARTY.md) e os materiais de fontes disponibilizados junto às Releases.
 

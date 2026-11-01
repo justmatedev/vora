@@ -17,7 +17,7 @@ Os builds datados do BtbN têm retenção limitada. Se um asset for removido, at
 
 ## Avisos incluídos no build
 
-`npm run build` prepara `dist-notices/`, incluída como `resources/licenses` no aplicativo. Contém as licenças de React, React DOM, scheduler, Lucide e Inter das versões instaladas pelo lockfile, com manifesto. O Electron fornece seus próprios arquivos LICENSE e LICENSES.chromium.html no pacote.
+`npm run build` prepara `dist-notices/`, incluída como `resources/licenses` no aplicativo. Contém os avisos das dependências de produção instaladas pelo lockfile, incluindo React, React DOM, scheduler, Lucide, Inter, electron-updater e suas dependências, com manifesto. O Electron fornece seus próprios arquivos LICENSE e LICENSES.chromium.html no pacote.
 
 Os textos LGPLv3/GPLv3 e o aviso agregado `THIRD_PARTY_LICENSES.txt` do yt-dlp 2026.10.26 estão em `resources/notices/`, com URLs fixas e SHA-256 em `sources.json`. A preparação das ferramentas também os copia para `tools/licenses/`. A licença Unlicense do núcleo yt-dlp sozinha não descreve todas as dependências do standalone.
 
@@ -45,3 +45,9 @@ O cache original é amplo e inclui componentes de variantes opcionais que **não
 Esses arquivos não aumentam o tamanho do instalador: são materiais de desenvolvimento separados. Os textos e manifestos de avisos são incluídos no aplicativo. Enquanto a Release estiver em rascunho, seus anexos dependem de acesso de mantenedor; após publicada, as fontes e os binários estarão disponíveis juntos.
 
 A geração dos materiais é descrita em [docs/RELEASING.md](docs/RELEASING.md). Esta organização registra os materiais verificados; não promete reprodução binária bit a bit. Referência: [orientações do FFmpeg](https://ffmpeg.org/legal.html).
+
+## Dependências do atualizador
+
+`electron-updater` 6.8.12 e suas dependências mantêm suas próprias licenças. O preparador inclui os arquivos de licença de todas as dependências de produção do lockfile, também quando são empacotadas como módulos Node separados.
+
+`lazy-val` 1.0.5 declara MIT no package.json, mas não fornece LICENSE separado no pacote ou na revisão consultada. `lazy-val-NOTICE.txt` preserva os metadados originais e a atribuição de autor declarada, acompanhados do texto padrão MIT; nenhum ano de copyright foi inferido. A origem e o hash desse aviso estão em resources/notices/sources.json.

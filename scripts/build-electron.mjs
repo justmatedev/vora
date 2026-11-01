@@ -7,6 +7,6 @@ await build({
   platform: 'node',
   format: 'cjs',
   target: 'node22',
-  external: ['electron'],
+  external: ['electron', 'electron-updater'],
   sourcemap: true,
 });

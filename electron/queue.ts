@@ -58,6 +58,17 @@ export function requestForItem(info: VideoInfo, preferences: DownloadPreferences
   };
 }
 export class QueueManager {
+  private previewsPaused = false;
+  async pausePreviews() {
+    this.previewsPaused = true;
+    this.previewController?.abort();
+    await this.previewWorker;
+    await this.mutations;
+  }
+  resumePreviews() {
+    this.previewsPaused = false;
+    this.schedulePreviews();
+  }
   private state: QueueSnapshot = { groups: [], items: [], mode: 'paused' };
   private mutations: Promise<unknown> = Promise.resolve();
   private worker?: Promise<void>;
@@ -181,7 +192,7 @@ export class QueueManager {
     };
   }
   private schedulePreviews() {
-    if (!this.deps.preview || this.previewWorker || this.closing) return;
+    if (!this.deps.preview || this.previewWorker || this.closing || this.previewsPaused) return;
     let failed = false;
     this.previewWorker = this.loadPreviews()
       .catch((error) => {
@@ -201,7 +212,7 @@ export class QueueManager {
       });
   }
   private async loadPreviews() {
-    while (!this.closing) {
+    while (!this.closing && !this.previewsPaused) {
       const next = await this.change(() => {
         const item = this.state.items.find(
           (item) =>

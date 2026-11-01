@@ -39,3 +39,13 @@ Os materiais da versão 0.5.1 foram reunidos da execução oficial BtbN `4119974
 Para uma manutenção futura, baixe esses materiais pela API do GitHub/gh e execute `scripts/prepare-ffmpeg-sources.py` com os argumentos `--cache`, `--recipes`, `--ffmpeg-source`, `--linux-log`, `--windows-log` e `--output`. Essa ferramenta de manutenção requer Python 3.12 ou superior; o aplicativo e o build normal não requerem Python. O script lê os arquivos como dados e gera o inventário, avisos e partes do cache, sem executar o código baixado.
 
 Preserve os arquivos de fonte na Release, separados dos instaladores, junto com `SOURCES-SHA256SUMS`. As instruções de reunião das partes e reconstrução estão no README do arquivo `Vora-0.5.1-ffmpeg-build-materials.tar.gz`. Atualizações de FFmpeg exigem repetir a coleta para a nova revisão e atualizar os manifestos e avisos. As fontes da versão anterior devem continuar disponíveis para quem recebeu seus binários.
+
+## Publicação para atualização interna (0.6.0+)
+
+O workflow Gerar pacotes entrega também `latest.yml` (Windows), `latest-linux.yml` (Linux) e os `.blockmap` gerados, além dos instaladores e SHA256SUMS. Os metadados contêm versão, arquivo, tamanho e SHA-512 e são conferidos contra os binários pelo script `verify-update-metadata.mjs`. O canal GitHub embutido no pacote também é validado.
+
+Crie uma Release em rascunho e anexe o conjunto completo dos dois jobs. Gere um manifesto SHA256SUMS único reunindo os pacotes, YAMLs e blockmaps atuais. Mantenha cada YAML exatamente como foi gerado, com os nomes e hashes correspondentes; não altere um pacote depois dessa conferência. Publique o rascunho somente quando todos os anexos e testes estiverem prontos. Como clientes consultam Releases estáveis publicadas, a publicação passa a oferecer essa atualização aos usuários com o recurso instalado. Não publique os YAMLs separadamente antes dos arquivos que referenciam.
+
+A versão 0.5.1 não possui o atualizador: o primeiro salto para 0.6.0 é manual. Valide depois um salto de versão a partir de um cliente que já possua o atualizador. A aplicação nunca instala ao fechar normalmente, e instalar exige clique explícito com a fila pausada e sem trabalho ativo. No Linux, confira também diretório sem permissão e preservação do caminho/atalho do AppImage.
+
+O FFmpeg e suas dependências não mudaram em 0.6.0; os materiais de fontes permanecem nos anexos de 0.5.1, com links e hashes em THIRD_PARTY.md e FFmpeg-SOURCES.json. Preserve essa Release e cite seus materiais nas notas da nova versão.

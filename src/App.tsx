@@ -29,6 +29,8 @@ import { ImportDialog } from './ImportDialog';
 import { useQueue } from './queue-client';
 import { youtubeSource } from '../shared/youtube';
 import { RecoveryDialog } from './RecoveryDialog';
+import { UpdateSection, useUpdates } from './UpdateSection';
+import type { UpdateSnapshot } from '../shared/types';
 
 type Phase = 'idle' | 'analyzing' | 'ready';
 const api = (): VoraAPI => {
@@ -107,6 +109,7 @@ export function App() {
   const urlInput = useRef<HTMLInputElement>(null);
   const busy = phase === 'analyzing';
   const queue = useQueue();
+  const updates = useUpdates();
   const [importOpen, setImportOpen] = useState(false);
   const [importInitial, setImportInitial] = useState('');
   const [adding, setAdding] = useState(false);
@@ -325,6 +328,15 @@ export function App() {
       <header className="app-header">
         <Logo />
         <div className="header-right">
+          {['available', 'downloading', 'downloaded'].includes(updates.status) && (
+            <button className="update-badge" disabled={busy} onClick={() => setSettingsOpen(true)}>
+              {updates.status === 'downloaded'
+                ? 'Atualização pronta'
+                : updates.status === 'downloading'
+                  ? 'Baixando atualização'
+                  : 'Nova versão disponível'}
+            </button>
+          )}
           <span className="local-badge">
             <span />
             No seu computador
@@ -543,6 +555,7 @@ export function App() {
       )}
       {settingsOpen && (
         <SettingsModal
+          updates={updates}
           destination={destination}
           chooseDirectory={chooseDirectory}
           directoryBusy={directoryBusy}
@@ -554,11 +567,13 @@ export function App() {
 }
 
 function SettingsModal({
+  updates,
   destination,
   chooseDirectory,
   directoryBusy,
   onClose,
 }: {
+  updates: UpdateSnapshot;
   destination: string;
   chooseDirectory: () => Promise<void>;
   directoryBusy: boolean;
@@ -631,6 +646,7 @@ function SettingsModal({
           <X size={20} />
         </button>
       </div>
+      <UpdateSection state={updates} />
       <section>
         <h3>Pasta de destino</h3>
         <p className="modal-description">Seus próximos downloads serão salvos aqui.</p>
@@ -720,9 +736,6 @@ function SettingsModal({
             ))}
           </div>
         )}
-        <p className="modal-footnote">
-          Atualizações são instaladas manualmente com uma nova versão do Vora.
-        </p>
       </section>
       <div className="modal-brand">
         <Logo small />

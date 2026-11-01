@@ -1,5 +1,14 @@
 # Histórico de mudanças
 
+## 0.6.0 — em preparação
+
+- Verificação automática de novas versões e painel de atualizações nas configurações.
+- Download e instalação por clique, com progresso, notas da versão e alternativa manual.
+- Instalação bloqueada durante trabalho ativo; fila e preferências preservadas.
+- AppImage substituído no mesmo caminho após preparar uma cópia; atalhos preservados.
+- Metadados e blockmaps de atualização gerados e conferidos no workflow de pacotes.
+- Instalação automática ao fechar desabilitada. A primeira instalação a partir de 0.5.1 é manual.
+
 ## 0.5.1 — 2026-11-01
 
 - Layout compacto desde a abertura, com fila vazia e análise individual sempre em modal.

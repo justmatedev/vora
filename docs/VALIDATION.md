@@ -1,3 +1,14 @@
+# Versão 0.6.0 — atualizações internas em validação
+
+- Gerenciador de atualizações no processo principal, ponte tipada e painel React com consulta, notas, progresso, download e instalação explícitos. Provider público GitHub fixado no repositório Vora; sem feed ou caminho arbitrário vindo da interface.
+- 84 testes do núcleo passaram no Linux. Incluem bloqueio de instalação com trabalho ativo, comandos concorrentes, falha de preparação/instalação, retomada das prévias e substituição do AppImage preservando o original em falhas de cópia/permissão.
+- Dois testes de integração usam electron-updater real com servidor HTTP local e payloads de teste: consulta sem download automático, download por clique, instalação somente sem trabalho ativo e recusa de SHA-512 incorreto. Não executam um instalador NSIS real nem encerram o aplicativo do usuário.
+- Cinco testes de interface passaram, incluindo estados de atualização em 800 × 600, progresso, bloqueio, notas, alternativa manual e preservação do estado ao fechar o modal. Teste Electron passou com as novas operações IPC e atualizador indisponível no desenvolvimento.
+- Novas dependências fixadas e avisos das dependências de produção incluídos no build. Runtime de yt-dlp, formatos e dados persistidos não foram alterados.
+- Pacotes e metadados em geração. Validação nativa de instalação/reinício de uma versão para outra permanece pendente; os testes com payloads de teste não substituem esse ciclo.
+
+---
+
 # Release 0.5.1 — validação Windows confirmada em 1 de novembro de 2026
 
 - O mantenedor confirmou o teste manual do novo instalador Windows, sem falhas relatadas. A versão/edição do Windows não foi informada; este registro se refere à confirmação do mantenedor, distinta dos testes automatizados no runner Windows.

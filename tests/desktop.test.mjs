@@ -55,6 +55,21 @@ test(
       assert.equal(page.url(), 'vora://app/index.html');
       assert.equal(await page.evaluate(() => typeof window.require), 'undefined');
       assert.equal(await page.evaluate(() => typeof window.vora.analyze), 'function');
+      assert.equal(await page.evaluate(() => typeof window.vora.installUpdate), 'function');
+      const updateState = await page.evaluate(() => window.vora.updates());
+      assert.equal(updateState.currentVersion, '0.6.0');
+      const updateSupported = await application.evaluate(
+        ({ app }) =>
+          app.isPackaged &&
+          (process.platform === 'win32' ||
+            (process.platform === 'linux' && !!process.env.APPIMAGE)),
+      );
+      if (!updateSupported) {
+        assert.equal(updateState.status, 'unavailable');
+        await page.evaluate(() => window.vora.checkForUpdates());
+      }
+      await page.evaluate(() => window.vora.installUpdate());
+      assert.equal((await page.evaluate(() => window.vora.updates())).canInstall, false);
       const versions = await page.evaluate(() => window.vora.info());
       assert.equal(versions.tools.length, 4);
       assert.ok(

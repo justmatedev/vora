@@ -25,5 +25,11 @@
     "url": "https://github.com/BtbN/FFmpeg-Builds/actions/runs/41199749965",
     "generatedBy": "scripts/prepare-ffmpeg-sources.py",
     "sha256": "c23bfdeeb5e215f140e75df3d335a435b5e36ae36d8926432fa60455c37ac31d"
+  },
+  {
+    "file": "lazy-val-NOTICE.txt",
+    "url": "https://raw.githubusercontent.com/develar/lazy-val/b69ad4119f1b19bdab13c61ee2fcc88d46b89071/package.json",
+    "generatedFrom": "lazy-val@1.0.5 package metadata and standard MIT terms",
+    "sha256": "1b27c48a67d9a7f78efc1ebe589c48b555f6879bcc7c42e7ff93ad40094dc49e"
   }
 ]

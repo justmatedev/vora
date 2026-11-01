@@ -1,7 +1,24 @@
 import { contextBridge, ipcRenderer } from 'electron';
-import type { JobEvent, VoraAPI, QueueSnapshot, PlaylistSummary } from '../shared/types';
+import type {
+  JobEvent,
+  VoraAPI,
+  QueueSnapshot,
+  PlaylistSummary,
+  UpdateSnapshot,
+} from '../shared/types';
 
 const api: VoraAPI = {
+  updates: () => ipcRenderer.invoke('vora:updates'),
+  checkForUpdates: () => ipcRenderer.invoke('vora:update-check'),
+  downloadUpdate: () => ipcRenderer.invoke('vora:update-download'),
+  installUpdate: () => ipcRenderer.invoke('vora:update-install'),
+  openReleases: () => ipcRenderer.invoke('vora:update-releases'),
+  onUpdate: (callback) => {
+    const listener = (_event: Electron.IpcRendererEvent, snapshot: UpdateSnapshot) =>
+      callback(snapshot);
+    ipcRenderer.on('vora:update', listener);
+    return () => ipcRenderer.removeListener('vora:update', listener);
+  },
   setNotificationsEnabled: (enabled) => ipcRenderer.invoke('vora:notifications-enabled', enabled),
   testNotification: () => ipcRenderer.invoke('vora:notification-test'),
   settings: () => ipcRenderer.invoke('vora:settings'),

@@ -1,6 +1,6 @@
 {
   "name": "vora",
-  "version": "0.5.1",
+  "version": "0.6.0",
   "private": true,
   "description": "Vora — áudio e vídeo, do seu jeito.",
   "author": "justmatedev",
@@ -22,10 +22,12 @@
     "test:ui": "node --test tests/ui.test.mjs",
     "test:desktop": "node --test tests/desktop.test.mjs",
     "test:media": "node --import tsx --test tests/tools.integration.test.mjs tests/queue.integration.test.mjs",
-    "format": "prettier --write \"src/**/*.{ts,tsx,css}\" \"electron/**/*.ts\" \"shared/**/*.ts\" \"scripts/*.mjs\" \"tests/*.{ts,mjs}\" \"*.{json,ts,html,md}\""
+    "format": "prettier --write \"src/**/*.{ts,tsx,css}\" \"electron/**/*.ts\" \"shared/**/*.ts\" \"scripts/*.mjs\" \"tests/*.{ts,mjs}\" \"*.{json,ts,html,md}\"",
+    "test:updates": "node --import tsx --test tests/updates.integration.test.mjs"
   },
   "dependencies": {
     "@fontsource/inter": "5.3.0",
+    "electron-updater": "6.8.12",
     "lucide-react": "1.66.0",
     "react": "19.3.1",
     "react-dom": "19.3.1"
@@ -100,6 +102,11 @@
       "allowToChangeInstallationDirectory": true,
       "createDesktopShortcut": true,
       "createStartMenuShortcut": true
+    },
+    "publish": {
+      "provider": "github",
+      "owner": "justmatedev",
+      "repo": "vora"
     }
   },
   "engines": {

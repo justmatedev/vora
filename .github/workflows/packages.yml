@@ -39,6 +39,8 @@ jobs:
           CSC_IDENTITY_AUTO_DISCOVERY: 'false'
       - name: Verificar runtime empacotado
         run: node scripts/check-packaged-runtime.mjs ${{ matrix.target }}
+      - name: Verificar metadados de atualização
+        run: node scripts/verify-update-metadata.mjs ${{ matrix.target }}
       - name: Calcular checksum
         run: node scripts/release-checksums.mjs
       - uses: actions/upload-artifact@v4
@@ -48,4 +50,6 @@ jobs:
           retention-days: 14
           path: |
             ${{ matrix.pattern }}
+            release/*.blockmap
+            release/latest*.yml
             release/SHA256SUMS

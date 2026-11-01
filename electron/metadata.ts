@@ -73,6 +73,9 @@ interface Listing {
   finished: Promise<void>;
 }
 export class MetadataService {
+  get listingBusy() {
+    return [...this.listings.values()].some((listing) => listing.summary.state === 'loading');
+  }
   private listings = new Map<string, Listing>();
   private queries = new Map<AbortController, Promise<void>>();
   private previews = new Map<string, { info: QueuePreview; at: number }>();

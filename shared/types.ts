@@ -159,7 +159,33 @@ export interface AppInfo {
   version: string;
   tools: ToolVersion[];
 }
+export type UpdateStatus =
+  | 'unavailable'
+  | 'idle'
+  | 'checking'
+  | 'current'
+  | 'available'
+  | 'downloading'
+  | 'downloaded'
+  | 'installing'
+  | 'error';
+export interface UpdateSnapshot {
+  status: UpdateStatus;
+  currentVersion: string;
+  version?: string;
+  notes?: string;
+  message?: string;
+  percent?: number;
+  bytesPerSecond?: number;
+  canInstall: boolean;
+}
 export interface VoraAPI {
+  updates(): Promise<UpdateSnapshot>;
+  checkForUpdates(): Promise<void>;
+  downloadUpdate(): Promise<void>;
+  installUpdate(): Promise<void>;
+  openReleases(): Promise<void>;
+  onUpdate(callback: (snapshot: UpdateSnapshot) => void): () => void;
   settings(): Promise<AppSettings>;
   setNotificationsEnabled(enabled: boolean): Promise<boolean>;
   testNotification(): Promise<void>;

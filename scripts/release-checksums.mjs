@@ -5,7 +5,11 @@ import { join } from 'node:path';
 
 const directory = 'release';
 const files = (await readdir(directory))
-  .filter((name) => /^Vora-.*(?:\.AppImage|-setup\.exe)$/.test(name))
+  .filter(
+    (name) =>
+      /^Vora-.*(?:\.AppImage|-setup\.exe|\.blockmap)$/.test(name) ||
+      /^latest(?:-linux)?\.yml$/.test(name),
+  )
   .sort();
 if (!files.length) throw new Error('Nenhum pacote encontrado em release/.');
 const lines = [];
