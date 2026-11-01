@@ -1,0 +1,2 @@
+# Preserve exact upstream bytes used by resources/notices/sources.json hashes.
+resources/notices/*.txt -text
