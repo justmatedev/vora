@@ -1,0 +1,59 @@
+name: Kit de teste de atualização
+
+# Apenas versões isoladas de validação; não cria tags nem publica Releases.
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  build:
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - os: ubuntu-24.04
+            target: linux
+          - os: windows-2022
+            target: win32
+    runs-on: ${{ matrix.os }}
+    timeout-minutes: 40
+    steps:
+      - uses: actions/checkout@v6
+      - uses: actions/setup-node@v7
+        with:
+          node-version: '24'
+          cache: npm
+      - run: npm ci
+      - run: node --test tests/update-cycle-server.test.mjs
+      - run: npm run tools:fetch -- ${{ matrix.target }}
+      - run: node scripts/build-update-cycle.mjs ${{ matrix.target }}
+        env:
+          CSC_IDENTITY_AUTO_DISCOVERY: 'false'
+      - name: Preparar ambiente gráfico Linux
+        if: runner.os == 'Linux'
+        run: npx playwright install-deps chromium
+      - name: Testar troca real e reinício do AppImage
+        if: runner.os == 'Linux'
+        run: xvfb-run -a node scripts/test-update-cycle.mjs
+      - uses: actions/upload-artifact@v4
+        with:
+          name: vora-update-test-${{ matrix.target }}
+          if-no-files-found: error
+          retention-days: 14
+          path: |
+            release/update-cycle-${{ matrix.target }}/initial/*
+            release/update-cycle-${{ matrix.target }}/updates/*
+            release/update-cycle-${{ matrix.target }}/serve.mjs
+            release/update-cycle-${{ matrix.target }}/LEIA-ME.md
+            release/update-cycle-${{ matrix.target }}/iniciar-servidor.*
+      - uses: actions/upload-artifact@v4
+        if: always() && runner.os == 'Linux'
+        with:
+          name: resultado-ciclo-linux
+          if-no-files-found: ignore
+          retention-days: 14
+          path: |
+            test-results/update-cycle/*.json
+            test-results/update-cycle/*.png

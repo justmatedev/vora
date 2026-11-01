@@ -1,6 +1,7 @@
 # Versão 0.6.0 — atualizações internas em validação
 
 - Em 1 de novembro de 2026, o mantenedor confirmou teste manual do AppImage 0.6.0 sem falhas relatadas. A distribuição Linux e os cenários não foram especificados; esse relato não confirma, por si só, o ciclo de atualização entre duas versões.
+- Na mesma data, o mantenedor confirmou também o teste manual do aplicativo 0.6.0 no Windows, sem falhas relatadas. A edição do Windows e os cenários não foram especificados. O ciclo entre duas versões é uma validação separada.
 
 - Gerenciador de atualizações no processo principal, ponte tipada e painel React com consulta, notas, progresso, download e instalação explícitos. Provider público GitHub fixado no repositório Vora; sem feed ou caminho arbitrário vindo da interface.
 - 84 testes do núcleo passaram no Linux. Incluem bloqueio de instalação com trabalho ativo, comandos concorrentes, falha de preparação/instalação, retomada das prévias e substituição do AppImage preservando o original em falhas de cópia/permissão.
@@ -10,7 +11,8 @@
 - Quatro testes de mídia real também passaram. AppImage real, inclusive o artefato exato do CI, passou no teste de inicialização e IPC.
 - CI 41359972745 aprovado nos três jobs. Workflow 41359972961 gerou Linux e Windows no commit 481691a e conferiu runtime, canal, nome, versão, tamanho e SHA-512 dos metadados nos dois sistemas. Arquivos baixados conferidos contra SHA256SUMS.
 - Release 0.6.0 preparada como rascunho com instaladores, latest.yml, latest-linux.yml, blockmap Windows e manifesto de checksums único. A versão estável 0.5.1 permanece publicada e não oferece atualização interna.
-- Validação nativa de instalação/reinício de uma versão para outra permanece pendente, assim como a conferência manual do novo instalador Windows. Os testes com payloads de teste e de inicialização não substituem esse ciclo.
+- Validação nativa de instalação/reinício de uma versão para outra é separada dos relatos acima. Os testes com payloads de teste e de inicialização não substituem esse ciclo; o roteiro isolado está em [UPDATE-TEST.md](UPDATE-TEST.md).
+- Ciclo real AppImage conferido no Linux em 1 de novembro de 2026 usando VoraUpdateTest isolado, de 0.6.0 para 0.6.1: consulta sem download automático, download por clique, substituição no mesmo caminho com espaços, reinício real, igualdade SHA-512 com o pacote novo, preferências e itens pendentes/concluídos preservados, fila pausada e arquivo concluído inalterado. Nova consulta confirmou a versão mais recente. Relatório e capturas locais em `test-results/update-cycle`. Nenhuma versão fictícia foi publicada; o ciclo NSIS no Windows permanece pendente.
 
 ---
 

@@ -48,4 +48,6 @@ Crie uma Release em rascunho e anexe o conjunto completo dos dois jobs. Gere um 
 
 A versão 0.5.1 não possui o atualizador: o primeiro salto para 0.6.0 é manual. Valide depois um salto de versão a partir de um cliente que já possua o atualizador. A aplicação nunca instala ao fechar normalmente, e instalar exige clique explícito com a fila pausada e sem trabalho ativo. No Linux, confira também diretório sem permissão e preservação do caminho/atalho do AppImage.
 
+Para verificar o ciclo antes de haver outra versão pública, use o [kit isolado de atualização](UPDATE-TEST.md). Ele gera outro aplicativo com duas versões e servidor local, sem publicar releases fictícias ou mudar o feed do Vora.
+
 O FFmpeg e suas dependências não mudaram em 0.6.0; os materiais de fontes permanecem nos anexos de 0.5.1, com links e hashes em THIRD_PARTY.md e FFmpeg-SOURCES.json. Preserve essa Release e cite seus materiais nas notas da nova versão.
