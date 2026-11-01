@@ -1,3 +1,11 @@
+# Release 0.5.1 — validação Windows confirmada em 1 de novembro de 2026
+
+- O mantenedor confirmou o teste manual do novo instalador Windows, sem falhas relatadas. A versão/edição do Windows não foi informada; este registro se refere à confirmação do mantenedor, distinta dos testes automatizados no runner Windows.
+- Pacotes preservados da execução 41356281559, commit 451d5f4: Node do Electron, sem Deno separado. O relato encerra a pendência de teste manual registrada na etapa anterior.
+- Release 0.5.1 publicada com os dois instaladores, SHA256SUMS e seis anexos de fontes e checksums. Nenhum novo pacote foi gerado nesta etapa, pois as alterações são de documentação.
+
+---
+
 # Runtime embutido e fontes correspondentes — 1 de novembro de 2026
 
 - Com autorização do mantenedor, Deno separado substituído pelo Node.js incluído no Electron. O runtime é passado ao yt-dlp por caminho absoluto; ELECTRON_RUN_AS_NODE é aplicado apenas ao ambiente dos subprocessos. Node continua desabilitado na interface.

@@ -24,16 +24,16 @@ A captura da fila usa dados de teste.
 
 ## Download
 
-A versão atual é **0.5.1**, para **Linux e Windows x64**. Os instaladores ainda não foram publicados. Quando disponíveis, estarão na seção [Releases](https://github.com/justmatedev/vora/releases). Os nomes esperados para esta versão são:
+A versão atual é **0.5.1**, para **Linux e Windows x64**. Baixe os instaladores na [Release 0.5.1](https://github.com/justmatedev/vora/releases/tag/v0.5.1):
 
-| Sistema | Arquivo                            |
-| ------- | ---------------------------------- |
-| Linux   | `Vora-0.5.1-linux-x86_64.AppImage` |
-| Windows | `Vora-0.5.1-windows-x64-setup.exe` |
+| Sistema | Arquivo                                                                                                             |
+| ------- | ------------------------------------------------------------------------------------------------------------------- |
+| Linux   | [AppImage Linux](https://github.com/justmatedev/vora/releases/download/v0.5.1/Vora-0.5.1-linux-x86_64.AppImage)     |
+| Windows | [Instalador Windows](https://github.com/justmatedev/vora/releases/download/v0.5.1/Vora-0.5.1-windows-x64-setup.exe) |
 
 Os pacotes incluem yt-dlp e FFmpeg/ffprobe, usando o Node.js incluído no Electron. O usuário final não precisa instalar essas ferramentas ou Node.js separadamente. O AppImage pode exigir FUSE ou a opção `--appimage-extract-and-run`. O instalador Windows não possui assinatura digital.
 
-A versão Linux empacotada foi verificada. A validação nativa Windows da versão 0.5.1 está pendente; veja [VALIDATION.md](docs/VALIDATION.md).
+O AppImage passou na validação automatizada no Linux. O mantenedor confirmou o teste manual do instalador no Windows, sem falhas relatadas; veja [VALIDATION.md](docs/VALIDATION.md).
 
 ## Começar a desenvolver
 

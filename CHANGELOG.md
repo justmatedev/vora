@@ -1,25 +1,14 @@
 # Histórico de mudanças
 
-## Não publicado
-
-- yt-dlp passa a usar o Node.js incluído no Electron; Deno separado removido dos pacotes.
-- Fontes exatas, receitas e avisos das dependências do FFmpeg preservados com manifestos e checksums para acompanhar a Release.
-
-- Testes de recuperação sincronizados para evitar leitura de processo antes da inicialização e gravação concorrente entre sessões simuladas.
-
-- Avisos de React, React DOM, scheduler, Lucide e Inter incluídos no empacotamento; avisos agregados do yt-dlp e textos LGPLv3/GPLv3 fixados com checksums.
-- Identificação corrigida da licença do build FFmpeg incluído (LGPLv3), com pendências de fontes e dependências documentadas.
-
-- Metadados e documentação ligados ao repositório justmatedev/vora, com badge do CI e instruções de clone.
-
-- Código do Vora sob licença MIT, com autoria de justmatedev.
-- Apresentação do repositório, guias de uso e desenvolvimento, capturas demonstrativas e autoria de justmatedev.
-- Verificações automáticas e geração manual de pacotes pelo GitHub Actions.
-- Modelos de issues e pull requests, orientações de contribuição e publicação.
-
-## 0.5.1
+## 0.5.1 — 2026-11-01
 
 - Layout compacto desde a abertura, com fila vazia e análise individual sempre em modal.
+- yt-dlp usa o Node.js incluído no Electron; Deno separado removido dos pacotes.
+- Fontes exatas, receitas e avisos das dependências do FFmpeg preservados com manifestos e checksums junto à Release.
+- Licenças das bibliotecas da interface e avisos agregados do yt-dlp incluídos no empacotamento.
+- Testes de recuperação sincronizados para evitar condições de corrida entre sessões simuladas.
+- Repositório preparado com licença MIT, documentação, modelos de issues e pull requests, CI e geração manual de pacotes.
+- AppImage validado no Linux; teste manual do instalador Windows confirmado pelo mantenedor.
 
 ## 0.5.0
 

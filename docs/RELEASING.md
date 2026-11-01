@@ -2,9 +2,9 @@
 
 ## Preparar o repositório
 
-Autor: **justmatedev**. Repositório: [justmatedev/vora](https://github.com/justmatedev/vora). Os campos `repository`, `homepage` e `bugs` do `package.json` apontam para esse endereço. Os instaladores serão disponibilizados em [Releases](https://github.com/justmatedev/vora/releases).
+Autor: **justmatedev**. Repositório: [justmatedev/vora](https://github.com/justmatedev/vora). Os campos `repository`, `homepage` e `bugs` do `package.json` apontam para esse endereço. Os instaladores estão na [Release 0.5.1](https://github.com/justmatedev/vora/releases/tag/v0.5.1).
 
-O código do Vora usa MIT, registrada em `LICENSE`, `package.json` e `package-lock.json`; o aviso é incluído no empacotamento. Não altere as licenças dos componentes de terceiros. Revise as pendências de distribuição pública descritas em [THIRD_PARTY.md](../THIRD_PARTY.md).
+O código do Vora usa MIT, registrada em `LICENSE`, `package.json` e `package-lock.json`; o aviso é incluído no empacotamento. Não altere as licenças dos componentes de terceiros. Preserve os materiais de terceiros descritos em [THIRD_PARTY.md](../THIRD_PARTY.md).
 
 Antes de cada push, revise os arquivos que serão enviados com `git status` e `git diff --cached`. Não inclua `.env`, credenciais, perfis do aplicativo, binários ou instaladores. O `.gitignore` não remove arquivos já rastreados. As imagens em `docs/images/` são capturas da interface com dados demonstrativos.
 
@@ -14,7 +14,7 @@ O campo `private: true` impede publicação acidental no npm; a visibilidade no 
 
 O workflow **Verificações** roda em pushes, pull requests e por acionamento manual. Confere testes do núcleo e build no Linux/Windows, além da interface no Linux. Não consulta o YouTube nem baixa os binários de mídia nesses jobs.
 
-O workflow **Gerar pacotes** é manual, na aba Actions. Após empacotar, verifica no sistema nativo se o yt-dlp reconhece o Node do aplicativo e se Deno está ausente. Ele prepara as ferramentas fixadas, executa os testes do núcleo e gera AppImage no Linux e NSIS no Windows. Os artefatos ficam disponíveis por 14 dias e incluem SHA256SUMS. Não há publicação automática de Releases nem assinatura digital. A geração automatizada de Linux e Windows passou na [execução 41356281559](https://github.com/justmatedev/vora/actions/runs/41356281559), no commit `451d5f4`. A execução gera artefatos de teste; as fontes e avisos descritos em THIRD_PARTY.md foram reunidos. A publicação continua aguardando o teste manual do novo instalador Windows.
+O workflow **Gerar pacotes** é manual, na aba Actions. Após empacotar, verifica no sistema nativo se o yt-dlp reconhece o Node do aplicativo e se Deno está ausente. Ele prepara as ferramentas fixadas, executa os testes do núcleo e gera AppImage no Linux e NSIS no Windows. Os artefatos ficam disponíveis por 14 dias e incluem SHA256SUMS. Não há publicação automática de Releases nem assinatura digital. A geração automatizada de Linux e Windows passou na [execução 41356281559](https://github.com/justmatedev/vora/actions/runs/41356281559), no commit `451d5f4`. A execução gera artefatos de teste; as fontes e avisos descritos em THIRD_PARTY.md foram reunidos. O mantenedor confirmou o teste manual do novo instalador Windows, sem falhas relatadas; o resultado está em VALIDATION.md.
 
 O CI do commit `451d5f4` passou nos três jobs: núcleo/build Linux, núcleo/build Windows e interface Linux. [Registro da execução](https://github.com/justmatedev/vora/actions/runs/41356281270). Isso não inclui teste do instalador Windows ou dos binários de mídia.
 
