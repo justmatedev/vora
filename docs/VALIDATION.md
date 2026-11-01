@@ -5,7 +5,10 @@
 - Dois testes de integração usam electron-updater real com servidor HTTP local e payloads de teste: consulta sem download automático, download por clique, instalação somente sem trabalho ativo e recusa de SHA-512 incorreto. Não executam um instalador NSIS real nem encerram o aplicativo do usuário.
 - Cinco testes de interface passaram, incluindo estados de atualização em 800 × 600, progresso, bloqueio, notas, alternativa manual e preservação do estado ao fechar o modal. Teste Electron passou com as novas operações IPC e atualizador indisponível no desenvolvimento.
 - Novas dependências fixadas e avisos das dependências de produção incluídos no build. Runtime de yt-dlp, formatos e dados persistidos não foram alterados.
-- Pacotes e metadados em geração. Validação nativa de instalação/reinício de uma versão para outra permanece pendente; os testes com payloads de teste não substituem esse ciclo.
+- Quatro testes de mídia real também passaram. AppImage real, inclusive o artefato exato do CI, passou no teste de inicialização e IPC.
+- CI 41359972745 aprovado nos três jobs. Workflow 41359972961 gerou Linux e Windows no commit 481691a e conferiu runtime, canal, nome, versão, tamanho e SHA-512 dos metadados nos dois sistemas. Arquivos baixados conferidos contra SHA256SUMS.
+- Release 0.6.0 preparada como rascunho com instaladores, latest.yml, latest-linux.yml, blockmap Windows e manifesto de checksums único. A versão estável 0.5.1 permanece publicada e não oferece atualização interna.
+- Validação nativa de instalação/reinício de uma versão para outra permanece pendente, assim como a conferência manual do novo instalador Windows. Os testes com payloads de teste e de inicialização não substituem esse ciclo.
 
 ---
 
