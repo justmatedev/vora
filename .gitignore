@@ -1,0 +1,40 @@
+node_modules/
+dist/
+dist-electron/
+release/
+resources/tools/
+test-results/
+*.log
+.DS_Store
+
+# Configuração local e segredos
+.env
+.env.*
+!.env.example
+*.pem
+*.key
+*.p12
+*.pfx
+.npmrc
+.vscode/
+.idea/
+Thumbs.db
+coverage/
+*.tsbuildinfo
+
+# Credenciais locais
+/.aws/
+
+# Relatórios e caches gerados
+playwright-report/
+blob-report/
+.nyc_output/
+.vite/
+.vite-temp/
+.npm/
+.cache/
+
+# Temporários de edição
+*.swp
+*.swo
+*~

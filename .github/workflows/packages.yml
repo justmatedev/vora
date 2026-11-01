@@ -1,0 +1,49 @@
+name: Gerar pacotes
+
+# Gera artefatos para revisão. Não publica uma Release automaticamente.
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  package:
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - os: ubuntu-24.04
+            target: linux
+            script: dist:linux
+            artifact: linux-x64
+            pattern: release/*.AppImage
+          - os: windows-2022
+            target: win32
+            script: dist:win
+            artifact: windows-x64
+            pattern: release/*-setup.exe
+    runs-on: ${{ matrix.os }}
+    timeout-minutes: 40
+    steps:
+      - uses: actions/checkout@v6
+      - uses: actions/setup-node@v7
+        with:
+          node-version: '24'
+          cache: npm
+      - run: npm ci
+      - run: npm test
+      - run: npm run tools:fetch -- ${{ matrix.target }}
+      - run: npm run ${{ matrix.script }}
+        env:
+          CSC_IDENTITY_AUTO_DISCOVERY: 'false'
+      - name: Calcular checksum
+        run: node scripts/release-checksums.mjs
+      - uses: actions/upload-artifact@v4
+        with:
+          name: vora-${{ matrix.artifact }}
+          if-no-files-found: error
+          retention-days: 14
+          path: |
+            ${{ matrix.pattern }}
+            release/SHA256SUMS

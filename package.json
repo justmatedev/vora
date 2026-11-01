@@ -1,0 +1,105 @@
+{
+  "name": "vora",
+  "version": "0.5.1",
+  "private": true,
+  "description": "Vora — áudio e vídeo, do seu jeito.",
+  "author": "justmatedev",
+  "license": "MIT",
+  "type": "module",
+  "main": "dist-electron/main.cjs",
+  "scripts": {
+    "dev": "node scripts/dev.mjs",
+    "dev:ui": "vite --host 127.0.0.1",
+    "typecheck": "tsc --noEmit",
+    "test": "node --import tsx --test tests/*.test.ts",
+    "build": "npm run typecheck && vite build && node scripts/build-electron.mjs",
+    "tools:fetch": "node scripts/fetch-tools.mjs",
+    "tools:verify": "node scripts/verify-tools.mjs",
+    "dist:linux": "npm run build && node scripts/verify-tools.mjs linux && electron-builder --linux AppImage --x64",
+    "dist:win": "npm run build && node scripts/verify-tools.mjs win32 && electron-builder --win nsis --x64",
+    "electron:install": "node node_modules/electron/install.js",
+    "predev": "npm run electron:install",
+    "test:ui": "node --test tests/ui.test.mjs",
+    "test:desktop": "node --test tests/desktop.test.mjs",
+    "test:media": "node --import tsx --test tests/tools.integration.test.mjs tests/queue.integration.test.mjs",
+    "format": "prettier --write \"src/**/*.{ts,tsx,css}\" \"electron/**/*.ts\" \"shared/**/*.ts\" \"scripts/*.mjs\" \"tests/*.{ts,mjs}\" \"*.{json,ts,html,md}\""
+  },
+  "dependencies": {
+    "@fontsource/inter": "5.3.0",
+    "lucide-react": "1.66.0",
+    "react": "19.3.1",
+    "react-dom": "19.3.1"
+  },
+  "devDependencies": {
+    "@electron-internal/extract-zip": "1.0.8",
+    "@types/node": "26.6.6",
+    "@types/react": "19.3.0",
+    "@types/react-dom": "19.3.0",
+    "@vitejs/plugin-react": "6.1.2",
+    "electron": "45.2.1",
+    "electron-builder": "26.18.0",
+    "esbuild": "0.28.2",
+    "playwright": "1.64.1",
+    "prettier": "3.6.2",
+    "tsx": "4.23.15",
+    "typescript": "5.9.3",
+    "vite": "8.3.5"
+  },
+  "build": {
+    "appId": "app.vora.desktop",
+    "productName": "Vora",
+    "asar": true,
+    "directories": {
+      "output": "release",
+      "buildResources": "assets"
+    },
+    "files": [
+      "dist/**/*",
+      "dist-electron/**/*",
+      "package.json"
+    ],
+    "extraResources": [
+      {
+        "from": "resources/tools/${os}-${arch}",
+        "to": "tools",
+        "filter": [
+          "**/*"
+        ]
+      },
+      {
+        "from": "THIRD_PARTY.md",
+        "to": "THIRD_PARTY.md"
+      },
+      {
+        "from": "LICENSE",
+        "to": "LICENSE"
+      }
+    ],
+    "linux": {
+      "target": [
+        "AppImage"
+      ],
+      "category": "AudioVideo",
+      "icon": "assets/icon.png",
+      "artifactName": "Vora-${version}-linux-${arch}.${ext}",
+      "syncDesktopName": true
+    },
+    "win": {
+      "target": [
+        "nsis"
+      ],
+      "icon": "assets/icon.png",
+      "artifactName": "Vora-${version}-windows-${arch}-setup.${ext}"
+    },
+    "nsis": {
+      "oneClick": false,
+      "allowToChangeInstallationDirectory": true,
+      "createDesktopShortcut": true,
+      "createStartMenuShortcut": true
+    }
+  },
+  "engines": {
+    "node": ">=22.12.0"
+  },
+  "desktopName": "app.vora.desktop"
+}
