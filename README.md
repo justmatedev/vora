@@ -24,6 +24,8 @@ A captura da fila usa dados de teste.
 
 ## Download
 
+**Em preparação: 0.6.1**, com refinamentos visuais e busca adaptada ao tamanho da fila. As capturas acima mostram essas melhorias. Os links abaixo continuam apontando para a versão estável publicada; acompanhe os detalhes no [changelog](CHANGELOG.md) e na [preparação do lançamento](docs/RELEASE-0.6.1.md).
+
 A versão estável publicada é **0.6.0**, para **Linux e Windows x64**. Baixe os instaladores na [Release 0.6.0](https://github.com/justmatedev/vora/releases/tag/v0.6.0):
 
 | Sistema | Arquivo                                                                                                             |
@@ -71,7 +73,7 @@ Para relatar problemas ou sugerir melhorias, [abra uma issue](https://github.com
 
 ## Limites e licença
 
-Suporte a vídeos públicos e playlists públicas finitas. Sem macOS, login/cookies, canais, mixes automáticos, lives em andamento ou downloads simultâneos. A atualização interna está sendo introduzida na versão 0.6.0. Mudanças no YouTube podem exigir atualização das ferramentas.
+Suporte a vídeos públicos e playlists públicas finitas. Sem macOS, login/cookies, canais, mixes automáticos, lives em andamento ou downloads simultâneos. A atualização interna está disponível desde a versão 0.6.0. Mudanças no YouTube podem exigir atualização das ferramentas.
 
 O código do Vora é disponibilizado sob a [licença MIT](LICENSE), com copyright de **justmatedev**. As dependências e os executáveis incluídos conservam suas próprias licenças; consulte [THIRD_PARTY.md](THIRD_PARTY.md) e os materiais de fontes disponibilizados junto às Releases.
 

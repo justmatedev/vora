@@ -30,7 +30,7 @@ O workflow **Gerar pacotes** confere também a árvore de dependências de produ
 4. Teste o AppImage e o instalador em sistemas nativos. Registre cada plataforma separadamente em [VALIDATION.md](VALIDATION.md); marque como pendente o que não foi verificado.
 5. Confira os avisos e fontes correspondentes dos componentes distribuídos conforme registrado em THIRD_PARTY.md.
 6. Gere os checksums localmente com `node scripts/release-checksums.mjs`. O script inclui todos os pacotes presentes em `release/`; publique apenas os da versão escolhida. Para juntar artefatos dos dois jobs, reúna os pacotes e gere um novo manifesto único.
-7. Crie uma tag como `v0.5.1` para o commit validado e uma Release no GitHub, com notas de versão, AppImage, instalador e SHA256SUMS. Use rascunho enquanto a revisão estiver pendente.
+7. Crie uma tag como `v0.6.1` para o commit validado e uma Release no GitHub, com notas de versão, AppImage, instalador e SHA256SUMS. Use rascunho enquanto a revisão estiver pendente.
 
 As versões dos binários estão em `resources/tools.lock.json`. Os assets datados do FFmpeg podem expirar; uma falha no download exige atualização deliberada de versão, URL e checksum, sem substituição silenciosa por `latest`.
 

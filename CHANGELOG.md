@@ -1,5 +1,14 @@
 # Histórico de mudanças
 
+## 0.6.1 — em preparação
+
+- Identidade visual refinada, com ícone atualizado, textos mais legíveis e maior contraste.
+- Download ativo e grupos da fila com hierarquia visual mais clara.
+- Busca exibida automaticamente a partir de 10 itens na lista, sem contar o download ativo; abertura manual pela lupa em filas menores.
+- Busca em uso preservada quando a fila diminui; fechamento por botão ou Esc limpa a pesquisa e mantém o filtro escolhido.
+- Foco pelo teclado, seleção de vídeo/playlist e estados desabilitados mais consistentes.
+- Estilos consolidados, novos testes de interface e documentação visual com capturas atualizadas.
+
 ## 0.6.0 — 2026-11-01
 
 - Verificação automática de novas versões e painel de atualizações nas configurações.

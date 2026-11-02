@@ -26,8 +26,8 @@ No Linux:
 ```sh
 npm run tools:fetch -- linux
 npm run dist:linux
-chmod +x release/Vora-0.6.0-linux-x86_64.AppImage
-./release/Vora-0.6.0-linux-x86_64.AppImage
+chmod +x release/Vora-0.6.1-linux-x86_64.AppImage
+./release/Vora-0.6.1-linux-x86_64.AppImage
 ```
 
 O AppImage depende das bibliotecas de desktop do sistema e, conforme a distribuição, de FUSE. É possível executar com `--appimage-extract-and-run` quando FUSE não estiver disponível. O build FFmpeg Linux escolhido exige glibc compatível com o build upstream. Valide no Linux de destino.

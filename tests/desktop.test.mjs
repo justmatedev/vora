@@ -7,6 +7,10 @@ import { join, resolve } from 'node:path';
 import { _electron } from 'playwright';
 import electron from 'electron';
 
+const { version: expectedVersion } = JSON.parse(
+  await readFile(new URL('../package.json', import.meta.url), 'utf8'),
+);
+
 test(
   'Electron: protocolo local, preload isolado, IPC e ferramentas empacotadas',
   { timeout: 60_000 },
@@ -57,7 +61,7 @@ test(
       assert.equal(await page.evaluate(() => typeof window.vora.analyze), 'function');
       assert.equal(await page.evaluate(() => typeof window.vora.installUpdate), 'function');
       const updateState = await page.evaluate(() => window.vora.updates());
-      assert.equal(updateState.currentVersion, '0.6.0');
+      assert.equal(updateState.currentVersion, expectedVersion);
       const updateSupported = await application.evaluate(
         ({ app }) =>
           app.isPackaged &&

@@ -1,3 +1,15 @@
+# Release 0.6.1 — preparação
+
+- Escopo: refinamentos visuais, estados de interação e busca automática a partir de 10 itens na lista, excluindo o download ativo.
+- Versão atualizada em package.json e package-lock.json. O teste Electron consulta a versão do projeto; os cenários isolados de atualização mantêm suas versões de teste.
+- Validação local da 0.6.1 no Linux: build e typecheck aprovados; 84 testes do núcleo, dois testes do atualizador real com servidor local, três testes de empacotamento/servidor, sete testes de interface, quatro testes com ferramentas de mídia reais e um teste Electron passaram. Logs em `test-results/release-061-build.log` e `test-results/release-061-checks.log`. O teste Electron usa um perfil temporário.
+- A interface foi conferida entre 620 e 960 px sem transbordamento; o ícone foi inspecionado em 16, 24 e 32 px no navegador. Isso não substitui a conferência nativa da barra de tarefas do Windows.
+- Os resultados das versões anteriores abaixo não validam os novos pacotes.
+- Pendentes: pacotes novos, validação nativa Windows e ciclo de atualização real de 0.6.0 para 0.6.1.
+- Notas e composição dos anexos em [RELEASE-0.6.1.md](RELEASE-0.6.1.md).
+
+---
+
 # Release 0.6.0 — publicada em 1 de novembro de 2026
 
 - Em 1 de novembro de 2026, o mantenedor confirmou teste manual do AppImage 0.6.0 sem falhas relatadas. A distribuição Linux e os cenários não foram especificados; esse relato não confirma, por si só, o ciclo de atualização entre duas versões.
