@@ -33,7 +33,7 @@ Os materiais foram recuperados da [execução oficial BtbN de 31/10/2026](https:
 
 O arquivo `resources/notices/FFmpeg-SOURCES.json`, também incluído no aplicativo, registra a proveniência, os checksums do cache, de cada um dos 129 arquivos de fontes de dependências e dos avisos coletados. `FFmpeg-THIRD_PARTY_NOTICES.txt` acompanha os binários. Algumas bibliotecas guardam suas permissões em cabeçalhos de código; esses avisos foram preservados também.
 
-Os materiais acompanham a [Release 0.5.1](https://github.com/justmatedev/vora/releases) como arquivos separados:
+Os materiais acompanham a [Release 0.5.1](https://github.com/justmatedev/vora/releases/tag/v0.5.1) como arquivos separados:
 
 - `Vora-0.5.1-ffmpeg-source.tar.gz`: fonte da revisão exata do FFmpeg.
 - `Vora-0.5.1-ffmpeg-build-materials.tar.gz`: receitas, logs, manifestos, avisos e instruções de reconstrução, com patch para fixar a revisão do FFmpeg.
@@ -42,7 +42,7 @@ Os materiais acompanham a [Release 0.5.1](https://github.com/justmatedev/vora/re
 
 O cache original é amplo e inclui componentes de variantes opcionais que **não estão ligados aos nossos binários**. A presença de seus avisos no conjunto não muda a licença MIT do Vora nem significa que o FFmpeg distribuído usa a variante GPL. A linha configure original não habilita `--enable-gpl` ou `--enable-nonfree`.
 
-Esses arquivos não aumentam o tamanho do instalador: são materiais de desenvolvimento separados. Os textos e manifestos de avisos são incluídos no aplicativo. Enquanto a Release estiver em rascunho, seus anexos dependem de acesso de mantenedor; após publicada, as fontes e os binários estarão disponíveis juntos.
+Esses arquivos não aumentam o tamanho do instalador: são materiais de desenvolvimento separados. Os textos e manifestos de avisos são incluídos no aplicativo. As fontes estão disponíveis publicamente nos anexos da Release 0.5.1 e correspondem também ao FFmpeg distribuído na versão 0.6.0, que não foi alterado. Preserve essa Release enquanto distribuir esses binários.
 
 A geração dos materiais é descrita em [docs/RELEASING.md](docs/RELEASING.md). Esta organização registra os materiais verificados; não promete reprodução binária bit a bit. Referência: [orientações do FFmpeg](https://ffmpeg.org/legal.html).
 

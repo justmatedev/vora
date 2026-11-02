@@ -12,7 +12,7 @@ O campo `private: true` impede publicação acidental no npm; a visibilidade no 
 
 ## Verificações automáticas
 
-O workflow **Verificações** roda em pushes, pull requests e por acionamento manual. Confere testes do núcleo e build no Linux/Windows, além da interface no Linux. Não consulta o YouTube nem baixa os binários de mídia nesses jobs.
+O workflow **Verificações** roda em pushes, pull requests e por acionamento manual. Confere testes do núcleo, atualizador, integridade de pacotes e servidor do kit, além do build no Linux/Windows e da interface no Linux. Não consulta o YouTube nem baixa os binários de mídia nesses jobs.
 
 O workflow **Gerar pacotes** é manual, na aba Actions. Após empacotar, verifica no sistema nativo se o yt-dlp reconhece o Node do aplicativo e se Deno está ausente. Ele prepara as ferramentas fixadas, executa os testes do núcleo e gera AppImage no Linux e NSIS no Windows. Os artefatos ficam disponíveis por 14 dias e incluem SHA256SUMS. Não há publicação automática de Releases nem assinatura digital. A geração automatizada de Linux e Windows passou na [execução 41356281559](https://github.com/justmatedev/vora/actions/runs/41356281559), no commit `451d5f4`. A execução gera artefatos de teste; as fontes e avisos descritos em THIRD_PARTY.md foram reunidos. O mantenedor confirmou o teste manual do novo instalador Windows, sem falhas relatadas; o resultado está em VALIDATION.md.
 
@@ -21,6 +21,8 @@ O CI do commit `451d5f4` passou nos três jobs: núcleo/build Linux, núcleo/bui
 Os workflows seguem a [documentação de CI Node.js do GitHub](https://docs.github.com/en/actions/tutorials/build-and-test-code/nodejs). Uma geração bem-sucedida não substitui teste manual do aplicativo instalado.
 
 ## Preparar uma versão
+
+O workflow **Gerar pacotes** confere também a árvore de dependências de produção dentro do `app.asar`, antes das verificações de runtime e metadados. Arquivos instalados no computador de desenvolvimento não podem suprir dependências ausentes do pacote. A mesma conferência é usada pelo kit isolado. Localmente, após empacotar, execute `node scripts/verify-packaged-dependencies.mjs linux` ou `win32`.
 
 1. Atualize a versão no `package.json` e no `package-lock.json`, o CHANGELOG e as referências aos nomes dos pacotes na documentação.
 2. Rode os testes do núcleo, build, interface, ferramentas reais e Electron conforme [DEVELOPMENT.md](DEVELOPMENT.md).

@@ -53,6 +53,7 @@ npx playwright install chromium
 npm run test:ui          # fluxos da interface com ponte simulada, sem acessar o YouTube
 npm run test:media       # executáveis reais: fila, playlist local, MP3 e preservação de codecs
 npm run test:updates     # atualizador real com feed HTTP local e checksum inválido
+npm run test:packaging   # dependências do pacote e servidor local do kit, sem downloads externos
 npm run test:desktop     # Electron real, protocolo local, IPC e ferramentas
 ```
 
