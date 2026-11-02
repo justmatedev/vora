@@ -59,6 +59,7 @@ Stack: **Electron + React + TypeScript + Vite**, com ferramentas executadas loca
 
 - [Guia de uso](docs/USAGE.md): formatos, fila, playlists, notificações e recuperação.
 - [Desenvolvimento](docs/DEVELOPMENT.md): instalação, arquitetura, testes e empacotamento.
+- [Identidade visual](docs/VISUAL_IDENTITY.md): marca, cores, tipografia e hierarquia da interface.
 - [Publicação no GitHub](docs/RELEASING.md): preparação do repositório e das versões.
 - [Histórico de mudanças](CHANGELOG.md).
 - [Validação por versão](docs/VALIDATION.md).
