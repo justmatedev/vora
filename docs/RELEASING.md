@@ -2,7 +2,7 @@
 
 ## Preparar o repositório
 
-Autor: **justmatedev**. Repositório: [justmatedev/vora](https://github.com/justmatedev/vora). Os campos `repository`, `homepage` e `bugs` do `package.json` apontam para esse endereço. Os instaladores atuais estão na [Release 0.6.0](https://github.com/justmatedev/vora/releases/tag/v0.6.0).
+Autor: **justmatedev**. Repositório: [justmatedev/vora](https://github.com/justmatedev/vora). Os campos `repository`, `homepage` e `bugs` do `package.json` apontam para esse endereço. Os instaladores atuais estão na [Release 0.6.1](https://github.com/justmatedev/vora/releases/tag/v0.6.1).
 
 O código do Vora usa MIT, registrada em `LICENSE`, `package.json` e `package-lock.json`; o aviso é incluído no empacotamento. Não altere as licenças dos componentes de terceiros. Preserve os materiais de terceiros descritos em [THIRD_PARTY.md](../THIRD_PARTY.md).
 

@@ -1,6 +1,6 @@
-# Preparação do lançamento 0.6.1
+# Lançamento 0.6.1
 
-Estado: rascunho da 0.6.1 criado no GitHub; publicação pendente das validações manuais descritas abaixo. A versão estável anunciada no README continua sendo 0.6.0 até a publicação da nova Release.
+Estado: [Release 0.6.1 publicada](https://github.com/justmatedev/vora/releases/tag/v0.6.1) como estável e mais recente em 1 de novembro de 2026, após confirmação das validações pendentes e autorização do mantenedor.
 
 Código dos pacotes: commit `61f4037`. [CI aprovado](https://github.com/justmatedev/vora/actions/runs/41368236220) e [geração nativa dos pacotes aprovada](https://github.com/justmatedev/vora/actions/runs/41368251616). O AppImage exato do CI passou no teste Electron no Linux; hashes dos artefatos baixados e metadados conferidos.
 
@@ -20,16 +20,8 @@ As ferramentas de mídia permanecem nas versões fixadas para a 0.6.0. Os materi
 
 ## Validação e anexos
 
-Os seis anexos da versão já estão no rascunho, e os tamanhos e digests SHA-256 recebidos pelo GitHub conferem com os arquivos locais. Os pacotes validados foram preservados sem alterações após a geração.
+Os seis anexos da versão estão publicados: AppImage, instalador NSIS, blockmap Windows, `latest-linux.yml`, `latest.yml` e manifesto único `SHA256SUMS`. Os tamanhos e digests SHA-256 recebidos pelo GitHub conferem com os arquivos locais. Os pacotes e YAMLs foram preservados sem alterações após a geração.
 
-Consulte [VALIDATION.md](VALIDATION.md) para os resultados efetivamente obtidos. A publicação depende de:
+O CI e a geração nativa passaram nas duas plataformas. O AppImage exato do CI passou no teste Electron no Linux. O mantenedor confirmou as validações pendentes de instalação/leitura do ícone no Windows e do ciclo de atualização de 0.6.0 para 0.6.1; os cenários e a edição do Windows não foram detalhados. Consulte [VALIDATION.md](VALIDATION.md) para distinguir os resultados automatizados da confirmação manual.
 
-- Checks do código e build aprovados no Linux e Windows, além dos testes de interface no Linux.
-- Pacotes gerados com dependências, runtime embutido, canal e metadados conferidos.
-- Teste nativo do AppImage e do instalador NSIS, incluindo a leitura do ícone no Windows.
-- Ciclo de atualização da versão 0.6.0 para 0.6.1 validado sem perda da fila e das preferências.
-- Rascunho com AppImage, instalador, blockmaps gerados, `latest-linux.yml`, `latest.yml` e manifesto único `SHA256SUMS`, todos da mesma geração validada.
-
-Não reúna pacotes de versões anteriores no manifesto. Os YAMLs precisam permanecer idênticos aos gerados para os instaladores anexados.
-
-Após concluir a validação, registre os resultados, publique a Release e atualize os links de download e o estado do lançamento no README. A publicação da versão estável passa a oferecê-la aos usuários pelo atualizador.
+O README aponta para os instaladores publicados. A versão estável passa a ser oferecida aos usuários pelo atualizador; o download e a instalação continuam dependendo de ações explícitas do usuário.

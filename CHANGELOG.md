@@ -1,6 +1,6 @@
 # Histórico de mudanças
 
-## 0.6.1 — em preparação
+## 0.6.1 — 2026-11-01
 
 - Identidade visual refinada, com ícone atualizado, textos mais legíveis e maior contraste.
 - Download ativo e grupos da fila com hierarquia visual mais clara.

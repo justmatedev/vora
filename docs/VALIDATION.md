@@ -1,4 +1,4 @@
-# Release 0.6.1 — preparação
+# Release 0.6.1 — publicada em 1 de novembro de 2026
 
 - Escopo: refinamentos visuais, estados de interação e busca automática a partir de 10 itens na lista, excluindo o download ativo.
 - Versão atualizada em package.json e package-lock.json. O teste Electron consulta a versão do projeto; os cenários isolados de atualização mantêm suas versões de teste.
@@ -9,8 +9,9 @@
 - Os resultados das versões anteriores abaixo não validam os novos pacotes.
 - Artefatos baixados da execução 41368251616: todos os cinco arquivos conferem com os manifestos SHA256SUMS de cada plataforma. As versões, tamanhos e hashes SHA-512 dos dois YAMLs conferem com os instaladores baixados. Manifesto único da versão gerado em `release/0.6.1/SHA256SUMS`, sem pacotes antigos.
 - O AppImage exato do CI passou no teste Electron real no Linux com `APPIMAGE_EXTRACT_AND_RUN=1`, perfil temporário e verificação da versão 0.6.1, protocolo local, preload isolado, IPC e ferramentas. Log em `test-results/release-061-official-appimage.log`. Isso não equivale a validar o ciclo de atualização entre versões.
-- Rascunho da Release `v0.6.1` preparado com seis anexos: AppImage, instalador NSIS, blockmap Windows, os dois YAMLs e SHA256SUMS único. Tamanhos e digests SHA-256 registrados pelo GitHub conferem com os arquivos locais. O rascunho permanece sem publicação; a versão estável oferecida aos usuários continua sendo 0.6.0.
-- Pendentes antes da publicação: validação manual nativa Windows (instalação e leitura do ícone) e ciclo real de atualização de 0.6.0 para 0.6.1. Nenhuma dessas duas validações foi declarada concluída nesta preparação.
+- Rascunho da Release `v0.6.1` preparado com seis anexos: AppImage, instalador NSIS, blockmap Windows, os dois YAMLs e SHA256SUMS único. Tamanhos e digests SHA-256 registrados pelo GitHub conferem com os arquivos locais. Os seis anexos foram preservados na publicação, sem reconstrução dos instaladores.
+- Em 1 de novembro de 2026, após receber o rascunho com os pacotes e a relação das pendências, o mantenedor confirmou que as validações estavam concluídas e autorizou a publicação. Essa confirmação encerra as pendências de instalação/leitura do ícone no Windows e do ciclo real de atualização de 0.6.0 para 0.6.1. A edição do Windows e os resultados individuais dos cenários não foram detalhados; o relato do mantenedor é distinto dos testes automatizados acima.
+- [Release 0.6.1](https://github.com/justmatedev/vora/releases/tag/v0.6.1) publicada como estável e mais recente, oferecendo a atualização aos clientes compatíveis. README e changelog atualizados para a versão publicada.
 - Notas e composição dos anexos em [RELEASE-0.6.1.md](RELEASE-0.6.1.md).
 
 ---
