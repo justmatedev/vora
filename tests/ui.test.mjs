@@ -748,3 +748,175 @@ test(
     }
   },
 );
+
+test(
+  'interface: foco pelo teclado, seleção persistente e hover de controles desabilitados',
+  { timeout: 60_000 },
+  async () => {
+    const server = await preview({ preview: { host: '127.0.0.1', port: 4173, strictPort: true } });
+    let browser;
+    try {
+      browser = await chromium.launch({
+        executablePath: process.env.VORA_TEST_BROWSER || undefined,
+        headless: true,
+        args: process.env.VORA_TEST_BROWSER ? ['--no-sandbox', '--disable-dev-shm-usage'] : [],
+      });
+      const page = await browser.newPage({
+        viewport: { width: 800, height: 600 },
+        reducedMotion: 'reduce',
+      });
+      await page.addInitScript(queueFixture);
+      await page.goto('http://127.0.0.1:4173');
+      await page.getByRole('heading', { name: 'Adicione um link para começar' }).waitFor();
+      const appearance = (locator) =>
+        locator.evaluate((element) => {
+          const style = getComputedStyle(element);
+          return {
+            background: style.backgroundColor,
+            color: style.color,
+            opacity: style.opacity,
+            cursor: style.cursor,
+            transform: style.transform,
+          };
+        });
+      const analyze = page.getByRole('button', { name: 'Analisar', exact: true });
+      assert.equal(await analyze.isDisabled(), true);
+      const disabledAppearance = await appearance(analyze);
+      await analyze.hover();
+      assert.deepEqual(await appearance(analyze), disabledAppearance);
+      assert.equal(disabledAppearance.cursor, 'not-allowed');
+
+      const settingsButton = page.getByRole('button', { name: 'Configurações', exact: true });
+      await settingsButton.click();
+      const settings = page.getByRole('dialog', { name: 'Configurações', exact: true });
+      const toggle = settings.getByRole('checkbox', { name: /Avisar quando a fila/ });
+      await toggle.uncheck();
+      const notification = settings.getByRole('button', {
+        name: 'Testar notificação',
+        exact: true,
+      });
+      assert.equal(await notification.isDisabled(), true);
+      const notificationAppearance = await appearance(notification);
+      await notification.hover();
+      assert.deepEqual(await appearance(notification), notificationAppearance);
+      await toggle.focus();
+      await page.keyboard.press('Tab');
+      assert.equal(
+        await notification.evaluate((element) => element === document.activeElement),
+        false,
+      );
+      // Native dialogs may pass the last Tab to browser chrome before wrapping.
+      if (await page.evaluate(() => document.activeElement === document.body))
+        await page.keyboard.press('Tab');
+      assert.equal(
+        await settings.evaluate((element) => element.contains(document.activeElement)),
+        true,
+      );
+      await page.keyboard.press('Escape');
+
+      await page.evaluate(() => {
+        window.__test.setRecoveries([
+          {
+            id: 'visual-recovery',
+            title: 'Download interrompido',
+            destination: '/home/teste/Downloads',
+            url: 'https://www.youtube.com/watch?v=BaW_jenozKc',
+            createdAt: new Date().toISOString(),
+            size: 2048,
+          },
+        ]);
+        window.vora.cleanupRecovery = () =>
+          new Promise((resolve) => {
+            window.__resolveCleanup = resolve;
+          });
+      });
+      await page.getByRole('button', { name: 'Revisar', exact: true }).click();
+      const recovery = page.getByRole('dialog', { name: 'Downloads interrompidos', exact: true });
+      await recovery.getByRole('button', { name: 'Limpar temporários', exact: true }).click();
+      const closeRecovery = recovery.getByRole('button', {
+        name: 'Fechar recuperação',
+        exact: true,
+      });
+      assert.equal(await closeRecovery.isDisabled(), true);
+      await page.mouse.move(0, 0);
+      const closeAppearance = await appearance(closeRecovery);
+      await closeRecovery.hover();
+      assert.deepEqual(await appearance(closeRecovery), closeAppearance);
+      await page.evaluate(() => {
+        window.__test.setRecoveries([]);
+        window.__resolveCleanup();
+      });
+      await page.waitForFunction(
+        () => !document.querySelector('[aria-label="Fechar recuperação"]').disabled,
+      );
+      await page.keyboard.press('Escape');
+
+      const url = page.getByRole('textbox', { name: 'Link do YouTube', exact: true });
+      await url.focus();
+      await page.keyboard.press('ArrowRight');
+      assert.equal(
+        await url.evaluate((element) => {
+          const style = getComputedStyle(element.closest('.url-field'));
+          return style.outlineStyle !== 'none' && parseFloat(style.outlineWidth) >= 2;
+        }),
+        true,
+      );
+      await url.fill('https://www.youtube.com/watch?v=BaW_jenozKc');
+      await url.press('Enter');
+      const analysis = page.getByRole('dialog', { name: 'Opções do vídeo', exact: true });
+      await analysis.waitFor();
+      // Hold a real directory request to exercise fieldset-inherited disabled states.
+      await page.evaluate(() => {
+        window.vora.chooseDirectory = () =>
+          new Promise((resolve) => {
+            window.__resolveDirectory = resolve;
+          });
+      });
+      await analysis.getByRole('button', { name: 'Alterar', exact: true }).click();
+      const video = analysis.getByRole('button', { name: 'Vídeo', exact: true });
+      const select = analysis.locator('select').first();
+      assert.equal(await video.isDisabled(), true);
+      assert.equal(await select.isDisabled(), true);
+      assert.equal((await appearance(select)).cursor, 'not-allowed');
+      const videoAppearance = await appearance(video);
+      await video.hover();
+      assert.deepEqual(await appearance(video), videoAppearance);
+      await page.evaluate(() => window.__resolveDirectory('/home/teste/Downloads'));
+      await page.waitForFunction(() => !document.querySelector('.download-options').disabled);
+      await page.keyboard.press('Escape');
+
+      await page.getByRole('button', { name: 'Adicionar links', exact: true }).click();
+      const importer = page.getByRole('dialog', { name: 'Adicionar links', exact: true });
+      const links = importer.getByRole('textbox', { name: /Links do YouTube/ });
+      await links.fill('https://www.youtube.com/watch?v=BaW_jenozKc&list=PL1234567890abcdef');
+      await links.focus();
+      assert.equal(
+        await links.evaluate((element) => {
+          const style = getComputedStyle(element);
+          return style.outlineStyle !== 'none' && parseFloat(style.outlineWidth) >= 2;
+        }),
+        true,
+      );
+      const videoChoice = importer.getByRole('button', { name: /Somente este vídeo/ });
+      const playlistChoice = importer.getByRole('button', {
+        name: 'Selecionar vídeos da playlist',
+        exact: true,
+      });
+      assert.equal(await videoChoice.getAttribute('aria-pressed'), 'false');
+      assert.equal(await playlistChoice.getAttribute('aria-pressed'), 'false');
+      await videoChoice.click();
+      assert.equal(await videoChoice.getAttribute('aria-pressed'), 'true');
+      await playlistChoice.click();
+      assert.equal(await playlistChoice.getAttribute('aria-pressed'), 'true');
+      assert.equal(await videoChoice.getAttribute('aria-pressed'), 'false');
+      await page.mouse.move(0, 0);
+      const selectedBackground = (await appearance(playlistChoice)).background;
+      await playlistChoice.hover();
+      assert.equal((await appearance(playlistChoice)).background, selectedBackground);
+      await page.screenshot({ path: 'test-results/vora-interacoes.png', animations: 'disabled' });
+    } finally {
+      await browser?.close();
+      await new Promise((resolve) => server.httpServer.close(resolve));
+    }
+  },
+);

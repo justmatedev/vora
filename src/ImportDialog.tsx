@@ -313,12 +313,14 @@ export function ImportDialog({
               <p>O link contém vídeo e playlist. O que deseja adicionar?</p>
               <button
                 className={choice === 'video' ? 'secondary selected' : 'secondary'}
+                aria-pressed={choice === 'video'}
                 onClick={() => setChoice('video')}
               >
                 Somente {parsed.lines.length > 1 ? 'estes vídeos' : 'este vídeo'}
               </button>
               <button
                 className={choice === 'playlist' ? 'secondary selected' : 'secondary'}
+                aria-pressed={choice === 'playlist'}
                 disabled={parsed.lines.length !== 1 || !parsed.sources[0]?.playlistUrl}
                 onClick={() => setChoice('playlist')}
               >

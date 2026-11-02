@@ -69,9 +69,9 @@ function Logo({ small = false }: { small?: boolean }) {
       <span className="brand-mark">
         <svg viewBox="0 0 32 32" fill="none" aria-hidden="true">
           <path
-            d="M7 7.5 16 25 25 7.5M16 6v16M10.5 17 16 23l5.5-6"
+            d="M7 7.5 16 25 25 7.5M16 6v11M12.5 13.5 16 17l3.5-3.5"
             stroke="currentColor"
-            strokeWidth="2.6"
+            strokeWidth="2.2"
             strokeLinecap="round"
             strokeLinejoin="round"
           />
