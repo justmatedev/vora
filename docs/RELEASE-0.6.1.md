@@ -1,6 +1,8 @@
 # Preparação do lançamento 0.6.1
 
-Estado: em preparação. A versão estável anunciada no README continua sendo 0.6.0 até a publicação da nova Release.
+Estado: rascunho da 0.6.1 criado no GitHub; publicação pendente das validações manuais descritas abaixo. A versão estável anunciada no README continua sendo 0.6.0 até a publicação da nova Release.
+
+Código dos pacotes: commit `61f4037`. [CI aprovado](https://github.com/justmatedev/vora/actions/runs/41368236220) e [geração nativa dos pacotes aprovada](https://github.com/justmatedev/vora/actions/runs/41368251616). O AppImage exato do CI passou no teste Electron no Linux; hashes dos artefatos baixados e metadados conferidos.
 
 ## Notas de versão
 
@@ -17,6 +19,8 @@ Atualização a partir da 0.6.0: use **Configurações → Atualizações**, bai
 As ferramentas de mídia permanecem nas versões fixadas para a 0.6.0. Os materiais de fontes do FFmpeg continuam nos [anexos da versão 0.5.1](https://github.com/justmatedev/vora/releases/tag/v0.5.1); veja [THIRD_PARTY.md](../THIRD_PARTY.md) para origem e hashes. Linux e Windows x64; instalador Windows sem assinatura digital.
 
 ## Validação e anexos
+
+Os seis anexos da versão já estão no rascunho, e os tamanhos e digests SHA-256 recebidos pelo GitHub conferem com os arquivos locais. Os pacotes validados foram preservados sem alterações após a geração.
 
 Consulte [VALIDATION.md](VALIDATION.md) para os resultados efetivamente obtidos. A publicação depende de:
 

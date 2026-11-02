@@ -4,8 +4,13 @@
 - Versão atualizada em package.json e package-lock.json. O teste Electron consulta a versão do projeto; os cenários isolados de atualização mantêm suas versões de teste.
 - Validação local da 0.6.1 no Linux: build e typecheck aprovados; 84 testes do núcleo, dois testes do atualizador real com servidor local, três testes de empacotamento/servidor, sete testes de interface, quatro testes com ferramentas de mídia reais e um teste Electron passaram. Logs em `test-results/release-061-build.log` e `test-results/release-061-checks.log`. O teste Electron usa um perfil temporário.
 - A interface foi conferida entre 620 e 960 px sem transbordamento; o ícone foi inspecionado em 16, 24 e 32 px no navegador. Isso não substitui a conferência nativa da barra de tarefas do Windows.
+- CI da preparação aprovado nos três jobs (núcleo/build Linux, núcleo/build Windows e interface Linux): [execução 41368236220](https://github.com/justmatedev/vora/actions/runs/41368236220), commit `61f4037`.
+- Pacotes Linux e Windows gerados nativamente e aprovados na [execução 41368251616](https://github.com/justmatedev/vora/actions/runs/41368251616), no mesmo commit. O workflow conferiu dependências de produção, Node embutido reconhecido pelo yt-dlp, ausência de Deno, canal GitHub e versão/tamanho/SHA-512 dos metadados.
 - Os resultados das versões anteriores abaixo não validam os novos pacotes.
-- Pendentes: pacotes novos, validação nativa Windows e ciclo de atualização real de 0.6.0 para 0.6.1.
+- Artefatos baixados da execução 41368251616: todos os cinco arquivos conferem com os manifestos SHA256SUMS de cada plataforma. As versões, tamanhos e hashes SHA-512 dos dois YAMLs conferem com os instaladores baixados. Manifesto único da versão gerado em `release/0.6.1/SHA256SUMS`, sem pacotes antigos.
+- O AppImage exato do CI passou no teste Electron real no Linux com `APPIMAGE_EXTRACT_AND_RUN=1`, perfil temporário e verificação da versão 0.6.1, protocolo local, preload isolado, IPC e ferramentas. Log em `test-results/release-061-official-appimage.log`. Isso não equivale a validar o ciclo de atualização entre versões.
+- Rascunho da Release `v0.6.1` preparado com seis anexos: AppImage, instalador NSIS, blockmap Windows, os dois YAMLs e SHA256SUMS único. Tamanhos e digests SHA-256 registrados pelo GitHub conferem com os arquivos locais. O rascunho permanece sem publicação; a versão estável oferecida aos usuários continua sendo 0.6.0.
+- Pendentes antes da publicação: validação manual nativa Windows (instalação e leitura do ícone) e ciclo real de atualização de 0.6.0 para 0.6.1. Nenhuma dessas duas validações foi declarada concluída nesta preparação.
 - Notas e composição dos anexos em [RELEASE-0.6.1.md](RELEASE-0.6.1.md).
 
 ---
