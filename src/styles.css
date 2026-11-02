@@ -1411,6 +1411,15 @@ footer > span:first-child {
   max-width: none;
   font-size: var(--font-caption);
 }
+.queue-controls {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+}
+.queue-search-toggle {
+  width: 32px;
+  height: 32px;
+}
 .queue-controls .primary,
 .queue-controls .secondary {
   padding: 7px 11px;

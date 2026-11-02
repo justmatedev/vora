@@ -8,6 +8,8 @@ import { queueView, toggleExpanded, type QueueFilter } from './queue-view';
 import { desktop } from './queue-client';
 export { configurationLabel } from './QueueGroupHeader';
 
+const SEARCH_ITEM_THRESHOLD = 10;
+
 export function QueuePanel({
   snapshot,
   working,
@@ -26,6 +28,10 @@ export function QueuePanel({
   const [open, setOpen] = useState(true),
     [page, setPage] = useState(0);
   const listRef = useRef<HTMLDivElement>(null);
+  const searchInput = useRef<HTMLInputElement>(null);
+  const searchToggle = useRef<HTMLButtonElement>(null);
+  const focusSearch = useRef(false);
+  const [searchOpen, setSearchOpen] = useState<boolean>();
   const [query, setQuery] = useState(''),
     [filter, setFilter] = useState<QueueFilter>('all');
   const [expanded, setExpanded] = useState<Set<string>>(new Set());
@@ -37,6 +43,7 @@ export function QueuePanel({
       setOpen(true);
       setPage(0);
       setQuery('');
+      setSearchOpen(undefined);
       setFilter('all');
       setExpanded(new Set());
     }
@@ -45,6 +52,13 @@ export function QueuePanel({
   const completed = snapshot.items.filter((item) => item.status === 'completed').length;
   const active = snapshot.items.find((item) => item.id === snapshot.activeId);
   const view = useMemo(() => queueView(snapshot, query, filter), [snapshot, query, filter]);
+  const searchVisible = !!query || (searchOpen ?? view.total >= SEARCH_ITEM_THRESHOLD);
+  useEffect(() => {
+    if (open && searchVisible && focusSearch.current) {
+      searchInput.current?.focus();
+      focusSearch.current = false;
+    }
+  }, [open, searchVisible]);
   const lastPage = Math.max(0, Math.ceil(view.rows.length / 100) - 1),
     currentPage = Math.min(page, lastPage);
   const visible = view.rows.slice(currentPage * 100, (currentPage + 1) * 100);
@@ -62,6 +76,20 @@ export function QueuePanel({
       await command(() => desktop().cancelItem(active.id));
     } finally {
       setCancellingId(undefined);
+    }
+  }
+  function closeSearch() {
+    setQuery('');
+    setPage(0);
+    setSearchOpen(false);
+    searchToggle.current?.focus();
+  }
+  function toggleSearch() {
+    if (open && searchVisible) closeSearch();
+    else {
+      focusSearch.current = true;
+      setSearchOpen(true);
+      setOpen(true);
     }
   }
   function clearFilters() {
@@ -122,6 +150,17 @@ export function QueuePanel({
           </span>
         </span>
         <div className="queue-controls">
+          <button
+            ref={searchToggle}
+            className="icon-button queue-search-toggle"
+            aria-label={open && searchVisible ? 'Fechar busca' : 'Buscar na fila'}
+            title={open && searchVisible ? 'Fechar busca' : 'Buscar na fila'}
+            aria-expanded={open && searchVisible}
+            aria-controls={open && searchVisible ? 'queue-search-field' : undefined}
+            onClick={toggleSearch}
+          >
+            {open && searchVisible ? <X size={17} /> : <Search size={17} />}
+          </button>
           {snapshot.mode === 'running' ? (
             <button
               className="secondary"
@@ -169,30 +208,41 @@ export function QueuePanel({
       {open && (
         <>
           <div className="queue-filters">
-            <div className="queue-search">
-              <Search size={15} />
-              <input
-                aria-label="Buscar na fila"
-                placeholder="Buscar título, canal ou link"
-                value={query}
-                onChange={(event) => {
-                  setQuery(event.target.value);
-                  setPage(0);
-                }}
-              />
-              {query && (
-                <button
-                  className="icon-button"
-                  aria-label="Limpar busca"
-                  onClick={() => {
-                    setQuery('');
+            {searchVisible && (
+              <div className="queue-search" id="queue-search-field">
+                <Search size={15} />
+                <input
+                  ref={searchInput}
+                  aria-label="Buscar na fila"
+                  placeholder="Buscar título, canal ou link"
+                  value={query}
+                  onFocus={() => setSearchOpen(true)}
+                  onKeyDown={(event) => {
+                    if (event.key === 'Escape') {
+                      event.preventDefault();
+                      closeSearch();
+                    }
+                  }}
+                  onChange={(event) => {
+                    setQuery(event.target.value);
                     setPage(0);
                   }}
-                >
-                  <X size={13} />
-                </button>
-              )}
-            </div>
+                />
+                {query && (
+                  <button
+                    className="icon-button"
+                    aria-label="Limpar busca"
+                    onClick={() => {
+                      setQuery('');
+                      setPage(0);
+                      searchInput.current?.focus();
+                    }}
+                  >
+                    <X size={13} />
+                  </button>
+                )}
+              </div>
+            )}
             <div className="queue-filter-buttons" role="group" aria-label="Filtros da fila">
               {(
                 [

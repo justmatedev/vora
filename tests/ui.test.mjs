@@ -920,3 +920,146 @@ test(
     }
   },
 );
+
+test(
+  'interface: busca automática com dez itens, abertura manual e foco ao fechar',
+  { timeout: 60_000 },
+  async () => {
+    const server = await preview({ preview: { host: '127.0.0.1', port: 4173, strictPort: true } });
+    let browser;
+    try {
+      browser = await chromium.launch({
+        executablePath: process.env.VORA_TEST_BROWSER || undefined,
+        headless: true,
+        args: process.env.VORA_TEST_BROWSER ? ['--no-sandbox', '--disable-dev-shm-usage'] : [],
+      });
+      const page = await browser.newPage({ viewport: { width: 800, height: 600 } });
+      await page.addInitScript(queueFixture);
+      await page.goto('http://127.0.0.1:4173');
+      await page.getByRole('heading', { name: 'Adicione um link para começar' }).waitFor();
+      const queue = page.getByRole('region', { name: 'Fila de downloads' });
+      const search = queue.getByRole('textbox', { name: 'Buscar na fila', exact: true });
+      const rows = queue.locator('.queue-items article');
+      async function seed(count, withActive = true) {
+        await page.evaluate(
+          ({ count, withActive }) => {
+            const preferences = { kind: 'video', videoMode: 'original', audioMode: 'original' };
+            const make = (id, title, status = 'waiting') => ({
+              id,
+              title,
+              status,
+              groupId: 'search-group',
+              preferences,
+              url: `https://www.youtube.com/watch?v=${id.padEnd(11, '0')}`,
+              destination: '/home/teste/Downloads',
+              previewState: 'ready',
+              preview: { title, channel: 'Canal de teste', duration: 125 },
+            });
+            const active = make('active', 'Download ativo', 'downloading');
+            active.progress = {
+              type: 'progress',
+              stage: 'downloading',
+              track: 'video',
+              percent: 30,
+            };
+            window.__test.replaceQueue({
+              mode: withActive ? 'running' : 'paused',
+              ...(withActive ? { activeId: active.id } : {}),
+              groups: [
+                {
+                  id: 'search-group',
+                  label: 'Vídeos',
+                  preferences,
+                  destination: '/home/teste/Downloads',
+                },
+              ],
+              items: [
+                ...(withActive ? [active] : []),
+                ...Array.from({ length: count }, (_, i) => make(`row${i}`, `Vídeo ${i}`)),
+              ],
+            });
+          },
+          { count, withActive },
+        );
+      }
+      // Nine rows plus an active download must not trigger the automatic search.
+      await seed(9);
+      await queue.getByText('9 de 9 itens na lista', { exact: true }).waitFor();
+      assert.equal(await search.count(), 0);
+      assert.equal(await queue.getByRole('group', { name: 'Filtros da fila' }).isVisible(), true);
+      const url = page.getByRole('textbox', { name: 'Link do YouTube', exact: true });
+      await url.focus();
+      await seed(10);
+      await search.waitFor();
+      assert.equal(await url.evaluate((element) => element === document.activeElement), true);
+      await seed(9);
+      await queue.getByText('9 de 9 itens na lista', { exact: true }).waitFor();
+      assert.equal(await search.count(), 0);
+      await seed(10);
+      await search.waitFor();
+      // Filters do not change the threshold, which uses the unfiltered list.
+      await queue.getByRole('button', { name: 'Concluídos', exact: true }).click();
+      await queue.getByText('0 de 10 itens na lista', { exact: true }).waitFor();
+      assert.equal(await search.isVisible(), true);
+      await queue.getByRole('button', { name: 'Todos', exact: true }).click();
+      await search.fill('Vídeo 8');
+      await queue.getByText('1 de 10 itens na lista', { exact: true }).waitFor();
+      await seed(9);
+      await queue.getByText('1 de 9 itens na lista', { exact: true }).waitFor();
+      assert.equal(await search.inputValue(), 'Vídeo 8');
+      assert.equal(await rows.count(), 1);
+      await queue.getByRole('button', { name: 'Limpar busca', exact: true }).click();
+      assert.equal(await search.inputValue(), '');
+      assert.equal(await search.evaluate((element) => element === document.activeElement), true);
+      await search.fill('Vídeo 8');
+      await search.press('Escape');
+      assert.equal(await search.count(), 0);
+      assert.equal(await rows.count(), 9);
+      const toggle = queue.getByRole('button', { name: 'Buscar na fila', exact: true });
+      assert.equal(await toggle.evaluate((element) => element === document.activeElement), true);
+      await toggle.press('Enter');
+      assert.equal(await search.inputValue(), '');
+      assert.equal(await search.evaluate((element) => element === document.activeElement), true);
+      await search.fill('não existe');
+      await queue.getByRole('button', { name: 'Fechar busca', exact: true }).click();
+      assert.equal(await rows.count(), 9);
+      // The header shortcut also expands a collapsed queue and focuses its search.
+      await queue.getByRole('button', { name: 'Recolher ou expandir fila', exact: true }).click();
+      await toggle.click();
+      assert.equal(await search.evaluate((element) => element === document.activeElement), true);
+      await queue.getByRole('button', { name: 'Fechar busca', exact: true }).click();
+      await queue.getByRole('button', { name: 'Concluídos', exact: true }).click();
+      await toggle.click();
+      await search.fill('Vídeo');
+      await search.press('Escape');
+      assert.equal(
+        await queue
+          .getByRole('button', { name: 'Concluídos', exact: true })
+          .getAttribute('aria-pressed'),
+        'true',
+      );
+      await queue.getByRole('button', { name: 'Todos', exact: true }).click();
+      await page.screenshot({
+        path: 'test-results/vora-busca-recolhida.png',
+        animations: 'disabled',
+      });
+      await page.evaluate(() =>
+        window.__test.replaceQueue({ items: [], groups: [], mode: 'paused' }),
+      );
+      await page.getByRole('heading', { name: 'Adicione um link para começar' }).waitFor();
+      assert.equal(await toggle.count(), 0);
+      await seed(1, false);
+      await queue.getByText('1 de 1 itens na lista', { exact: true }).waitFor();
+      assert.equal(await search.count(), 0);
+      await toggle.click();
+      assert.equal(await search.isVisible(), true);
+      assert.equal(
+        await page.evaluate(() => document.documentElement.scrollWidth > innerWidth),
+        false,
+      );
+    } finally {
+      await browser?.close();
+      await new Promise((resolve) => server.httpServer.close(resolve));
+    }
+  },
+);
