@@ -1,6 +1,6 @@
 # Lançamento 0.7.0
 
-Estado: [release 0.7.0 em rascunho](https://github.com/justmatedev/vora/releases/tag/untagged-0a305e4d32350ffa3863), com seis anexos completos e conferidos. A versão estável publicada continua sendo 0.6.1.
+Estado: [release 0.7.0 em rascunho](https://github.com/justmatedev/vora/releases), com seis anexos completos e conferidos. A versão estável publicada continua sendo 0.6.1.
 
 ## Notas de versão
 
