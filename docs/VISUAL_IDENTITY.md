@@ -10,7 +10,7 @@ A geometria do cabeçalho está em `src/App.tsx`; o ícone de instalação está
 
 ![Ícone do Vora em 16, 24 e 32 pixels sobre fundos escuro e claro](images/icones.png)
 
-A prancha registra a renderização no navegador em escala 1×. A aparência na barra de tarefas do Windows ainda precisa de conferência no próprio sistema.
+A prancha registra a renderização no navegador em escala 1×. O mantenedor confirmou a conferência nativa do ícone no Windows durante a validação da versão 0.6.1; veja [VALIDATION.md](VALIDATION.md). Essa confirmação é distinta da inspeção automatizada no navegador.
 
 ## Cores e hierarquia
 
@@ -30,13 +30,19 @@ Os tokens ficam no início de `src/styles.css`.
 | `--focus-ring`                      | Indicador de foco pelo teclado                         |
 | `--disabled-opacity`                | Opacidade uniforme de controles desabilitados          |
 
+As variantes `--accent-hover`, `--accent-selected`, `--accent-glow` e `--accent-border-soft` atendem hover, seleção e decoração discreta. Sucesso, aviso e erro usam as famílias `--success`, `--warning` e `--danger`, com variantes `-soft` e `-border`. `--on-accent` e `--on-image` garantem texto apropriado sobre botões e imagens. O marcador do YouTube usa `--source-brand`.
+
+Campos e seletores usam `--surface-inset`, `--border` e `--text`; descrições usam `--muted` ou `--subtle`. Sombras e sobreposições usam `--shadow-panel`, `--shadow-dialog`, `--focus-shadow`, `--image-overlay` e `--dialog-backdrop`. Defina cores e suas transparências nos tokens de `:root`, sem repetir valores hexadecimais nas regras dos componentes.
+
 Reserve o lavanda para os pontos de maior importância. Ações secundárias usam texto neutro; sucesso e erro mantêm cores semânticas acompanhadas de rótulos. O item ativo recebe uma borda lateral lavanda e uma barra de progresso. Os grupos usam fundo rebaixado, título em seminegrito e separação entre lotes.
 
 ## Tipografia e espaçamento
 
 Use Inter nos pesos 400, 500, 600 e 700. Na fila, `--font-title` (14 px) identifica vídeos, `--font-body` (13 px) identifica grupos e conteúdo, e `--font-caption` (12 px) atende metadados e ações. Evite reduzir textos operacionais abaixo de 12 px.
 
-Use os tokens de espaçamento de 4, 8, 12 e 16 px. Os raios de controles e painéis usam `--radius-control` e `--radius-panel`.
+Use os tokens de espaçamento em múltiplos de 4 px, de `--space-1` (4 px) até `--space-12` (48 px). `--space-fine` (2 px) atende badges e detalhes compactos. Medidas estruturais de ícones, miniaturas e janelas, offsets de foco, traços e ajustes ópticos de 1 px podem manter valores próprios; não pertencem à escala de espaçamento entre conteúdos.
+
+Controles usam `--radius-control`, painéis e diálogos usam `--radius-panel`, badges e miniaturas usam `--radius-small`, e ilustrações usam `--radius-artwork`. Formas circulares mantêm raio de 50%. Tamanhos de títulos de destaque e do logotipo podem usar medidas específicas; textos operacionais e auxiliares usam no mínimo `--font-caption` (12 px), inclusive em janelas pequenas.
 
 ## Comportamento visual
 

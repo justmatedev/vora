@@ -1,5 +1,11 @@
 # Histórico de mudanças
 
+## Não lançado
+
+- Textos operacionais e auxiliares padronizados em pelo menos 12 px, inclusive avisos compactos e diálogos.
+- Cores, espaçamentos e raios dos componentes alinhados aos tokens da identidade visual.
+- Guia visual atualizado com a confirmação do mantenedor sobre a validação do ícone no Windows na versão 0.6.1.
+
 ## 0.6.1 — 2026-11-01
 
 - Identidade visual refinada, com ícone atualizado, textos mais legíveis e maior contraste.
