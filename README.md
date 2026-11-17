@@ -25,6 +25,8 @@ A captura da fila usa dados de teste.
 
 ## Download
 
+A versão **0.7.0**, com suporte a Reels públicos do Instagram, está em preparação. Os instaladores estáveis abaixo continuam na 0.6.1 até a publicação da nova versão.
+
 A versão estável publicada é **0.6.1**, para **Linux e Windows x64**. Baixe os instaladores na [Release 0.6.1](https://github.com/justmatedev/vora/releases/tag/v0.6.1):
 
 | Sistema | Arquivo                                                                                                             |

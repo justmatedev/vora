@@ -22,6 +22,8 @@ Os workflows seguem a [documentação de CI Node.js do GitHub](https://docs.gith
 
 ## Preparar uma versão
 
+A versão 0.7.0 está em preparação; notas e validações em [RELEASE-0.7.0.md](RELEASE-0.7.0.md) e [VALIDATION.md](VALIDATION.md). A versão estável publicada continua sendo 0.6.1 até a publicação do novo rascunho.
+
 O workflow **Gerar pacotes** confere também a árvore de dependências de produção dentro do `app.asar`, antes das verificações de runtime e metadados. Arquivos instalados no computador de desenvolvimento não podem suprir dependências ausentes do pacote. A mesma conferência é usada pelo kit isolado. Localmente, após empacotar, execute `node scripts/verify-packaged-dependencies.mjs linux` ou `win32`.
 
 1. Atualize a versão no `package.json` e no `package-lock.json`, o CHANGELOG e as referências aos nomes dos pacotes na documentação.

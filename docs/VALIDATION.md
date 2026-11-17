@@ -1,3 +1,15 @@
+# Release 0.7.0 — em preparação em 17 de novembro de 2026
+
+- Escopo: Reels públicos do Instagram, títulos em português e refinamentos visuais; sem login/cookies, fotos, carrosséis, Stories ou perfis.
+- Ferramentas de mídia e dependências preservadas; versão do aplicativo alterada em package.json e package-lock.json.
+- Desenvolvimento no Linux: 99 testes unitários e build aprovados. A integração de Reels passou nos três links de referência, com nove arquivos (vídeo original, áudio original e MP3) validados por ffprobe e decodificação FFmpeg.
+- Validação local repetida com a versão 0.7.0: 99 testes do núcleo, dois do atualizador real com servidor local, três de empacotamento/servidor, oito de interface, quatro de mídia local e teste Electron com fila mista e reinício aprovados. Build e typecheck aprovados. Logs locais em `test-results/release-070-*.log`; testes dos artefatos exatos serão registrados separadamente.
+- CI, geração nativa Linux/Windows, hashes e teste do AppImage exato: em preparação.
+- Teste manual do novo instalador Windows e ciclo real de atualização de 0.6.1 para 0.7.0: pendentes; não inferidos dos testes de versões anteriores.
+- Release deve permanecer em rascunho enquanto os anexos e as validações estiverem pendentes. Notas em [RELEASE-0.7.0.md](RELEASE-0.7.0.md).
+
+---
+
 # Release 0.6.1 — publicada em 1 de novembro de 2026
 
 - Escopo: refinamentos visuais, estados de interação e busca automática a partir de 10 itens na lista, excluindo o download ativo.
