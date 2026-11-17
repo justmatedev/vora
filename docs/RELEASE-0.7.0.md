@@ -1,6 +1,6 @@
 # Lançamento 0.7.0
 
-Estado: em preparação, para publicação em rascunho. A versão estável publicada continua sendo 0.6.1.
+Estado: [release 0.7.0 em rascunho](https://github.com/justmatedev/vora/releases/tag/untagged-0a305e4d32350ffa3863), com seis anexos completos e conferidos. A versão estável publicada continua sendo 0.6.1.
 
 ## Notas de versão
 
@@ -21,6 +21,6 @@ As ferramentas de mídia permanecem nas versões fixadas anteriormente. Os mater
 
 ## Validação e anexos
 
-Antes da publicação, reunir AppImage, instalador NSIS, blockmap Windows, `latest-linux.yml`, `latest.yml` e manifesto único `SHA256SUMS`. Conferir versões, tamanhos, SHA-512 dos YAMLs e SHA-256 dos anexos. Não reconstruir nem alterar os pacotes após a conferência.
+Rascunho com AppImage, instalador NSIS, blockmap Windows, `latest-linux.yml`, `latest.yml` e manifesto único `SHA256SUMS`. Versões, tamanhos, SHA-512 dos YAMLs e SHA-256 dos seis anexos recebidos pelo GitHub conferidos. Pacotes e YAMLs preservados sem alterações após a geração.
 
-A aprovação do CI e do empacotamento será registrada em [VALIDATION.md](VALIDATION.md). Teste nativo do instalador Windows e ciclo real de atualização para 0.7.0 permanecem pendentes até confirmação específica; resultados de versões anteriores não validam estes pacotes.
+Código dos pacotes: commit `90a2d51`. [CI](https://github.com/justmatedev/vora/actions/runs/44195248462) e [empacotamento nativo Linux/Windows](https://github.com/justmatedev/vora/actions/runs/44195247794) aprovados; AppImage exato do CI aprovado no teste Electron no Linux. Evidências em [VALIDATION.md](VALIDATION.md). Teste nativo do instalador Windows e ciclo real de atualização para 0.7.0 permanecem pendentes até confirmação específica; resultados de versões anteriores não validam estes pacotes.

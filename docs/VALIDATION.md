@@ -4,7 +4,11 @@
 - Ferramentas de mídia e dependências preservadas; versão do aplicativo alterada em package.json e package-lock.json.
 - Desenvolvimento no Linux: 99 testes unitários e build aprovados. A integração de Reels passou nos três links de referência, com nove arquivos (vídeo original, áudio original e MP3) validados por ffprobe e decodificação FFmpeg.
 - Validação local repetida com a versão 0.7.0: 99 testes do núcleo, dois do atualizador real com servidor local, três de empacotamento/servidor, oito de interface, quatro de mídia local e teste Electron com fila mista e reinício aprovados. Build e typecheck aprovados. Logs locais em `test-results/release-070-*.log`; testes dos artefatos exatos serão registrados separadamente.
-- CI, geração nativa Linux/Windows, hashes e teste do AppImage exato: em preparação.
+- Código dos pacotes: commit `90a2d51`. [CI da preparação](https://github.com/justmatedev/vora/actions/runs/44195248462) aprovado nos três jobs: núcleo/build Linux, núcleo/build Windows e interface Linux.
+- [Geração nativa dos pacotes](https://github.com/justmatedev/vora/actions/runs/44195247794) aprovada em Linux e Windows. Conferidas dependências de produção no app.asar, Node embutido reconhecido pelo yt-dlp, ausência de Deno, canal GitHub e metadados de atualização.
+- Artefatos baixados da execução 44195247794: manifestos SHA256SUMS de cada plataforma aprovados; versão 0.7.0, nomes, tamanhos e SHA-512 dos dois YAMLs conferem com os instaladores. Manifesto único em `release/0.7.0/SHA256SUMS`, contendo somente os cinco arquivos desta versão.
+- O AppImage exato do CI passou no teste Electron real no Linux com `APPIMAGE_EXTRACT_AND_RUN=1`, perfil temporário, versão 0.7.0, ferramentas, IPC, fila mista e restauração após reiniciar. Log local em `test-results/release-070-official-appimage.log`. Esse teste não valida o ciclo de atualização entre versões.
+- [Rascunho da release 0.7.0](https://github.com/justmatedev/vora/releases/tag/untagged-0a305e4d32350ffa3863) preparado com seis anexos: AppImage, instalador NSIS, blockmap Windows, latest-linux.yml, latest.yml e manifesto único SHA256SUMS. Os tamanhos e digests SHA-256 dos seis anexos recebidos pelo GitHub conferem com os arquivos locais. Os pacotes e YAMLs não foram alterados após a geração.
 - Teste manual do novo instalador Windows e ciclo real de atualização de 0.6.1 para 0.7.0: pendentes; não inferidos dos testes de versões anteriores.
 - Release deve permanecer em rascunho enquanto os anexos e as validações estiverem pendentes. Notas em [RELEASE-0.7.0.md](RELEASE-0.7.0.md).
 
