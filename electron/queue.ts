@@ -13,7 +13,14 @@ import type {
   VideoInfo,
 } from '../shared/types';
 import { validPreferences, preferredOption } from '../shared/preferences';
-import { normalizeYouTubeUrl, friendlyError } from './media';
+import { friendlyError } from './media';
+import {
+  normalizeMediaUrl,
+  mediaSource,
+  sourceVideoId,
+  sourceTitle,
+  REEL_COMPATIBILITY_MESSAGE,
+} from '../shared/sources';
 import { CancelledError } from './processes';
 import { failureReason, MediaError } from './failures';
 
@@ -43,6 +50,13 @@ export function requestForItem(info: VideoInfo, preferences: DownloadPreferences
   const p = validPreferences(preferences);
   if (p.kind === 'audio' && !info.audio)
     throw new Error('Nenhum áudio disponível no formato solicitado.');
+  if (
+    p.kind === 'video' &&
+    p.videoMode === 'compatible' &&
+    !info.compatible.length &&
+    mediaSource(info.url).platform === 'instagram'
+  )
+    throw new Error(REEL_COMPATIBILITY_MESSAGE);
   const options = p.quality
     ? info[p.videoMode].filter((option) => option.height <= p.quality!.height)
     : info[p.videoMode];
@@ -124,7 +138,7 @@ export class QueueManager {
             typeof item.id !== 'string' ||
             itemIds.has(item.id) ||
             typeof item.title !== 'string' ||
-            normalizeYouTubeUrl(item.url) !== item.url
+            normalizeMediaUrl(item.url) !== item.url
           )
             continue;
           const statuses = [
@@ -154,7 +168,7 @@ export class QueueManager {
           items.push({
             id: item.id,
             groupId: group.id,
-            title: item.title,
+            title: sourceTitle(item.title, mediaSource(item.url).platform),
             ...(Number.isInteger(item.attempt) && item.attempt >= 0 && item.attempt <= MAX_ATTEMPTS
               ? { attempt: item.attempt }
               : {}),
@@ -181,6 +195,7 @@ export class QueueManager {
   }
   private basicInfo(info: QueuePreview): QueuePreview {
     return {
+      ...(info.platform ? { platform: info.platform } : {}),
       title: info.title,
       ...(typeof info.channel === 'string' ? { channel: info.channel } : {}),
       ...(typeof info.duration === 'number' && Number.isFinite(info.duration) && info.duration > 0
@@ -243,7 +258,10 @@ export class QueueManager {
           if (!item || item.previewState !== 'loading') return;
           item.previewState = controller.signal.aborted ? 'pending' : 'error';
           if (!controller.signal.aborted)
-            item.previewError = friendlyError((error as Error).message);
+            item.previewError = friendlyError(
+              (error as Error).message,
+              mediaSource(item.url).platform,
+            );
         });
       } finally {
         this.previewController = undefined;
@@ -287,10 +305,14 @@ export class QueueManager {
     if (!isAbsolute(destination) || !Array.isArray(entries) || !entries.length)
       throw new Error('Informe links e uma pasta de destino válidos.');
     const normalized = entries.map((entry) => ({
-      url: normalizeYouTubeUrl(entry.url),
+      url: normalizeMediaUrl(entry.url),
       title: entry.title,
       preview: entry.preview ? this.basicInfo(entry.preview) : undefined,
     }));
+    await this.validateReelFormats(
+      normalized.map((entry) => entry.url),
+      preferences,
+    );
     const result = await this.change(() => {
       const group = {
         id: randomUUID(),
@@ -320,7 +342,9 @@ export class QueueManager {
           id: randomUUID(),
           groupId: group.id,
           url: entry.url,
-          title: entry.title || `Vídeo ${new URL(entry.url).searchParams.get('v')}`,
+          title:
+            entry.title ||
+            `${mediaSource(entry.url).platform === 'instagram' ? 'Reel' : 'Vídeo'} ${sourceVideoId(entry.url)}`,
           preferences: structuredClone(preferences),
           destination,
           status: 'waiting',
@@ -337,6 +361,16 @@ export class QueueManager {
     this.schedulePreviews();
     return result;
   }
+  private async validateReelFormats(urls: string[], preferences: DownloadPreferences) {
+    if (preferences.kind !== 'video' || preferences.videoMode !== 'compatible') return;
+    const affected: string[] = [];
+    for (const url of new Set(urls)) {
+      if (mediaSource(url).platform !== 'instagram') continue;
+      const info = await this.deps.analyze(url, new AbortController().signal);
+      if (!info.compatible.length) affected.push(url);
+    }
+    if (affected.length) throw new Error(`${REEL_COMPATIBILITY_MESSAGE}\n${affected.join('\n')}`);
+  }
   editableGroup(id: string) {
     const group = this.state.groups.find((group) => group.id === id);
     if (
@@ -350,6 +384,13 @@ export class QueueManager {
     const preferences = validPreferences(input);
     if (typeof destination !== 'string' || !isAbsolute(destination))
       throw new Error('Escolha uma pasta de destino válida.');
+    this.editableGroup(id);
+    await this.validateReelFormats(
+      this.state.items
+        .filter((item) => item.groupId === id && item.status === 'waiting')
+        .map((item) => item.url),
+      preferences,
+    );
     await this.change(() => {
       const group = this.editableGroup(id);
       const pending = this.state.items.filter(

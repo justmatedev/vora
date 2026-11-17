@@ -9,8 +9,116 @@ import {
 } from '../electron/metadata';
 import { youtubeSource } from '../shared/youtube';
 import { CancelledError, runProcess } from '../electron/processes';
+import { readFileSync } from 'node:fs';
+const reels = JSON.parse(
+  readFileSync(new URL('./fixtures/instagram.json', import.meta.url), 'utf8'),
+);
 const tools = { ytdlp: '', ffmpeg: '', ffprobe: '', node: process.execPath };
 const url = 'https://www.youtube.com/playlist?list=PL1234567890abcdef';
+
+test('traduz título genérico de Reel na prévia e análise, preservando títulos reais', async () => {
+  for (const [title, expected] of [
+    ['Video by gean.mech', 'Reel de @gean.mech'],
+    ['Video by celorde_', 'Reel de @celorde_'],
+    ['Meu vídeo de viagem', 'Meu vídeo de viagem'],
+    ['Video by gean.mech: bastidores', 'Video by gean.mech: bastidores'],
+  ]) {
+    const service = new MetadataService(
+      tools,
+      () => {},
+      async () => JSON.stringify({ ...reels[0], title }),
+    );
+    const target = 'https://www.instagram.com/reel/Df2T11TxZQr/';
+    assert.equal((await service.preview(target)).title, expected);
+    assert.equal((await service.analyze(target)).title, expected);
+  }
+});
+
+test('prévia de Reel sem cache não usa opções de extração específicas do YouTube', async () => {
+  const service = new MetadataService(
+    tools,
+    () => {},
+    async (_exe, args) => {
+      assert.ok(!args.includes('--extractor-args'));
+      assert.ok(args.includes('--no-cookies-from-browser'));
+      return JSON.stringify(reels[0]);
+    },
+  );
+  const preview = await service.preview('https://www.instagram.com/reel/Df2T11TxZQr/');
+  assert.equal(preview.platform, 'instagram');
+  assert.equal(preview.duration, undefined);
+  assert.equal(preview.thumbnail, 'https://instagram.test.fna.fbcdn.net/reel.jpg');
+});
+
+test('analisa os três Reels reais sanitizados, preserva VP9 e aceita miniatura Meta', async () => {
+  for (const raw of reels) {
+    const service = new MetadataService(
+      tools,
+      () => {},
+      async (_exe, args) => {
+        assert.ok(
+          !args.includes('--extractor-args'),
+          'Reels não usam argumentos específicos do YouTube',
+        );
+        assert.ok(args.includes('--no-cookies'));
+        return JSON.stringify(raw);
+      },
+    );
+    const target = `https://www.instagram.com/reels/${raw.id}/?igsh=teste`;
+    const info = await service.analyze(target);
+    assert.equal(info.platform, 'instagram');
+    assert.equal(info.url, `https://www.instagram.com/reel/${raw.id}/`);
+    assert.equal(info.original[0].height, 1920);
+    assert.equal(info.compatible.length, 0);
+    assert.ok(info.audio);
+    assert.equal(info.duration, 0);
+    assert.equal(info.thumbnail, 'https://instagram.test.fna.fbcdn.net/reel.jpg');
+    const preview = await service.preview(target);
+    assert.equal(preview.platform, 'instagram');
+    assert.equal(preview.duration, undefined);
+    assert.equal(preview.thumbnail, info.thumbnail);
+  }
+});
+
+test('Reels rejeitam ID divergente e resultados de carrossel sem guardar prévia', async () => {
+  for (const invalid of [
+    { ...reels[0], id: 'Df2LJrnMJpT' },
+    { ...reels[0], _type: 'playlist', entries: [reels[0]] },
+  ]) {
+    const service = new MetadataService(
+      tools,
+      () => {},
+      async () => JSON.stringify(invalid),
+    );
+    const target = 'https://www.instagram.com/reel/Df2T11TxZQr/';
+    await assert.rejects(service.analyze(target), /interpretar|Reel/);
+    assert.equal(service.cachedPreview(target), undefined);
+  }
+});
+
+test('erros de Instagram identificam a plataforma e preservam classificação', async () => {
+  for (const [message, reason, pattern] of [
+    ['Connection timed out', 'network', /conectar ao Instagram/],
+    ['Login required; use cookies', 'item', /Instagram.*login/],
+    ['Video unavailable', 'item', /indisponível/],
+  ] as const) {
+    const service = new MetadataService(
+      tools,
+      () => {},
+      async () => {
+        throw new Error(message);
+      },
+    );
+    await assert.rejects(
+      service.analyze('https://instagram.com/reel/Df2T11TxZQr/'),
+      (error: any) => {
+        assert.equal(error.reason, reason);
+        assert.match(error.message, pattern);
+        return true;
+      },
+    );
+  }
+});
 
 test('runtime usa caminho explícito do Node, desativa descoberta e isola o ambiente do subprocesso', async () => {
   const toolsWithSpaces = { ...tools, node: '/Aplicativo com espaços/Vora.exe' };

@@ -1,3 +1,4 @@
+import type { SourcePlatform } from './sources';
 export type MediaKind = 'video' | 'audio';
 export type VideoMode = 'compatible' | 'original';
 export type AudioMode = 'original' | 'mp3';
@@ -36,6 +37,7 @@ export interface VideoOption {
   estimatedSize?: number;
 }
 export interface VideoInfo {
+  platform?: SourcePlatform;
   id: string;
   url: string;
   title: string;
@@ -92,6 +94,7 @@ export interface QueueGroup {
   destination: string;
 }
 export interface QueuePreview {
+  platform?: SourcePlatform;
   title: string;
   channel?: string;
   duration?: number;

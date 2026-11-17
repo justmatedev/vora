@@ -4,13 +4,14 @@
 
 **Áudio e vídeo, do seu jeito.**
 
-Aplicativo desktop de código aberto desenvolvido por **justmatedev** para baixar áudio e vídeo do YouTube no Linux e Windows. Cole um link, escolha o formato e acompanhe seus downloads em uma fila. Interface em português, tema escuro e processamento no seu computador.
+Aplicativo desktop de código aberto desenvolvido por **justmatedev** para baixar áudio e vídeo do YouTube e de Reels públicos do Instagram no Linux e Windows. Cole um link, escolha o formato e acompanhe seus downloads em uma fila. Interface em português, tema escuro e processamento no seu computador.
 
 ![Tela inicial do Vora](docs/images/inicio.png)
 
 ## Recursos
 
-- Vídeos individuais, Shorts, vários links e seleção de vídeos de playlists públicas.
+- Vídeos individuais, Shorts, vários links e seleção de vídeos de playlists públicas do YouTube.
+- Reels públicos do Instagram, com vídeo original, áudio original e MP3, na mesma fila.
 - Vídeo original ou MP4 compatível, com qualidades disponíveis na fonte e sem aumentar a resolução.
 - Áudio original ou MP3.
 - Fila sequencial com configuração e pasta por grupo, busca e filtros.
@@ -71,7 +72,7 @@ Para relatar problemas ou sugerir melhorias, [abra uma issue](https://github.com
 
 ## Limites e licença
 
-Suporte a vídeos públicos e playlists públicas finitas. Sem macOS, login/cookies, canais, mixes automáticos, lives em andamento ou downloads simultâneos. A atualização interna está disponível desde a versão 0.6.0. Mudanças no YouTube podem exigir atualização das ferramentas.
+Suporte a vídeos e playlists públicas finitas do YouTube e a Reels públicos do Instagram acessíveis sem login. Fotos, carrosséis, Stories e perfis do Instagram não são suportados. Sem macOS, login/cookies, canais, mixes automáticos, lives em andamento ou downloads simultâneos. A atualização interna está disponível desde a versão 0.6.0. Mudanças no YouTube ou Instagram podem exigir atualização das ferramentas. Para Reels sem H.264/AAC disponível, selecione Original; o aplicativo não reconverte vídeo nem troca o formato automaticamente.
 
 O código do Vora é disponibilizado sob a [licença MIT](LICENSE), com copyright de **justmatedev**. As dependências e os executáveis incluídos conservam suas próprias licenças; consulte [THIRD_PARTY.md](THIRD_PARTY.md) e os materiais de fontes disponibilizados junto às Releases.
 

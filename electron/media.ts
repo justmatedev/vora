@@ -1,3 +1,4 @@
+import { mediaSource, safeThumbnail, sourceTitle, type SourcePlatform } from '../shared/sources';
 import { failureReason } from './failures';
 import type { VideoInfo, VideoOption } from '../shared/types';
 
@@ -16,6 +17,8 @@ export interface RawFormat {
   has_drm?: boolean;
 }
 export interface RawVideo {
+  _type?: string;
+  entries?: unknown;
   id: string;
   title: string;
   channel?: string;
@@ -113,24 +116,22 @@ export function parseVideo(raw: RawVideo, url: string): VideoInfo {
       })
       .sort((a, b) => b.height - a.height || b.fps - a.fps);
   };
-  let thumbnail: string | undefined;
-  try {
-    const t = new URL(raw.thumbnail ?? '');
-    if (t.protocol === 'https:' && ['i.ytimg.com', 'img.youtube.com'].includes(t.hostname))
-      thumbnail = t.href;
-  } catch {
-    /* optional */
-  }
+  const platform = mediaSource(url).platform;
+  const thumbnail = safeThumbnail(raw.thumbnail, platform);
   const compatible = buildOptions(true),
     original = buildOptions(false);
   if (!original.length && !bestAudio)
     throw new Error('Nenhum formato de áudio ou vídeo disponível foi encontrado.');
   return {
+    platform,
     id: raw.id,
     url,
-    title: raw.title,
-    channel: raw.channel ?? raw.uploader ?? 'YouTube',
-    duration: raw.duration ?? 0,
+    title: sourceTitle(raw.title, platform),
+    channel: raw.channel ?? raw.uploader ?? (platform === 'instagram' ? 'Instagram' : 'YouTube'),
+    duration:
+      typeof raw.duration === 'number' && Number.isFinite(raw.duration) && raw.duration > 0
+        ? raw.duration
+        : 0,
     thumbnail,
     compatible,
     original,
@@ -145,11 +146,14 @@ export function parseVideo(raw: RawVideo, url: string): VideoInfo {
   };
 }
 
-export function friendlyError(raw: string): string {
+export function friendlyError(raw: string, platform: SourcePlatform = 'youtube'): string {
+  const service = platform === 'instagram' ? 'Instagram' : 'YouTube';
+  if (platform === 'instagram' && /login|log in|sign in|cookies/i.test(raw))
+    return 'O Instagram exige login para acessar este Reel. Esta versão aceita apenas Reels públicos acessíveis sem login.';
   if (/DESTINATION_NOT_FOUND/.test(raw))
     return 'A pasta de destino não existe mais. Escolha outra pasta para salvar o arquivo.';
   if (/403|429|sign in|bot|cookies|PO Token/i.test(raw))
-    return 'O YouTube recusou esta solicitação. Tente novamente mais tarde; se persistir, atualize as ferramentas do aplicativo.';
+    return `O ${service} recusou esta solicitação. Tente novamente mais tarde; se persistir, atualize as ferramentas do aplicativo.`;
   if (/requested format|format is not available/i.test(raw))
     return 'Esse formato deixou de estar disponível. Analise o link novamente.';
   if (/private|unavailable|removed|not available|members.only|age.restricted/i.test(raw))
@@ -159,7 +163,7 @@ export function friendlyError(raw: string): string {
   if (/EACCES|EPERM|permission denied|read.only/i.test(raw))
     return 'Sem permissão para gravar nessa pasta. Escolha outra pasta de destino.';
   if (failureReason(raw) === 'network' || /network|resolve/i.test(raw))
-    return 'Não foi possível conectar ao YouTube. Verifique a conexão e tente novamente.';
+    return `Não foi possível conectar ao ${service}. Verifique a conexão e tente novamente.`;
   if (/ENOENT/i.test(raw))
     return 'Uma ferramenta do aplicativo não foi encontrada. Prepare os binários ou reinstale o Vora.';
   return 'Não foi possível concluir a operação. Tente novamente ou analise o link de novo.';

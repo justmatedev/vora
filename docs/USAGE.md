@@ -2,13 +2,21 @@
 
 [Voltar ao projeto](../README.md)
 
-1. Cole o endereço de um vídeo ou Short e clique em **Analisar**.
+1. Cole o endereço de um vídeo ou Short do YouTube, ou de um Reel público do Instagram e clique em **Analisar**.
 2. Escolha **Vídeo** ou **Áudio**.
 3. Para vídeo, selecione **Compatível** (MP4/H.264/AAC) ou **Original**, e uma resolução disponível. Para áudio, escolha o formato original ou MP3.
 4. Escolha a pasta e clique em **Adicionar à fila**.
 5. Na seção **Fila**, clique em **Iniciar fila**. Adicionar itens não inicia uma fila pausada.
 
 O layout permanece compacto desde a abertura, com o campo de link no topo e a área da fila ocupando o espaço restante. Sem itens, a fila mostra “Adicione um link para começar”; filtros e controles de execução aparecem quando houver itens. A busca abre automaticamente a partir de 10 itens na lista, sem contar o download ativo. Em filas menores, use a lupa no cabeçalho. O campo permanece aberto durante a pesquisa, mesmo que a fila diminua; fechar pela opção **Fechar busca** ou pela tecla **Esc** no campo limpa a pesquisa e conserva o filtro selecionado. Toda análise individual abre em um modal, inclusive a do primeiro vídeo. Adicionar fecha o modal; cancelar conserva a fila. **Rever opções** reabre os dados já analisados sem nova consulta. Confirmações de adição e duplicatas são compactas, dispensáveis e somem após seis segundos, suspendendo a contagem enquanto houver foco ou mouse sobre o aviso. Erros e avisos que exigem decisão continuam visíveis.
+
+### Reels do Instagram
+
+Aceita links `https://www.instagram.com/reel/ID/` e `/reels/ID/`, inclusive com parâmetros de compartilhamento. Somente Reels públicos acessíveis sem login; fotos, carrosséis, Stories e perfis não são suportados. Não é necessário conectar uma conta, e o Vora não importa cookies do navegador.
+
+Escolha vídeo Original, áudio original ou MP3. MP4 compatível só está disponível quando a fonte oferece H.264/AAC; vídeos VP9 são preservados no modo Original, sem reconversão. Se o modo compatível estiver selecionado e indisponível, o Vora pede que você escolha Original antes de adicionar. Sua preferência não muda automaticamente. Duração desconhecida aparece como “—”; uma miniatura ausente usa o ícone de vídeo.
+
+Você pode misturar links do YouTube e Reels no mesmo grupo. Ao adicionar ou editar um grupo em MP4 compatível, os Reels são analisados antes de salvar. Se algum não tiver esse formato, os links afetados são informados e o grupo permanece sem alterações; escolha Original ou remova os links afetados para continuar. A execução sempre consulta os formatos novamente e pode falhar se a disponibilidade mudar. O Instagram pode restringir links públicos ou passar a exigir login.
 
 ### Vários links e playlists
 
@@ -18,7 +26,7 @@ Na playlist, a consulta é incremental e pode ser cancelada. A revisão tem pág
 
 Cada grupo captura formato, qualidade e pasta ao ser adicionado. Alterar as configurações gerais depois não modifica grupos existentes. Use **Editar grupo** na fila para alterar áudio/vídeo, formato, qualidade preferida e pasta dos itens aguardando. O ativo e os itens já finalizados ou interrompidos conservam suas opções. A edição preserva os identificadores e a ordem; não inicia downloads nem altera a pasta padrão do aplicativo. Na fila, **Até 1080p**, por exemplo, limita a resolução a 1080p e permite resoluções menores. Se não houver formato dentro do limite e modo escolhido, o item falha; o Vora não troca silenciosamente MP3 por áudio original, vídeo por áudio ou modo compatível por original.
 
-Os links adicionados carregam título, miniatura, canal e duração em segundo plano, mesmo com a fila pausada. As consultas leves ocorrem uma por vez e não iniciam downloads. Elas dispensam o JavaScript do player e os manifestos de streaming, aceitam metadados sem formatos utilizáveis e usam cache de até 500 vídeos por 10 minutos. A análise completa continua sendo feita na execução. [Opções do extrator yt-dlp](https://github.com/yt-dlp/yt-dlp#extractor-arguments). Dados já obtidos pela análise individual são reaproveitados. Se a prévia falhar, o item permanece pendente com um aviso; a execução consulta os dados novamente. Ao reabrir, pendentes antigos sem prévia também são consultados.
+Os links adicionados carregam título, miniatura, canal e duração em segundo plano, mesmo com a fila pausada. As consultas leves ocorrem uma por vez e não iniciam downloads. No YouTube, elas dispensam o JavaScript do player e os manifestos de streaming, aceitam metadados sem formatos utilizáveis e usam cache de até 500 vídeos por 10 minutos. A análise completa continua sendo feita na execução. [Opções do extrator yt-dlp](https://github.com/yt-dlp/yt-dlp#extractor-arguments). Dados já obtidos pela análise individual são reaproveitados. Se a prévia falhar, o item permanece pendente com um aviso; a execução consulta os dados novamente. Ao reabrir, pendentes antigos sem prévia também são consultados.
 
 ### Acompanhar e localizar itens
 
@@ -65,7 +73,7 @@ O registro de recuperação fica em `recoveries.json` na pasta de dados do Vora 
 
 Pastas antigas sem registro, inclusive temporários deixados pela versão 0.1, não são removidas automaticamente. A recuperação é aplicada aos downloads criados por esta versão.
 
-Configurações e versões das ferramentas ficam no botão de ajustes. A última pasta é persistida em `settings.json` na pasta de dados do aplicativo do sistema. O Vora consulta o YouTube diretamente; não usa servidor próprio.
+Configurações e versões das ferramentas ficam no botão de ajustes. A última pasta é persistida em `settings.json` na pasta de dados do aplicativo do sistema. O Vora consulta o YouTube e o Instagram diretamente; não usa servidor próprio.
 
 ## Atualização do Vora (a partir de 0.6.0)
 

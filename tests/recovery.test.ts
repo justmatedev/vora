@@ -26,6 +26,62 @@ const info = {
   url: 'https://www.youtube.com/watch?v=BaW_jenozKc',
 } as VideoInfo;
 
+test('recuperação traduz títulos genéricos antigos de Reels e preserva títulos reais e YouTube', async () => {
+  const root = await mkdtemp(join(tmpdir(), 'vora-recovery-titles-'));
+  try {
+    const journal = join(root, 'recoveries.json');
+    const store = new RecoveryStore(journal);
+    const cases = [
+      {
+        url: 'https://www.instagram.com/reel/Df2T11TxZQr/',
+        title: 'Video by gean.mech',
+        expected: 'Reel de @gean.mech',
+      },
+      {
+        url: 'https://www.instagram.com/reel/Df2LJrnMJpT/',
+        title: 'Meu vídeo de viagem',
+        expected: 'Meu vídeo de viagem',
+      },
+      { url: info.url, title: 'Video by gean.mech', expected: 'Video by gean.mech' },
+    ];
+    const sessions = [];
+    for (const item of cases) sessions.push(await store.create(root, { ...info, ...item }));
+    const restarted = new RecoveryStore(journal);
+    await restarted.load();
+    const items = await restarted.list();
+    assert.equal(items.length, 3);
+    for (const [index, session] of sessions.entries()) {
+      assert.equal(items.find((item) => item.id === session.id)?.title, cases[index].expected);
+      await restarted.remove(session.id);
+    }
+  } finally {
+    await rm(root, { recursive: true, force: true });
+  }
+});
+
+test('recuperação preserva Reel normalizado após reiniciar e limpa seus parciais', async () => {
+  const root = await mkdtemp(join(tmpdir(), 'vora-reel-recovery-'));
+  try {
+    const journal = join(root, 'recoveries.json');
+    const store = new RecoveryStore(journal);
+    const session = await store.create(root, {
+      ...info,
+      id: 'Df2T11TxZQr',
+      url: 'https://www.instagram.com/reel/Df2T11TxZQr/',
+    });
+    await writeFile(join(session.path, 'reel.part'), 'partial');
+    const restarted = new RecoveryStore(journal);
+    await restarted.load();
+    const items = await restarted.list();
+    assert.equal(items.length, 1);
+    assert.equal(items[0].url, 'https://www.instagram.com/reel/Df2T11TxZQr/');
+    await restarted.remove(items[0].id);
+    assert.equal((await restarted.list()).length, 0);
+  } finally {
+    await rm(root, { recursive: true, force: true });
+  }
+});
+
 test('recuperação aguarda processo órfão encerrar antes de permitir limpeza', async () => {
   const root = await mkdtemp(join(tmpdir(), 'vora-recovery-process-'));
   let child: ReturnType<typeof spawn> | undefined;

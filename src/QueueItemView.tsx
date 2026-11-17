@@ -1,3 +1,4 @@
+import { mediaSource } from '../shared/sources';
 import { useEffect, useRef, useState } from 'react';
 import {
   ArrowDown,
@@ -50,6 +51,7 @@ export function ItemSummary({
         <p className="queue-metadata">
           {item.preview ? (
             [
+              ...(mediaSource(item.url).platform === 'instagram' ? ['Instagram'] : []),
               item.preview.channel,
               item.preview.duration ? formatEta(item.preview.duration) : undefined,
             ]
@@ -61,6 +63,8 @@ export function ItemSummary({
             <>
               <LoaderCircle size={12} className="spin" /> Carregando informações…
             </>
+          ) : mediaSource(item.url).platform === 'instagram' ? (
+            'Instagram'
           ) : (
             'YouTube'
           )}

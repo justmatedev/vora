@@ -1,6 +1,13 @@
 import { normalizeYouTubeUrl, parseVideo, friendlyError, type RawVideo } from './media';
 import { failureReason, MediaError } from './failures';
 import { youtubeSource } from '../shared/youtube';
+import {
+  mediaSource,
+  normalizeMediaUrl,
+  safeThumbnail,
+  sourceVideoId,
+  sourceTitle,
+} from '../shared/sources';
 import { CancelledError, runProcess } from './processes';
 import type { PlaylistEntry, PlaylistPage, PlaylistSummary, QueuePreview } from '../shared/types';
 import type { ToolPaths } from './downloader';
@@ -18,6 +25,8 @@ export function toolEnvironment(): NodeJS.ProcessEnv {
 export function commonToolArgs(tools: ToolPaths) {
   return [
     '--ignore-config',
+    '--no-cookies',
+    '--no-cookies-from-browser',
     '--encoding',
     'utf-8',
     '--no-colors',
@@ -85,6 +94,8 @@ export class MetadataService {
     this.previews.delete(url);
   }
   private remember(url: string, info: QueuePreview) {
+    if (!(typeof info.duration === 'number' && Number.isFinite(info.duration) && info.duration > 0))
+      delete info.duration;
     this.previews.delete(url);
     this.previews.set(url, { info, at: Date.now() });
     if (this.previews.size > 500) {
@@ -94,24 +105,16 @@ export class MetadataService {
     return structuredClone(info);
   }
   async preview(input: string, signal?: AbortSignal): Promise<QueuePreview> {
-    const url = normalizeYouTubeUrl(input);
+    const url = normalizeMediaUrl(input);
     if (signal?.aborted) throw new CancelledError();
     const cached = this.cachedPreview(url);
     if (cached) return cached;
     const raw = await this.query(url, signal, true);
-    let thumbnail: string | undefined;
-    try {
-      const image = new URL(raw.thumbnail ?? '');
-      if (
-        image.protocol === 'https:' &&
-        ['i.ytimg.com', 'img.youtube.com'].includes(image.hostname)
-      )
-        thumbnail = image.href;
-    } catch {
-      /* Thumbnail is optional. */
-    }
+    const platform = mediaSource(url).platform;
+    const thumbnail = safeThumbnail(raw.thumbnail, platform);
     return this.remember(url, {
-      title: raw.title,
+      platform,
+      title: sourceTitle(raw.title, platform),
       channel: raw.channel ?? raw.uploader,
       ...(typeof raw.duration === 'number' && raw.duration > 0 ? { duration: raw.duration } : {}),
       ...(thumbnail ? { thumbnail } : {}),
@@ -126,9 +129,10 @@ export class MetadataService {
     return this.cachedPreview(url)?.title;
   }
   async analyze(input: string, signal?: AbortSignal) {
-    const url = normalizeYouTubeUrl(input);
+    const url = normalizeMediaUrl(input);
     const info = parseVideo(await this.query(url, signal), url);
     this.remember(url, {
+      platform: info.platform,
       title: info.title,
       channel: info.channel,
       duration: info.duration,
@@ -154,7 +158,7 @@ export class MetadataService {
           '--no-playlist',
           '--dump-single-json',
           '--skip-download',
-          ...(lightweight
+          ...(lightweight && mediaSource(url).platform === 'youtube'
             ? [
                 '--ignore-no-formats-error',
                 '--no-check-formats',
@@ -175,7 +179,9 @@ export class MetadataService {
       if (controller.signal.aborted) throw new CancelledError();
       const raw = JSON.parse(data) as RawVideo;
       if (
-        raw.id !== new URL(url).searchParams.get('v') ||
+        raw.id !== sourceVideoId(url) ||
+        (raw._type !== undefined && raw._type !== 'video') ||
+        raw.entries !== undefined ||
         typeof raw.title !== 'string' ||
         !raw.title.trim()
       )
@@ -186,7 +192,10 @@ export class MetadataService {
       const message = (error as Error).message;
       if (/Lives|Nenhum formato|interpretar/.test(message)) throw error;
       console.error('[Vora/análise]', message);
-      throw new MediaError(friendlyError(message), failureReason(message));
+      throw new MediaError(
+        friendlyError(message, mediaSource(url).platform),
+        failureReason(message),
+      );
     } finally {
       this.queries.delete(controller);
       finished();

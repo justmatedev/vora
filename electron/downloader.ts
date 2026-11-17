@@ -1,3 +1,4 @@
+import { mediaSource } from '../shared/sources';
 import { access, mkdtemp, readdir, rm, stat } from 'node:fs/promises';
 import { constants } from 'node:fs';
 import { basename, join } from 'node:path';
@@ -174,7 +175,7 @@ export class Downloader {
           console.error('[Vora/download]', (error as Error).message);
           terminal = {
             type: 'error',
-            message: friendlyError((error as Error).message),
+            message: friendlyError((error as Error).message, mediaSource(info.url).platform),
             reason: failureReason((error as Error).message),
           };
         }

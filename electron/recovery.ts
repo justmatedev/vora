@@ -13,7 +13,7 @@ import {
 } from 'node:fs/promises';
 import { basename, dirname, isAbsolute, join, resolve, sep } from 'node:path';
 import type { RecoveryItem, VideoInfo } from '../shared/types';
-import { normalizeYouTubeUrl } from './media';
+import { mediaSource, normalizeMediaUrl, sourceTitle } from '../shared/sources';
 
 export const SESSION_MARKER = '.vora-session.json';
 export interface DownloadSession {
@@ -68,7 +68,7 @@ export class RecoveryStore {
         for (const s of saved) {
           if (validSession(s)) {
             try {
-              if (normalizeYouTubeUrl(s.url) === s.url) this.sessions.set(s.id, s);
+              if (normalizeMediaUrl(s.url) === s.url) this.sessions.set(s.id, s);
             } catch {
               /* Invalid journal entry. */
             }
@@ -188,7 +188,7 @@ export class RecoveryStore {
         await this.verify(s);
         result.push({
           id: s.id,
-          title: s.title,
+          title: sourceTitle(s.title, mediaSource(s.url).platform),
           url: s.url,
           destination: s.destination,
           createdAt: s.createdAt,

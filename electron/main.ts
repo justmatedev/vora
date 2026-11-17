@@ -20,7 +20,7 @@ import { RecoveryStore } from './recovery';
 import { MetadataService, toolEnvironment } from './metadata';
 import { DesktopNotifier } from './notifications';
 import { QueueManager } from './queue';
-import { youtubeSource } from '../shared/youtube';
+import { mediaSource } from '../shared/sources';
 import { UpdateManager, RELEASES_URL } from './updates';
 import { createUpdater } from './update-adapter';
 import { appImageAvailability } from './appimage-update';
@@ -303,7 +303,7 @@ else {
         if (!Array.isArray(urls) || !urls.length || urls.some((url) => typeof url !== 'string'))
           throw new Error('Informe um link por linha.');
         const entries = urls.map((url) => {
-          const source = youtubeSource(url);
+          const source = mediaSource(url);
           if (!source.videoUrl || source.kind !== 'video')
             throw new Error('Revise os links com playlist antes de adicioná-los.');
           return {

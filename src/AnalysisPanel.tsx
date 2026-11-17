@@ -1,3 +1,4 @@
+import { mediaSource, REEL_COMPATIBILITY_MESSAGE } from '../shared/sources';
 import { useEffect, useRef, type ReactNode } from 'react';
 import {
   AudioLines,
@@ -59,6 +60,7 @@ export function AnalysisPanel({
   formatSize: (value?: number) => string | undefined;
   formatDuration: (value: number) => string;
 }) {
+  const instagram = mediaSource(info.url).platform === 'instagram';
   const options = info[videoMode],
     selected = options.find((option) => option.id === optionId);
   return (
@@ -76,14 +78,20 @@ export function AnalysisPanel({
           ) : (
             <Video size={28} />
           )}
-          <span>{formatDuration(info.duration)}</span>
+          <span>{info.duration > 0 ? formatDuration(info.duration) : '—'}</span>
         </div>
         <div className="video-details">
           <span className="source-label">
-            <span className="youtube-mark">
-              <span />
-            </span>
-            YOUTUBE<span className="source-dot">·</span>VÍDEO ENCONTRADO
+            {instagram ? (
+              <Video size={16} aria-hidden="true" />
+            ) : (
+              <span className="youtube-mark">
+                <span />
+              </span>
+            )}
+            {instagram ? 'INSTAGRAM' : 'YOUTUBE'}
+            <span className="source-dot">·</span>
+            {instagram ? 'REEL ENCONTRADO' : 'VÍDEO ENCONTRADO'}
           </span>
           <h2 title={info.title}>{info.title}</h2>
           <p>{info.channel}</p>
@@ -94,6 +102,11 @@ export function AnalysisPanel({
       </article>
 
       <>
+        {instagram && kind === 'video' && videoMode === 'compatible' && !info.compatible.length && (
+          <div className="message" role="status">
+            {REEL_COMPATIBILITY_MESSAGE}
+          </div>
+        )}
         <fieldset className="download-options" disabled={busy || directoryBusy}>
           <legend className="sr-only">Opções de download</legend>
           <div className="segment" aria-label="Tipo de download">

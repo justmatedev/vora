@@ -6,7 +6,7 @@ import type {
   PlaylistSummary,
   QueueAddResult,
 } from '../shared/types';
-import { youtubeSource } from '../shared/youtube';
+import { mediaSource } from '../shared/sources';
 import { GroupOptions } from './GroupOptions';
 import { desktop, message } from './queue-client';
 
@@ -44,7 +44,7 @@ export function ImportDialog({
         .split(/\r?\n/)
         .map((line) => line.trim())
         .filter(Boolean);
-      return { lines, sources: lines.map(youtubeSource), error: '' };
+      return { lines, sources: lines.map(mediaSource), error: '' };
     } catch (error) {
       return { lines: [], sources: [], error: message(error) };
     }
@@ -77,7 +77,7 @@ export function ImportDialog({
     });
     if (initial) {
       try {
-        if (youtubeSource(initial).kind === 'playlist') void beginPlaylist(initial);
+        if (mediaSource(initial).kind === 'playlist') void beginPlaylist(initial);
       } catch {
         /* validation shown in the form */
       }
@@ -280,7 +280,7 @@ export function ImportDialog({
       ) : (
         <>
           <label className="batch-label" htmlFor="batch-links">
-            Links do YouTube <span>Um por linha</span>
+            Links do YouTube ou Reels do Instagram <span>Um por linha</span>
           </label>
           <textarea
             id="batch-links"

@@ -84,3 +84,7 @@ A integração usa electron-updater 6.8.12 com provider GitHub fixado em justmat
 UpdateManager é testado com adaptador controlado. `npm run test:updates` usa o downloader e a verificação SHA-512 reais com servidor local e payloads de teste; não instala o aplicativo do usuário. No Linux, a substituição preserva o nome do AppImage e prepara uma cópia no mesmo diretório antes do rename. O workflow de pacotes confere os metadados e o canal embutido em cada sistema.
 
 O ciclo completo com instalador/reinício deve ser validado em ambiente nativo antes de promover uma versão: os testes de servidor local não equivalem à execução de um instalador NSIS real ou ao reinício de um AppImage real.
+
+### Teste opcional de Reels públicos
+
+`npm run test:instagram` fica ignorado por padrão. Para executar o teste de rede dos três Reels de referência, use `VORA_TEST_INSTAGRAM=1 npm run test:instagram` (no PowerShell, defina `$env:VORA_TEST_INSTAGRAM="1"` antes do comando). Ele usa os serviços de metadados, fila, download e recuperação reais, baixa vídeo original, áudio original e MP3 e verifica os nove arquivos com ffprobe e decodificação FFmpeg. Não importa cookies nem usa login. O conteúdo temporário é removido ao terminar; `VORA_KEEP_INSTAGRAM_TEST=1` preserva os resultados para inspeção. A disponibilidade depende do Instagram e não faz parte da suíte offline.

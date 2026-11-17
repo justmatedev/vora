@@ -21,6 +21,7 @@
     "predev": "npm run electron:install",
     "test:ui": "node --test tests/ui.test.mjs",
     "test:desktop": "node --test tests/desktop.test.mjs",
+    "test:instagram": "node --import tsx --test tests/instagram.integration.test.mjs",
     "test:media": "node --import tsx --test tests/tools.integration.test.mjs tests/queue.integration.test.mjs",
     "format": "prettier --write \"src/**/*.{ts,tsx,css}\" \"electron/**/*.ts\" \"shared/**/*.ts\" \"scripts/*.mjs\" \"tests/*.{ts,mjs}\" \"*.{json,ts,html,md}\"",
     "test:updates": "node --import tsx --test tests/updates.integration.test.mjs",

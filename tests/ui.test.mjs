@@ -6,6 +6,100 @@ import { chromium } from 'playwright';
 import { queueFixture } from './ui-fixture.mjs';
 
 test(
+  'Reels: exige Original explicitamente, identifica Instagram e não inventa duração',
+  { timeout: 60_000 },
+  async () => {
+    const server = await preview({ preview: { host: '127.0.0.1', port: 4173, strictPort: true } });
+    let browser;
+    try {
+      browser = await chromium.launch({
+        executablePath: process.env.VORA_TEST_BROWSER || undefined,
+        headless: true,
+        args: ['--no-sandbox', '--disable-dev-shm-usage'],
+      });
+      const page = await browser.newPage({ viewport: { width: 960, height: 720 } });
+      page.setDefaultTimeout(5000);
+      await page.addInitScript(queueFixture);
+      await page.addInitScript(() => {
+        const analyze = window.vora.analyze;
+        window.vora.analyze = async (url) => ({
+          ...(await analyze('https://www.youtube.com/watch?v=BaW_jenozKc')),
+          id: 'Df2T11TxZQr',
+          url,
+          platform: 'instagram',
+          title: 'Reel de teste',
+          compatible: [],
+          duration: 0,
+          thumbnail: undefined,
+        });
+        window.__savedPreferences = [];
+        const save = window.vora.savePreferences;
+        window.vora.savePreferences = async (value) => {
+          window.__savedPreferences.push(value);
+          return save(value);
+        };
+      });
+      await page.goto('http://127.0.0.1:4173');
+      const input = page.getByRole('textbox', {
+        name: 'Link do YouTube ou Reel do Instagram',
+        exact: true,
+      });
+      await input.fill('https://www.instagram.com/reels/Df2T11TxZQr/');
+      await input.press('Enter');
+      const analysis = page.getByRole('dialog', { name: 'Opções do vídeo', exact: true });
+      await analysis.waitFor();
+      await analysis.getByText(/MP4 compatível indisponível.*Selecione Original/).waitFor();
+      assert.match(await analysis.locator('.source-label').innerText(), /INSTAGRAM/);
+      assert.equal(await analysis.locator('.thumbnail > span').innerText(), '—');
+      assert.equal(
+        await analysis.getByRole('button', { name: 'Adicionar à fila', exact: true }).isDisabled(),
+        true,
+      );
+      assert.deepEqual(await page.evaluate(() => window.__savedPreferences), []);
+      await analysis.getByLabel('Formato', { exact: true }).selectOption('original');
+      assert.equal(
+        await analysis.getByRole('button', { name: 'Adicionar à fila', exact: true }).isEnabled(),
+        true,
+      );
+      await page.screenshot({ path: 'test-results/vora-reel-original.png' });
+      await analysis.getByRole('button', { name: 'Adicionar à fila', exact: true }).click();
+      await page.waitForFunction(() => window.__test.state().items.length === 1);
+      assert.equal((await page.evaluate(() => window.__test.state())).items.length, 1);
+      assert.equal(
+        (await page.evaluate(() => window.__test.state())).items[0].preferences.videoMode,
+        'original',
+      );
+      // A saved audio choice must not silently choose Original when switching to video.
+      await page.evaluate(() =>
+        window.vora.savePreferences({
+          kind: 'audio',
+          videoMode: 'compatible',
+          audioMode: 'original',
+        }),
+      );
+      await page.reload();
+      await input.fill('https://www.instagram.com/reels/Df2T11TxZQr/');
+      await input.press('Enter');
+      await analysis.waitFor();
+      assert.deepEqual(await page.evaluate(() => window.__savedPreferences), []);
+      await analysis.getByRole('button', { name: 'Vídeo', exact: true }).click();
+      assert.equal(
+        await analysis.getByRole('button', { name: 'Adicionar à fila', exact: true }).isDisabled(),
+        true,
+      );
+      await analysis.getByText(/MP4 compatível indisponível.*Selecione Original/).waitFor();
+      assert.equal(
+        await analysis.getByLabel('Formato', { exact: true }).inputValue(),
+        'compatible',
+      );
+    } finally {
+      await browser?.close();
+      await new Promise((resolve) => server.httpServer.close(resolve));
+    }
+  },
+);
+
+test(
   'interface: fila, grupos, progresso ativo, pausa, arquivos por item e restauração',
   { timeout: 60_000 },
   async () => {
@@ -851,7 +945,10 @@ test(
       );
       await page.keyboard.press('Escape');
 
-      const url = page.getByRole('textbox', { name: 'Link do YouTube', exact: true });
+      const url = page.getByRole('textbox', {
+        name: 'Link do YouTube ou Reel do Instagram',
+        exact: true,
+      });
       await url.focus();
       await page.keyboard.press('ArrowRight');
       assert.equal(
@@ -987,7 +1084,10 @@ test(
       await queue.getByText('9 de 9 itens na lista', { exact: true }).waitFor();
       assert.equal(await search.count(), 0);
       assert.equal(await queue.getByRole('group', { name: 'Filtros da fila' }).isVisible(), true);
-      const url = page.getByRole('textbox', { name: 'Link do YouTube', exact: true });
+      const url = page.getByRole('textbox', {
+        name: 'Link do YouTube ou Reel do Instagram',
+        exact: true,
+      });
       await url.focus();
       await seed(10);
       await search.waitFor();

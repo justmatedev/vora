@@ -163,12 +163,14 @@ test(
           [
             'https://www.youtube.com/watch?v=BaW_jenozKc',
             'https://www.youtube.com/watch?v=aqz-KE-bpKQ',
+            'https://www.instagram.com/reels/Df2T11TxZQr/?igsh=test',
           ],
           { kind: 'audio', videoMode: 'original', audioMode: 'mp3' },
         ),
       );
       const beforeRestart = await page.evaluate(() => window.vora.queue());
-      assert.equal(beforeRestart.items.length, 2);
+      assert.equal(beforeRestart.items.length, 3);
+      assert.equal(beforeRestart.items[2].url, 'https://www.instagram.com/reel/Df2T11TxZQr/');
       assert.equal(beforeRestart.mode, 'paused');
       await assert.rejects(
         page.evaluate(() => window.vora.chooseGroupDirectory('missing')),
@@ -219,6 +221,7 @@ test(
       const afterRestart = await restarted.evaluate(() => window.vora.queue());
       assert.equal(afterRestart.mode, 'paused');
       assert.equal(afterRestart.activeId, undefined);
+      assert.equal(afterRestart.items[2].url, 'https://www.instagram.com/reel/Df2T11TxZQr/');
       assert.deepEqual(
         afterRestart.items.map((item) => item.id),
         beforeRestart.items.map((item) => item.id),

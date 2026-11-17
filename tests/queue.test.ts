@@ -13,6 +13,154 @@ import { Downloader } from '../electron/downloader';
 const urls = ['BaW_jenozKc', 'aqz-KE-bpKQ', 'M7lc1UVf-VE'].map(
   (id) => `https://www.youtube.com/watch?v=${id}`,
 );
+const reelUrl = 'https://www.instagram.com/reel/Df2T11TxZQr/';
+function reelVideo(): VideoInfo {
+  return { ...video(), id: 'Df2T11TxZQr', url: reelUrl, platform: 'instagram', compatible: [] };
+}
+
+test('Reels exigem Original antes de adicionar lote misto sem inclusão parcial', async () => {
+  const s = await setup({ analyze: async (url) => (url === reelUrl ? reelVideo() : video(url)) });
+  try {
+    await assert.rejects(
+      s.manager.add([{ url: urls[0] }, { url: reelUrl }], DEFAULT_PREFERENCES, s.root),
+      /MP4 compatível.*Original.*Df2T11TxZQr/s,
+    );
+    assert.equal(s.manager.snapshot().items.length, 0);
+    await s.manager.add(
+      [{ url: urls[0] }, { url: reelUrl }],
+      { ...DEFAULT_PREFERENCES, videoMode: 'original' },
+      s.root,
+    );
+    assert.equal(s.manager.snapshot().items.length, 2);
+    assert.equal(s.manager.snapshot().mode, 'paused');
+    await assert.rejects(
+      s.manager.editGroup(s.manager.snapshot().groups[0].id, DEFAULT_PREFERENCES, s.root),
+      /Selecione Original/,
+    );
+    assert.equal(s.manager.snapshot().items[1].preferences.videoMode, 'original');
+  } finally {
+    await s.close();
+  }
+});
+
+test('fila mista persiste e reabre Reels, preserva YouTube e executa ambos', async () => {
+  const downloaded: string[] = [];
+  const s = await setup({
+    analyze: async (url) => (url === reelUrl ? reelVideo() : video(url)),
+    download: async (info) => {
+      downloaded.push(info.url);
+      return {
+        type: 'complete',
+        path: join(s.root, info.id + '.mp4'),
+        filename: info.id + '.mp4',
+        size: 4,
+      };
+    },
+  });
+  try {
+    await s.manager.add(
+      [{ url: urls[0] }, { url: 'https://instagram.com/reels/Df2T11TxZQr/?igsh=test' }],
+      { ...DEFAULT_PREFERENCES, videoMode: 'original' },
+      s.root,
+    );
+    assert.equal(s.manager.snapshot().items[1].title, 'Reel Df2T11TxZQr');
+    await s.manager.shutdown();
+    const restarted = new QueueManager(
+      join(s.root, 'queue.json'),
+      s.deps,
+      () => {},
+      () => {},
+    );
+    await restarted.load();
+    assert.deepEqual(
+      restarted.snapshot().items.map((i) => i.url),
+      [urls[0], reelUrl],
+    );
+    await restarted.start();
+    await until(() => restarted.snapshot().items.every((i) => i.status === 'completed'));
+    assert.deepEqual(downloaded, [urls[0], reelUrl]);
+    await restarted.shutdown();
+  } finally {
+    await s.close();
+  }
+});
+
+test('execução não troca automaticamente Reel compatível por original', () => {
+  assert.throws(() => requestForItem(reelVideo(), DEFAULT_PREFERENCES), /Selecione Original/);
+  assert.equal(
+    requestForItem(reelVideo(), { ...DEFAULT_PREFERENCES, videoMode: 'original' }).videoMode,
+    'original',
+  );
+});
+
+test('fila salva traduz título genérico apenas do Instagram ao reabrir', async () => {
+  const s = await setup();
+  try {
+    await s.manager.add(
+      [
+        { url: reelUrl, title: 'Video by gean.mech' },
+        { url: urls[0], title: 'Video by gean.mech' },
+      ],
+      { ...DEFAULT_PREFERENCES, videoMode: 'original' },
+      s.root,
+    );
+    await s.manager.shutdown();
+    const restarted = new QueueManager(
+      join(s.root, 'queue.json'),
+      s.deps,
+      () => {},
+      () => {},
+    );
+    await restarted.load();
+    assert.deepEqual(
+      restarted.snapshot().items.map((item) => item.title),
+      ['Reel de @gean.mech', 'Video by gean.mech'],
+    );
+    await restarted.shutdown();
+  } finally {
+    await s.close();
+  }
+});
+
+test('Reel cancelado pode ser repetido sem afetar a configuração original', async () => {
+  const cancelled = gate();
+  let attempts = 0;
+  const s = await setup({
+    analyze: async () => reelVideo(),
+    cancelDownload: async () => cancelled.release(),
+    download: async () => {
+      if (++attempts === 1) {
+        await cancelled.promise;
+        return { type: 'cancelled' };
+      }
+      return { type: 'complete', path: join(s.root, 'reel.mp4'), filename: 'reel.mp4', size: 4 };
+    },
+  });
+  try {
+    await s.manager.add(
+      [{ url: reelUrl }],
+      { ...DEFAULT_PREFERENCES, videoMode: 'original' },
+      s.root,
+    );
+    await s.manager.start();
+    await until(() => attempts === 1);
+    const id = s.manager.snapshot().items[0].id;
+    await s.manager.cancel(id);
+    await until(
+      () =>
+        s.manager.snapshot().items[0].status === 'cancelled' &&
+        s.manager.snapshot().mode === 'paused',
+    );
+    await s.manager.retry(id);
+    await s.manager.start();
+    await until(() => s.manager.snapshot().items[0].status === 'completed');
+    assert.equal(attempts, 2);
+    assert.equal(s.manager.snapshot().items[0].preferences.videoMode, 'original');
+  } finally {
+    cancelled.release();
+    await s.close();
+  }
+});
 function video(url = urls[0]): VideoInfo {
   return {
     id: new URL(url).searchParams.get('v')!,

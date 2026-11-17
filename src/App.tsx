@@ -27,7 +27,7 @@ import { TemporaryNotice } from './TemporaryNotice';
 import { QueuePanel } from './QueuePanel';
 import { ImportDialog } from './ImportDialog';
 import { useQueue } from './queue-client';
-import { youtubeSource } from '../shared/youtube';
+import { mediaSource } from '../shared/sources';
 import { RecoveryDialog } from './RecoveryDialog';
 import { UpdateSection, useUpdates } from './UpdateSection';
 import type { UpdateSnapshot } from '../shared/types';
@@ -175,7 +175,7 @@ export function App() {
   async function analyze(input = url) {
     if (busy || directoryBusy || !input.trim()) return;
     try {
-      if (youtubeSource(input).kind !== 'video') {
+      if (mediaSource(input).kind !== 'video') {
         setImportInitial(input);
         setImportOpen(true);
         return;
@@ -194,8 +194,12 @@ export function App() {
       const choice = resolvePreferences(video, preferences.current);
       setInfo(video);
       setAnalysisOpen(true);
-      setVideoMode(choice.videoMode);
-      setOptionId(choice.option?.id ?? '');
+      const needsOriginal =
+        video.platform === 'instagram' &&
+        preferences.current.videoMode === 'compatible' &&
+        !video.compatible.length;
+      setVideoMode(needsOriginal ? 'compatible' : choice.videoMode);
+      setOptionId(needsOriginal ? '' : (choice.option?.id ?? ''));
       setKind(choice.kind);
       setAudioMode(preferences.current.audioMode);
       if (
@@ -376,7 +380,7 @@ export function App() {
             </button>
           </div>
         )}
-        <section className="workspace" aria-label="Download do YouTube">
+        <section className="workspace" aria-label="Downloads do YouTube e Instagram">
           <form
             className="link-form"
             onSubmit={(event) => {
@@ -384,8 +388,8 @@ export function App() {
               void analyze();
             }}
           >
-            <label htmlFor="youtube-url">
-              <span>Link do YouTube</span>
+            <label htmlFor="media-url">
+              <span>Link do YouTube ou Reel do Instagram</span>
               <span className="composer-actions">
                 {info && (
                   <button
@@ -414,14 +418,14 @@ export function App() {
               <div className="url-field">
                 <Link2 size={19} aria-hidden="true" />
                 <input
-                  id="youtube-url"
-                  aria-label="Link do YouTube"
+                  id="media-url"
+                  aria-label="Link do YouTube ou Reel do Instagram"
                   ref={urlInput}
                   type="text"
                   inputMode="url"
                   autoComplete="off"
                   spellCheck={false}
-                  placeholder="Cole o link do vídeo aqui"
+                  placeholder="Cole o link do vídeo ou Reel aqui"
                   value={url}
                   disabled={busy || directoryBusy}
                   maxLength={2048}
