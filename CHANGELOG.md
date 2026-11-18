@@ -1,6 +1,6 @@
 # Histórico de mudanças
 
-## 0.7.0 — em preparação
+## 0.7.0 — 2026-11-18
 
 - Reels públicos do Instagram na análise e na fila, com vídeo original, áudio original e MP3, sem login ou cookies.
 - Validação de formato antes de adicionar ou editar grupos com Reels: escolha explícita de Original quando MP4 compatível não estiver disponível.

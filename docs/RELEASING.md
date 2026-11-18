@@ -2,7 +2,7 @@
 
 ## Preparar o repositório
 
-Autor: **justmatedev**. Repositório: [justmatedev/vora](https://github.com/justmatedev/vora). Os campos `repository`, `homepage` e `bugs` do `package.json` apontam para esse endereço. Os instaladores atuais estão na [Release 0.6.1](https://github.com/justmatedev/vora/releases/tag/v0.6.1).
+Autor: **justmatedev**. Repositório: [justmatedev/vora](https://github.com/justmatedev/vora). Os campos `repository`, `homepage` e `bugs` do `package.json` apontam para esse endereço. Os instaladores atuais estão na [Release 0.7.0](https://github.com/justmatedev/vora/releases/tag/v0.7.0).
 
 O código do Vora usa MIT, registrada em `LICENSE`, `package.json` e `package-lock.json`; o aviso é incluído no empacotamento. Não altere as licenças dos componentes de terceiros. Preserve os materiais de terceiros descritos em [THIRD_PARTY.md](../THIRD_PARTY.md).
 
@@ -22,7 +22,7 @@ Os workflows seguem a [documentação de CI Node.js do GitHub](https://docs.gith
 
 ## Preparar uma versão
 
-A versão 0.7.0 está em preparação; notas e validações em [RELEASE-0.7.0.md](RELEASE-0.7.0.md) e [VALIDATION.md](VALIDATION.md). A versão estável publicada continua sendo 0.6.1 até a publicação do novo rascunho.
+A versão 0.7.0 foi publicada como estável em 18 de novembro de 2026; notas e validações em [RELEASE-0.7.0.md](RELEASE-0.7.0.md) e [VALIDATION.md](VALIDATION.md).
 
 O workflow **Gerar pacotes** confere também a árvore de dependências de produção dentro do `app.asar`, antes das verificações de runtime e metadados. Arquivos instalados no computador de desenvolvimento não podem suprir dependências ausentes do pacote. A mesma conferência é usada pelo kit isolado. Localmente, após empacotar, execute `node scripts/verify-packaged-dependencies.mjs linux` ou `win32`.
 
@@ -32,7 +32,7 @@ O workflow **Gerar pacotes** confere também a árvore de dependências de produ
 4. Teste o AppImage e o instalador em sistemas nativos. Registre cada plataforma separadamente em [VALIDATION.md](VALIDATION.md); marque como pendente o que não foi verificado.
 5. Confira os avisos e fontes correspondentes dos componentes distribuídos conforme registrado em THIRD_PARTY.md.
 6. Gere os checksums localmente com `node scripts/release-checksums.mjs`. O script inclui todos os pacotes presentes em `release/`; publique apenas os da versão escolhida. Para juntar artefatos dos dois jobs, reúna os pacotes e gere um novo manifesto único.
-7. Crie uma tag como `v0.6.1` para o commit validado e uma Release no GitHub, com notas de versão, AppImage, instalador e SHA256SUMS. Use rascunho enquanto a revisão estiver pendente.
+7. Crie uma tag como `v0.7.0` para o commit validado e uma Release no GitHub, com notas de versão, AppImage, instalador e SHA256SUMS. Use rascunho enquanto a revisão estiver pendente.
 
 As versões dos binários estão em `resources/tools.lock.json`. Os assets datados do FFmpeg podem expirar; uma falha no download exige atualização deliberada de versão, URL e checksum, sem substituição silenciosa por `latest`.
 
