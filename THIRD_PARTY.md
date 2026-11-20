@@ -51,3 +51,9 @@ A geração dos materiais é descrita em [docs/RELEASING.md](docs/RELEASING.md).
 `electron-updater` 6.8.12 e suas dependências mantêm suas próprias licenças. O preparador inclui os arquivos de licença de todas as dependências de produção do lockfile, também quando são empacotadas como módulos Node separados.
 
 `lazy-val` 1.0.5 declara MIT no package.json, mas não fornece LICENSE separado no pacote ou na revisão consultada. `lazy-val-NOTICE.txt` preserva os metadados originais e a atribuição de autor declarada, acompanhados do texto padrão MIT; nenhum ano de copyright foi inferido. A origem e o hash desse aviso estão em resources/notices/sources.json.
+
+# Transcrição local: Whisper e whisper.cpp
+
+O motor opcional de transcrição usa whisper.cpp 1.8.2 e GGML sob licença MIT. A fonte exata e seu SHA-256 estão em `resources/whisper.lock.json`. O instalador inclui o motor CPU e as bibliotecas declaradas no seu manifesto; não inclui os pesos dos modelos. Os modelos multilíngues Small e Medium são obtidos sob ação explícita e também são disponibilizados sob licença MIT pelo projeto OpenAI Whisper.
+
+As licenças estão em `resources/notices/whisper.cpp-LICENSE.txt`, `ggml-LICENSE.txt` e `Whisper-MODELS-LICENSE.txt`, são conferidas por hash e acompanham os avisos do pacote. Os builds desativam OpenMP externo e usam CRT estático no MSVC. Dependências de sistema do Linux seguem os requisitos do pacote nativo e devem ser verificadas no sistema de destino.

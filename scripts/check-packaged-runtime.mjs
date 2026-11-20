@@ -10,6 +10,11 @@ const windows = target === 'win32';
 const root = resolve('release', windows ? 'win-unpacked' : 'linux-unpacked');
 const executable = join(root, windows ? 'Vora.exe' : 'vora');
 const tools = join(root, 'resources', 'tools');
+await promisify(execFile)(
+  join(tools, 'whisper', windows ? 'whisper-cli.exe' : 'whisper-cli'),
+  ['--help'],
+  { timeout: 30000, windowsHide: true },
+);
 const env = {
   ...process.env,
   ELECTRON_RUN_AS_NODE: '1',

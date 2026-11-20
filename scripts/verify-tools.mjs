@@ -1,6 +1,7 @@
 import { readFile, access, readdir } from 'node:fs/promises';
 import { join } from 'node:path';
 import { sha256, platformKey } from './tool-utils.mjs';
+import { verifyWhisper } from './verify-whisper.mjs';
 
 const target = platformKey(process.argv[2]),
   root = join('resources', 'tools', target);
@@ -9,6 +10,7 @@ try {
   const manifest = JSON.parse(await readFile(join(root, 'manifest.json'), 'utf8'));
   const suffix = target.startsWith('win') ? '.exe' : '';
   const allowed = new Set([
+    'whisper',
     'licenses',
     'manifest.json',
     ...['yt-dlp', 'ffmpeg', 'ffprobe'].map((name) => name + suffix),
@@ -40,6 +42,7 @@ try {
   for (const notice of notices)
     if ((await sha256(join(root, 'licenses', notice.file))) !== notice.sha256)
       throw new Error(`Aviso de terceiros alterado: ${notice.file}`);
+  await verifyWhisper(root, target);
   console.log(`Binários e licenças verificados: ${target}`);
 } catch (error) {
   console.error(

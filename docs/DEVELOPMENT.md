@@ -16,6 +16,10 @@ A interface usa atualização automática no desenvolvimento. Alterações no pr
 
 ## Compilar e empacotar
 
+O motor de transcrição usa whisper.cpp **1.8.2** compilado no sistema nativo x64. Para `tools:fetch`, o ambiente de desenvolvimento precisa também de CMake 3.25+ e compilador C/C++ (GCC/Clang no Linux, Visual Studio Build Tools 2022 com C++ no Windows). A variável `CMAKE` permite indicar o executável. Esses requisitos são somente do build; o usuário final recebe o motor com suas bibliotecas, sem Python ou compilador. Os pesos Small/Medium não entram no instalador e são obtidos apenas quando solicitados no aplicativo.
+
+`node scripts/prepare-whisper.mjs linux` (ou `win32` no Windows) prepara apenas o motor. `node scripts/verify-whisper.mjs linux` confere seu manifesto. O build usa variantes de CPU, sem `-march=native`, GPU, OpenMP externo ou download de modelos pelo próprio motor. Fonte e checksum estão em `resources/whisper.lock.json`.
+
 ```sh
 npm run build
 npm run tools:verify

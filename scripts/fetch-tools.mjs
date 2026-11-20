@@ -18,6 +18,7 @@ import { promisify } from 'node:util';
 import { execFile } from 'node:child_process';
 import { extract } from '@electron-internal/extract-zip';
 import { sha256, platformKey } from './tool-utils.mjs';
+import { prepareWhisper } from './prepare-whisper.mjs';
 
 const target = platformKey(process.argv[2]);
 if (process.arch !== 'x64' && !process.argv[2])
@@ -94,6 +95,7 @@ try {
     await chmod(path, 0o755);
     manifest.files[filename] = await sha256(path);
   }
+  await prepareWhisper(target, stage);
   await writeFile(join(stage, 'manifest.json'), JSON.stringify(manifest, null, 2) + '\n');
   await copyFile('THIRD_PARTY.md', join(stage, 'licenses', 'THIRD_PARTY.md'));
   await rm(destination, { recursive: true, force: true });
