@@ -1,0 +1,35 @@
+{
+  "systeminfo": "CPU fixture",
+  "params": {
+    "model": "ggml-small.bin",
+    "language": "pt",
+    "translate": false
+  },
+  "result": {
+    "language": "pt"
+  },
+  "transcription": [
+    {
+      "timestamps": {
+        "from": "00:00:00,000",
+        "to": "00:00:09,680"
+      },
+      "offsets": {
+        "from": 0,
+        "to": 9680
+      },
+      "text": "Trecho de teste."
+    },
+    {
+      "timestamps": {
+        "from": "00:00:09,680",
+        "to": "00:00:20,320"
+      },
+      "offsets": {
+        "from": 9680,
+        "to": 20320
+      },
+      "text": "Trecho de teste."
+    }
+  ]
+}

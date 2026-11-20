@@ -1,0 +1,44 @@
+import type { AudioChunk, SourceRecord } from '../shared/transcription-types';
+import { runProcess, type RunOptions } from './processes';
+export function prepareAudioChunk(
+  source: SourceRecord,
+  chunk: AudioChunk,
+  output: string,
+  ffmpeg: string,
+  options: RunOptions,
+  run: typeof runProcess = runProcess,
+) {
+  return run(
+    ffmpeg,
+    [
+      '-hide_banner',
+      '-loglevel',
+      'error',
+      '-nostdin',
+      '-y',
+      '-protocol_whitelist',
+      'file,pipe',
+      '-ss',
+      (chunk.startMs / 1000).toFixed(3),
+      '-i',
+      source.path,
+      '-t',
+      ((chunk.endMs - chunk.startMs) / 1000).toFixed(3),
+      '-map',
+      `0:${source.audioStreamIndex}`,
+      '-vn',
+      '-sn',
+      '-dn',
+      '-ar',
+      '16000',
+      '-ac',
+      '1',
+      '-c:a',
+      'pcm_s16le',
+      '-threads',
+      '1',
+      output,
+    ],
+    options,
+  );
+}
