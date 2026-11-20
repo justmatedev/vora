@@ -56,3 +56,28 @@ test('inspeção exige áudio, recusa playlists disfarçadas e restringe protoco
     /áudio/i,
   );
 });
+test('encerramento da seleção cancela e drena uma inspeção ainda em andamento', async () => {
+  const root = await mkdtemp(join(tmpdir(), 'vora-source-close-'));
+  let entered!: () => void;
+  const started = new Promise<void>((resolve) => {
+    entered = resolve;
+  });
+  try {
+    const file = join(root, 'file.mp4');
+    await writeFile(file, 'media');
+    const registry = new SourceRegistry({ ffprobe: 'unused' }, async (_path, _tools, signal) => {
+      entered();
+      return new Promise((_resolve, reject) =>
+        signal.addEventListener('abort', () => reject(new Error('cancelled')), { once: true }),
+      );
+    });
+    const pending = registry.register([file], 'local');
+    const rejected = assert.rejects(pending, /cancelled/);
+    await started;
+    await registry.shutdown();
+    await rejected;
+    assert.equal(registry.busy, false);
+  } finally {
+    await rm(root, { recursive: true, force: true });
+  }
+});

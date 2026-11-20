@@ -29,6 +29,16 @@ export class DesktopNotifier {
   queue(notice: QueueNotice) {
     this.show(notificationText(notice));
   }
+  transcriptions(notice: QueueNotice) {
+    if (notice.type === 'attention') {
+      this.show({ title: 'Transcrições precisam de atenção', body: notice.message });
+      return;
+    }
+    this.show({
+      title: notice.failed ? 'Transcrições finalizadas com erros' : 'Transcrições finalizadas',
+      body: `${notice.completed} concluída${notice.completed === 1 ? '' : 's'}${notice.failed ? ` · ${notice.failed} com erro` : ''}${notice.cancelled ? ` · ${notice.cancelled} cancelada${notice.cancelled === 1 ? '' : 's'}` : ''}. Abra o Vora para conferir.`,
+    });
+  }
   test() {
     if (!this.deps.enabled()) throw new Error('Ative as notificações para enviar um teste.');
     if (!this.deps.supported())

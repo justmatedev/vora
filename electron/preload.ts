@@ -8,6 +8,45 @@ import type {
 } from '../shared/types';
 
 const api: VoraAPI = {
+  transcriptions: {
+    snapshot: () => ipcRenderer.invoke('vora:transcriptions'),
+    chooseFiles: () => ipcRenderer.invoke('vora:transcription-choose-files'),
+    fromDownload: (id) => ipcRenderer.invoke('vora:transcription-from-download', id),
+    chooseDirectory: () => ipcRenderer.invoke('vora:transcription-directory'),
+    add: (request) => ipcRenderer.invoke('vora:transcription-add', request),
+    start: () => ipcRenderer.invoke('vora:transcription-start'),
+    pause: () => ipcRenderer.invoke('vora:transcription-pause'),
+    cancel: (id) => ipcRenderer.invoke('vora:transcription-cancel', id),
+    retry: (id) => ipcRenderer.invoke('vora:transcription-retry', id),
+    clearCompleted: () => ipcRenderer.invoke('vora:transcription-clear'),
+    openOutput: (id, format) => ipcRenderer.invoke('vora:transcription-open-output', id, format),
+    showOutput: (id, format) => ipcRenderer.invoke('vora:transcription-show-output', id, format),
+    savePreferences: (options) => ipcRenderer.invoke('vora:transcription-preferences', options),
+    onChange: (callback) => {
+      const listener = (
+        _event: Electron.IpcRendererEvent,
+        value: import('../shared/transcription-types').TranscriptionSnapshot,
+      ) => callback(value);
+      ipcRenderer.on('vora:transcriptions', listener);
+      return () => ipcRenderer.removeListener('vora:transcriptions', listener);
+    },
+  },
+  models: {
+    snapshot: () => ipcRenderer.invoke('vora:models'),
+    install: (id) => ipcRenderer.invoke('vora:model-install', id),
+    cancel: (id) => ipcRenderer.invoke('vora:model-cancel', id),
+    discardPartial: (id) => ipcRenderer.invoke('vora:model-discard-partial', id),
+    remove: (id) => ipcRenderer.invoke('vora:model-remove', id),
+    openDirectory: () => ipcRenderer.invoke('vora:model-open-directory'),
+    onChange: (callback) => {
+      const listener = (
+        _event: Electron.IpcRendererEvent,
+        value: import('../shared/transcription-types').ModelSnapshot,
+      ) => callback(value);
+      ipcRenderer.on('vora:models', listener);
+      return () => ipcRenderer.removeListener('vora:models', listener);
+    },
+  },
   updates: () => ipcRenderer.invoke('vora:updates'),
   checkForUpdates: () => ipcRenderer.invoke('vora:update-check'),
   downloadUpdate: () => ipcRenderer.invoke('vora:update-download'),

@@ -11,7 +11,7 @@ import {
   shell,
 } from 'electron';
 import { stat } from 'node:fs/promises';
-import { join, resolve, sep } from 'node:path';
+import { join, resolve, sep, dirname } from 'node:path';
 import { pathToFileURL } from 'node:url';
 import { Downloader, type ToolPaths } from './downloader';
 import { runProcess } from './processes';
@@ -24,6 +24,14 @@ import { mediaSource } from '../shared/sources';
 import { UpdateManager, RELEASES_URL } from './updates';
 import { createUpdater } from './update-adapter';
 import { appImageAvailability } from './appimage-update';
+import { ModelManager } from './whisper-models';
+import { SourceRegistry } from './transcription-sources';
+import { TranscriptionSessions } from './transcription-sessions';
+import { Transcriber } from './transcriber';
+import { TranscriptionQueue } from './transcription-queue';
+import { registerTranscriptionIPC } from './transcription-ipc';
+import { workActivity, shutdownWork } from './work-activity';
+import whisperLock from '../resources/whisper.lock.json';
 import type { AppInfo, JobEvent } from '../shared/types';
 
 protocol.registerSchemesAsPrivileged([
@@ -38,6 +46,9 @@ let recovery: RecoveryStore;
 let metadata: MetadataService;
 let queue: QueueManager;
 let updates: UpdateManager | undefined;
+let transcriptions: TranscriptionQueue | undefined;
+let models: ModelManager | undefined;
+let transcriptionSessions: TranscriptionSessions | undefined;
 let pendingIpc = 0;
 let allowClose = false,
   askingClose = false;
@@ -161,6 +172,93 @@ else {
         (event) => send('vora:job', event),
       );
       await queue.load();
+      const modelRoot = join(app.getPath('userData'), 'models', 'whisper');
+      const whisper = join(
+        dirname(tools.ffmpeg),
+        'whisper',
+        process.platform === 'win32' ? 'whisper-cli.exe' : 'whisper-cli',
+      );
+      models = new ModelManager(
+        modelRoot,
+        (snapshot) => {
+          send('vora:models', snapshot);
+          updates?.activityChanged();
+          void transcriptions
+            ?.modelChanged()
+            .catch((error) => console.error('[Vora/transcrições]', error));
+        },
+        { inUse: (id) => transcriptions?.usesModel(id) ?? false },
+      );
+      await models.load();
+      transcriptionSessions = new TranscriptionSessions(
+        join(app.getPath('userData'), 'transcription-sessions.json'),
+      );
+      const sourceRegistry = new SourceRegistry(tools);
+      const transcriber = new Transcriber({ ...tools, whisper }, models, transcriptionSessions);
+      transcriptions = new TranscriptionQueue(
+        join(app.getPath('userData'), 'transcriptions.json'),
+        {
+          models,
+          sessions: transcriptionSessions,
+          transcriber,
+          notice: (notice) => notifier.transcriptions(notice),
+        },
+        (snapshot) => {
+          send('vora:transcriptions', snapshot);
+          updates?.activityChanged();
+        },
+      );
+      await transcriptions.load();
+      registerTranscriptionIPC(handle, {
+        queue: transcriptions,
+        models,
+        sources: sourceRegistry,
+        settings,
+        modelRoot,
+        completedPath,
+        openPath: (path) => shell.openPath(path),
+        showPath: (path) => shell.showItemInFolder(path),
+        selectFiles: async () => {
+          const result = await dialog.showOpenDialog(window, {
+            title: 'Selecionar áudio ou vídeo',
+            properties: ['openFile', 'multiSelections'],
+            filters: [
+              {
+                name: 'Áudio e vídeo',
+                extensions: [
+                  'mp4',
+                  'mkv',
+                  'webm',
+                  'mov',
+                  'avi',
+                  'mp3',
+                  'wav',
+                  'flac',
+                  'm4a',
+                  'aac',
+                  'ogg',
+                  'opus',
+                  'wma',
+                  'aiff',
+                  'm4v',
+                  'mpeg',
+                  'mpg',
+                  'ts',
+                ],
+              },
+              { name: 'Todos os arquivos', extensions: ['*'] },
+            ],
+          });
+          return result.canceled ? [] : result.filePaths;
+        },
+        selectDirectory: async () => {
+          const result = await dialog.showOpenDialog(window, {
+            title: 'Pasta das transcrições',
+            properties: ['openDirectory', 'createDirectory'],
+          });
+          return result.canceled ? null : (result.filePaths[0] ?? null);
+        },
+      });
       updates = new UpdateManager(createUpdater(), {
         version: app.getVersion(),
         disabledReason: !app.isPackaged
@@ -173,17 +271,29 @@ else {
         availability: async () =>
           process.platform === 'linux' ? appImageAvailability(process.env.APPIMAGE) : undefined,
         busy: () =>
-          pendingIpc > 0 ||
-          queue.busy ||
-          downloader.busy ||
-          queue.snapshot().mode !== 'paused' ||
-          metadata.listingBusy,
+          workActivity({
+            pendingIpc,
+            downloadBusy: queue.busy || downloader.busy,
+            downloadsMode: queue.snapshot().mode,
+            metadataBusy: metadata.listingBusy,
+            transcriptionBusy: transcriptions?.busy,
+            transcriptionMode: transcriptions?.snapshot().mode,
+            modelBusy: models?.busy,
+            cleanupPending: transcriptions?.cleanupPending || models?.cleanupPending,
+          }).busy,
         prepare: async () => {
           if ((await recovery.list()).some((item) => item.running))
             throw new Error('Um processo anterior ainda está em andamento.');
+          if (
+            (await transcriptionSessions?.running()) ||
+            transcriptions?.cleanupPending ||
+            models?.busy
+          )
+            throw new Error('Uma transcrição ou instalação de modelo ainda requer atenção.');
           await queue.pausePreviews();
           await metadata.cancelAll();
           await queue.pause();
+          await transcriptions?.pause();
           allowClose = true;
         },
         recover: () => {
@@ -236,12 +346,21 @@ else {
         if (askingClose) return;
         askingClose = true;
         const shutdown = async () => {
-          await queue.shutdown();
-          await metadata.cancelAll();
+          await shutdownWork([
+            () => queue.shutdown(),
+            () => metadata.cancelAll(),
+            () => sourceRegistry.shutdown(),
+            async () => {
+              await transcriptions?.shutdown();
+            },
+            async () => {
+              await models?.shutdown();
+            },
+          ]);
           allowClose = true;
           window.close();
         };
-        if (!queue.busy) {
+        if (!queue.busy && !transcriptions?.busy && !models?.busy && !sourceRegistry.busy) {
           void shutdown().catch((error) => {
             askingClose = false;
             dialog.showErrorBox('Vora', (error as Error).message);
@@ -254,7 +373,7 @@ else {
             title: 'Encerrar o Vora?',
             message: 'Uma operação está em andamento.',
             detail:
-              'O item atual será cancelado. Os pendentes ficam salvos para continuar na próxima abertura.',
+              'As operações em andamento serão interrompidas. As filas ficam salvas para continuar na próxima abertura. Downloads de modelos poderão ser retomados.',
             buttons: ['Continuar no Vora', 'Cancelar operação e sair'],
             defaultId: 0,
             cancelId: 0,
@@ -379,16 +498,17 @@ else {
               ['FFmpeg', tools.ffmpeg, '-version'],
               ['ffprobe', tools.ffprobe, '-version'],
               ['Node.js (Electron)', tools.node, '--version'],
+              ['Whisper.cpp (CPU)', whisper, '--help'],
             ].map(async ([name, executable, argument]) => {
               try {
+                const output = await runProcess(executable, [argument], {
+                  timeout: 10000,
+                  env: toolEnvironment(),
+                });
                 return {
                   name,
-                  version: (
-                    await runProcess(executable, [argument], {
-                      timeout: 10_000,
-                      env: toolEnvironment(),
-                    })
-                  ).split(/\r?\n/)[0],
+                  version:
+                    name === 'Whisper.cpp (CPU)' ? whisperLock.version : output.split(/\r?\n/)[0],
                 };
               } catch {
                 return { name, error: 'Não encontrado ou indisponível' };

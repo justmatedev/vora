@@ -415,6 +415,7 @@ export class TranscriptionQueue {
     this.closing = true;
     this.controller?.abort();
     await this.worker;
+    if (this.readOnly) return;
     await this.change(() => {
       this.state.mode = 'paused';
     });

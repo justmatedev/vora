@@ -106,11 +106,37 @@ export async function writableDirectory(path: string): Promise<string> {
 export class SourceRegistry {
   private sources = new Map<string, SourceRecord>();
   private destinations = new Map<string, string>();
+  private controllers = new Set<AbortController>();
+  private pending = new Set<Promise<SourceSelection[]>>();
+  private closing = false;
   constructor(
     private tools: Pick<ToolPaths, 'ffprobe'>,
     private inspect: typeof inspectLocalMedia = inspectLocalMedia,
   ) {}
-  async register(paths: string[], origin: 'local' | 'download'): Promise<SourceSelection[]> {
+  get busy() {
+    return this.pending.size > 0;
+  }
+  register(paths: string[], origin: 'local' | 'download'): Promise<SourceSelection[]> {
+    if (this.closing) return Promise.reject(new Error('O aplicativo está encerrando.'));
+    const controller = new AbortController();
+    this.controllers.add(controller);
+    const promise = this.registerBatch(paths, origin, controller.signal).finally(() => {
+      this.controllers.delete(controller);
+      this.pending.delete(promise);
+    });
+    this.pending.add(promise);
+    return promise;
+  }
+  async shutdown() {
+    this.closing = true;
+    for (const controller of this.controllers) controller.abort();
+    await Promise.allSettled([...this.pending]);
+  }
+  private async registerBatch(
+    paths: string[],
+    origin: 'local' | 'download',
+    signal: AbortSignal,
+  ): Promise<SourceSelection[]> {
     const records: SourceRecord[] = [];
     for (const path of paths) {
       if (typeof path !== 'string' || !isAbsolute(path))
@@ -120,7 +146,9 @@ export class SourceRegistry {
           info = await stat(canonical);
         if (!info.isFile()) throw new Error('Não é um arquivo de mídia.');
         await access(canonical, constants.R_OK);
-        const media = await this.inspect(canonical, this.tools, new AbortController().signal);
+        signal.throwIfAborted();
+        const media = await this.inspect(canonical, this.tools, signal);
+        signal.throwIfAborted();
         const record: SourceRecord = {
           id: randomUUID(),
           name: basename(path),

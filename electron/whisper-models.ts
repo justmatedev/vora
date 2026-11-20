@@ -64,16 +64,25 @@ export class ModelManager {
     this.notify(this.snapshot());
   }
   async load() {
-    await mkdir(this.root, { recursive: true });
-    this.root = await realpath(this.root);
+    try {
+      await mkdir(this.root, { recursive: true });
+      this.root = await realpath(this.root);
+    } catch (error) {
+      for (const id of ['small', 'medium'] as const) {
+        this.state[id].state = 'error';
+        this.state[id].error = `Pasta de modelos indisponível: ${(error as Error).message}`;
+      }
+      this.changed();
+      return;
+    }
     for (const id of ['small', 'medium'] as const) {
       const paths = this.paths(id);
-      await mkdir(paths.directory, { recursive: true });
-      if ((await realpath(paths.directory)) !== resolve(paths.directory))
-        throw new Error('Pasta de modelo inválida.');
       const model = this.state[id];
       model.path = paths.installed;
       try {
+        await mkdir(paths.directory, { recursive: true });
+        if ((await realpath(paths.directory)) !== resolve(paths.directory))
+          throw new Error('Pasta de modelo inválida.');
         const bytes = await regularSize(paths.installed);
         if (bytes) {
           if (bytes !== model.spec.bytes || (await fileHash(paths.installed)) !== model.spec.sha256)

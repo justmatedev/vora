@@ -116,3 +116,35 @@ export interface TranscriptionSnapshot {
   activeId?: string;
   error?: string;
 }
+export interface TranscriptionSelectionRequest {
+  sourceIds: string[];
+  options: TranscriptionOptions;
+  destinationId?: string;
+  downloadModel: boolean;
+  start: boolean;
+}
+export interface TranscriptionsAPI {
+  snapshot(): Promise<TranscriptionSnapshot>;
+  chooseFiles(): Promise<SourceSelection[]>;
+  fromDownload(id: string): Promise<SourceSelection>;
+  chooseDirectory(): Promise<DestinationSelection | null>;
+  add(request: TranscriptionSelectionRequest): Promise<string[]>;
+  start(): Promise<void>;
+  pause(): Promise<void>;
+  cancel(id: string): Promise<void>;
+  retry(id: string): Promise<void>;
+  clearCompleted(): Promise<void>;
+  openOutput(id: string, format: TranscriptFormat): Promise<void>;
+  showOutput(id: string, format: TranscriptFormat): Promise<void>;
+  savePreferences(options: TranscriptionOptions): Promise<TranscriptionOptions>;
+  onChange(callback: (snapshot: TranscriptionSnapshot) => void): () => void;
+}
+export interface ModelsAPI {
+  snapshot(): Promise<ModelSnapshot>;
+  install(id: WhisperModelId): Promise<void>;
+  cancel(id: WhisperModelId): Promise<void>;
+  discardPartial(id: WhisperModelId): Promise<void>;
+  remove(id: WhisperModelId): Promise<void>;
+  openDirectory(): Promise<void>;
+  onChange(callback: (snapshot: ModelSnapshot) => void): () => void;
+}

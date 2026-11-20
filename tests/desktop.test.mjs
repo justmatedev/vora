@@ -60,6 +60,38 @@ test(
       assert.equal(await page.evaluate(() => typeof window.require), 'undefined');
       assert.equal(await page.evaluate(() => typeof window.vora.analyze), 'function');
       assert.equal(await page.evaluate(() => typeof window.vora.installUpdate), 'function');
+      assert.equal(
+        await page.evaluate(() => typeof window.vora.transcriptions.chooseFiles),
+        'function',
+      );
+      assert.equal(
+        (await page.evaluate(() => window.vora.transcriptions.snapshot())).mode,
+        'paused',
+      );
+      assert.equal(
+        (await page.evaluate(() => window.vora.models.snapshot())).small.state,
+        'missing',
+      );
+      const modelError = await page.evaluate(async () => {
+        try {
+          await window.vora.models.install('https://invalid.test/model');
+          return '';
+        } catch (error) {
+          return error.message;
+        }
+      });
+      assert.match(modelError, /modelo/i);
+      await page.evaluate(() => {
+        window.__modelEvents = 0;
+        window.__offModels = window.vora.models.onChange(() => window.__modelEvents++);
+      });
+      await page.evaluate(() => window.vora.models.discardPartial('small'));
+      await page.waitForFunction(() => window.__modelEvents === 1);
+      await page.evaluate(() => {
+        window.__offModels();
+      });
+      await page.evaluate(() => window.vora.models.discardPartial('small'));
+      assert.equal(await page.evaluate(() => window.__modelEvents), 1);
       const updateState = await page.evaluate(() => window.vora.updates());
       assert.equal(updateState.currentVersion, expectedVersion);
       const updateSupported = await application.evaluate(
@@ -75,7 +107,7 @@ test(
       await page.evaluate(() => window.vora.installUpdate());
       assert.equal((await page.evaluate(() => window.vora.updates())).canInstall, false);
       const versions = await page.evaluate(() => window.vora.info());
-      assert.equal(versions.tools.length, 4);
+      assert.equal(versions.tools.length, 5);
       assert.ok(
         versions.tools.every((tool) => tool.version && !tool.error),
         JSON.stringify(versions.tools),

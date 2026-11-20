@@ -184,6 +184,8 @@ export interface UpdateSnapshot {
   canInstall: boolean;
 }
 export interface VoraAPI {
+  transcriptions: import('./transcription-types').TranscriptionsAPI;
+  models: import('./transcription-types').ModelsAPI;
   updates(): Promise<UpdateSnapshot>;
   checkForUpdates(): Promise<void>;
   downloadUpdate(): Promise<void>;
