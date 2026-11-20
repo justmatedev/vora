@@ -11,6 +11,7 @@ export { configurationLabel } from './QueueGroupHeader';
 const SEARCH_ITEM_THRESHOLD = 10;
 
 export function QueuePanel({
+  onTranscribe,
   snapshot,
   working,
   error,
@@ -18,6 +19,7 @@ export function QueuePanel({
   formatSize,
   formatEta,
 }: {
+  onTranscribe?: (id: string) => void;
   snapshot: QueueSnapshot;
   working: boolean;
   error: string;
@@ -317,6 +319,7 @@ export function QueuePanel({
                     />
                   )}
                   <QueueRow
+                    onTranscribe={onTranscribe}
                     item={row.item}
                     expanded={expanded.has(row.item.id)}
                     toggle={() => setExpanded((current) => toggleExpanded(current, row.item.id))}

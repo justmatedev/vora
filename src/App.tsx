@@ -10,6 +10,8 @@ import {
   AlertCircle,
   RotateCcw,
   ListPlus,
+  Download,
+  FileText,
 } from 'lucide-react';
 import type {
   AppInfo,
@@ -31,6 +33,12 @@ import { mediaSource } from '../shared/sources';
 import { RecoveryDialog } from './RecoveryDialog';
 import { UpdateSection, useUpdates } from './UpdateSection';
 import type { UpdateSnapshot } from '../shared/types';
+import type { SourceSelection } from '../shared/transcription-types';
+import { useTranscriptions, useWhisperModels, transcriptionMessage } from './transcription-client';
+import { TranscriptionsPanel } from './TranscriptionsPanel';
+import { TranscriptionDialog } from './TranscriptionDialog';
+import { WhisperModelsDialog } from './WhisperModelsDialog';
+import './transcriptions.css';
 
 type Phase = 'idle' | 'analyzing' | 'ready';
 const api = (): VoraAPI => {
@@ -85,6 +93,33 @@ function Logo({ small = false }: { small?: boolean }) {
 }
 
 export function App() {
+  const [workspace, setWorkspace] = useState<'downloads' | 'transcriptions'>('downloads');
+  const transcription = useTranscriptions(),
+    whisperModels = useWhisperModels();
+  const [transcriptionSources, setTranscriptionSources] = useState<SourceSelection[]>([]);
+  const [modelsOpen, setModelsOpen] = useState(false),
+    [choosingFiles, setChoosingFiles] = useState(false),
+    [transcriptionError, setTranscriptionError] = useState(''),
+    [transcriptionNotice, setTranscriptionNotice] = useState('');
+  const transcriptionPending = transcription.snapshot.items.filter((item) =>
+    ['model', 'waiting', 'preparing', 'transcribing', 'saving'].includes(item.status),
+  ).length;
+  async function chooseTranscriptionFiles(downloadId?: string) {
+    if (choosingFiles) return;
+    setChoosingFiles(true);
+    setTranscriptionError('');
+    setTranscriptionNotice('');
+    try {
+      const selected = downloadId
+        ? [await api().transcriptions.fromDownload(downloadId)]
+        : await api().transcriptions.chooseFiles();
+      if (selected.length) setTranscriptionSources(selected);
+    } catch (error) {
+      setTranscriptionError(transcriptionMessage(error));
+    } finally {
+      setChoosingFiles(false);
+    }
+  }
   const [url, setUrl] = useState('');
   const [phase, setPhase] = useState<Phase>('idle');
   const [info, setInfo] = useState<VideoInfo>();
@@ -357,147 +392,264 @@ export function App() {
         </div>
       </header>
       <main>
-        {!!recoveries.length && (
-          <div className="recovery-banner" role="status">
-            <RotateCcw size={19} />
-            <div>
-              <strong>
-                {recoveries.length === 1
-                  ? 'Um download foi interrompido'
-                  : `${recoveries.length} downloads foram interrompidos`}
-              </strong>
-              <p>
-                {bytes(recoveries.reduce((total, item) => total + item.size, 0))} em temporários de
-                sessões anteriores.
-              </p>
-            </div>
+        <nav
+          className="workspace-tabs"
+          role="tablist"
+          aria-label="Área de trabalho"
+          onKeyDown={(event) => {
+            if (!['ArrowLeft', 'ArrowRight', 'Home', 'End'].includes(event.key)) return;
+            event.preventDefault();
+            const next =
+              event.key === 'Home'
+                ? 'downloads'
+                : event.key === 'End'
+                  ? 'transcriptions'
+                  : workspace === 'downloads'
+                    ? 'transcriptions'
+                    : 'downloads';
+            setWorkspace(next);
+            document.getElementById(`workspace-${next}-tab`)?.focus();
+          }}
+        >
+          <button
+            id="workspace-downloads-tab"
+            role="tab"
+            aria-label="Downloads"
+            aria-selected={workspace === 'downloads'}
+            aria-controls="workspace-downloads"
+            tabIndex={workspace === 'downloads' ? 0 : -1}
+            onClick={() => setWorkspace('downloads')}
+          >
+            <Download size={16} />
+            Downloads
+          </button>
+          <button
+            id="workspace-transcriptions-tab"
+            role="tab"
+            aria-label="Transcrições"
+            aria-selected={workspace === 'transcriptions'}
+            aria-controls="workspace-transcriptions"
+            tabIndex={workspace === 'transcriptions' ? 0 : -1}
+            onClick={() => setWorkspace('transcriptions')}
+          >
+            <FileText size={16} />
+            Transcrições
+            {transcriptionPending > 0 && (
+              <span className="transcription-tab-count" aria-hidden="true">
+                {transcriptionPending}
+              </span>
+            )}
+          </button>
+        </nav>
+        {transcriptionError && (
+          <div className="message error" role="alert">
+            <AlertCircle size={17} />
+            <span>{transcriptionError}</span>
             <button
-              className="secondary"
-              disabled={busy || recoveryBusy}
-              onClick={() => setRecoveryOpen(true)}
+              className="dismiss"
+              aria-label="Dispensar erro de transcrição"
+              onClick={() => setTranscriptionError('')}
             >
-              Revisar
+              <X size={15} />
             </button>
           </div>
         )}
-        <section className="workspace" aria-label="Downloads do YouTube e Instagram">
-          <form
-            className="link-form"
-            onSubmit={(event) => {
-              event.preventDefault();
-              void analyze();
-            }}
-          >
-            <label htmlFor="media-url">
-              <span>Link do YouTube ou Reel do Instagram</span>
-              <span className="composer-actions">
-                {info && (
+        <section
+          id="workspace-downloads"
+          className="downloads-workspace"
+          hidden={workspace !== 'downloads'}
+          role="tabpanel"
+          aria-labelledby="workspace-downloads-tab"
+        >
+          {!!recoveries.length && (
+            <div className="recovery-banner" role="status">
+              <RotateCcw size={19} />
+              <div>
+                <strong>
+                  {recoveries.length === 1
+                    ? 'Um download foi interrompido'
+                    : `${recoveries.length} downloads foram interrompidos`}
+                </strong>
+                <p>
+                  {bytes(recoveries.reduce((total, item) => total + item.size, 0))} em temporários
+                  de sessões anteriores.
+                </p>
+              </div>
+              <button
+                className="secondary"
+                disabled={busy || recoveryBusy}
+                onClick={() => setRecoveryOpen(true)}
+              >
+                Revisar
+              </button>
+            </div>
+          )}
+          <section className="workspace" aria-label="Downloads do YouTube e Instagram">
+            <form
+              className="link-form"
+              onSubmit={(event) => {
+                event.preventDefault();
+                void analyze();
+              }}
+            >
+              <label htmlFor="media-url">
+                <span>Link do YouTube ou Reel do Instagram</span>
+                <span className="composer-actions">
+                  {info && (
+                    <button
+                      type="button"
+                      className="text-button"
+                      onClick={() => setAnalysisOpen(true)}
+                    >
+                      Rever opções
+                    </button>
+                  )}
                   <button
                     type="button"
                     className="text-button"
-                    onClick={() => setAnalysisOpen(true)}
+                    disabled={busy}
+                    onClick={() => {
+                      setImportInitial('');
+                      setImportOpen(true);
+                    }}
                   >
-                    Rever opções
+                    <ListPlus size={14} />
+                    Adicionar links
                   </button>
-                )}
+                </span>
+              </label>
+              <div className="url-row">
+                <div className="url-field">
+                  <Link2 size={19} aria-hidden="true" />
+                  <input
+                    id="media-url"
+                    aria-label="Link do YouTube ou Reel do Instagram"
+                    ref={urlInput}
+                    type="text"
+                    inputMode="url"
+                    autoComplete="off"
+                    spellCheck={false}
+                    placeholder="Cole o link do vídeo ou Reel aqui"
+                    value={url}
+                    disabled={busy || directoryBusy}
+                    maxLength={2048}
+                    onChange={(event) => {
+                      setUrl(event.target.value);
+                      setInfo(undefined);
+                      setPhase('idle');
+                      setError('');
+                      setNotice('');
+                    }}
+                  />
+                  <button
+                    type="button"
+                    className="paste-button"
+                    onClick={() => void paste()}
+                    disabled={busy || directoryBusy}
+                  >
+                    <Clipboard size={15} />
+                    Colar
+                  </button>
+                </div>
                 <button
-                  type="button"
-                  className="text-button"
-                  disabled={busy}
-                  onClick={() => {
-                    setImportInitial('');
-                    setImportOpen(true);
-                  }}
+                  type="submit"
+                  className="primary analyze-button"
+                  disabled={!url.trim() || busy || directoryBusy}
                 >
-                  <ListPlus size={14} />
-                  Adicionar links
-                </button>
-              </span>
-            </label>
-            <div className="url-row">
-              <div className="url-field">
-                <Link2 size={19} aria-hidden="true" />
-                <input
-                  id="media-url"
-                  aria-label="Link do YouTube ou Reel do Instagram"
-                  ref={urlInput}
-                  type="text"
-                  inputMode="url"
-                  autoComplete="off"
-                  spellCheck={false}
-                  placeholder="Cole o link do vídeo ou Reel aqui"
-                  value={url}
-                  disabled={busy || directoryBusy}
-                  maxLength={2048}
-                  onChange={(event) => {
-                    setUrl(event.target.value);
-                    setInfo(undefined);
-                    setPhase('idle');
-                    setError('');
-                    setNotice('');
-                  }}
-                />
-                <button
-                  type="button"
-                  className="paste-button"
-                  onClick={() => void paste()}
-                  disabled={busy || directoryBusy}
-                >
-                  <Clipboard size={15} />
-                  Colar
+                  {phase === 'analyzing' ? (
+                    <>
+                      <LoaderCircle size={17} className="spin" />
+                      Analisando
+                    </>
+                  ) : (
+                    <>
+                      Analisar
+                      <ArrowRight size={17} />
+                    </>
+                  )}
                 </button>
               </div>
-              <button
-                type="submit"
-                className="primary analyze-button"
-                disabled={!url.trim() || busy || directoryBusy}
-              >
-                {phase === 'analyzing' ? (
-                  <>
-                    <LoaderCircle size={17} className="spin" />
-                    Analisando
-                  </>
-                ) : (
-                  <>
-                    Analisar
-                    <ArrowRight size={17} />
-                  </>
-                )}
-              </button>
-            </div>
-          </form>
+            </form>
 
-          {error && !analysisOpen && (
-            <div className="message error" role="alert">
-              <AlertCircle size={18} />
-              <span>{error}</span>
-              <button className="dismiss" aria-label="Dispensar erro" onClick={() => setError('')}>
-                <X size={15} />
-              </button>
-            </div>
-          )}
-          {confirmation && (
-            <TemporaryNotice
-              key={confirmation.id}
-              text={confirmation.text}
-              onDismiss={() =>
-                setConfirmation((current) =>
-                  current?.id === confirmation.id ? undefined : current,
-                )
-              }
-            />
-          )}
+            {error && !analysisOpen && (
+              <div className="message error" role="alert">
+                <AlertCircle size={18} />
+                <span>{error}</span>
+                <button
+                  className="dismiss"
+                  aria-label="Dispensar erro"
+                  onClick={() => setError('')}
+                >
+                  <X size={15} />
+                </button>
+              </div>
+            )}
+            {confirmation && (
+              <TemporaryNotice
+                key={confirmation.id}
+                text={confirmation.text}
+                onDismiss={() =>
+                  setConfirmation((current) =>
+                    current?.id === confirmation.id ? undefined : current,
+                  )
+                }
+              />
+            )}
+          </section>
+
+          <QueuePanel
+            onTranscribe={(id) => void chooseTranscriptionFiles(id)}
+            snapshot={queue.snapshot}
+            working={queue.working}
+            error={queue.error}
+            command={queueCommand}
+            formatSize={(value) => bytes(value)!}
+            formatEta={duration}
+          />
         </section>
-
-        <QueuePanel
-          snapshot={queue.snapshot}
-          working={queue.working}
-          error={queue.error}
-          command={queueCommand}
-          formatSize={(value) => bytes(value)!}
-          formatEta={duration}
-        />
+        <section
+          id="workspace-transcriptions"
+          className="transcription-area"
+          hidden={workspace !== 'transcriptions'}
+          role="tabpanel"
+          aria-labelledby="workspace-transcriptions-tab"
+        >
+          {transcriptionNotice && (
+            <p className="analysis-notice" role="status">
+              {transcriptionNotice}
+            </p>
+          )}
+          <TranscriptionsPanel
+            snapshot={transcription.snapshot}
+            models={whisperModels.snapshot}
+            error={transcription.error || whisperModels.error}
+            onChooseFiles={() => void chooseTranscriptionFiles()}
+            onModels={() => setModelsOpen(true)}
+            choosing={choosingFiles}
+          />
+        </section>
       </main>
+      {!!transcriptionSources.length && (
+        <TranscriptionDialog
+          sources={transcriptionSources}
+          models={whisperModels.snapshot}
+          snapshot={transcription.snapshot}
+          onClose={() => setTranscriptionSources([])}
+          onAdded={(notice) => {
+            setTranscriptionSources([]);
+            setWorkspace('transcriptions');
+            setTranscriptionNotice(notice ?? '');
+            document.getElementById('workspace-transcriptions-tab')?.focus();
+          }}
+        />
+      )}
+      {modelsOpen && (
+        <WhisperModelsDialog
+          models={whisperModels.snapshot}
+          snapshot={transcription.snapshot}
+          onClose={() => setModelsOpen(false)}
+        />
+      )}
       {analysisOpen && info && (
         <AnalysisDialog busy={adding || directoryBusy} onClose={() => setAnalysisOpen(false)}>
           {notice && (

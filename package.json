@@ -19,7 +19,7 @@
     "dist:win": "npm run build && node scripts/verify-tools.mjs win32 && electron-builder --win nsis --x64 --publish never",
     "electron:install": "node node_modules/electron/install.js",
     "predev": "npm run electron:install",
-    "test:ui": "node --test tests/ui.test.mjs",
+    "test:ui": "node --test tests/ui.test.mjs tests/transcription-ui.test.mjs",
     "test:desktop": "node --test tests/desktop.test.mjs",
     "test:instagram": "node --import tsx --test tests/instagram.integration.test.mjs",
     "test:media": "node --import tsx --test tests/tools.integration.test.mjs tests/queue.integration.test.mjs",

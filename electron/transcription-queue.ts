@@ -270,9 +270,9 @@ export class TranscriptionQueue {
       throw new Error('Este item não pode ser repetido.');
     const session = await this.deps.sessions.forItem(id);
     if (session) await this.deps.sessions.cleanup(session.id);
-    await revalidateSource(item.source);
+    const onlyCleanup = item.status === 'completed';
+    if (!onlyCleanup) await revalidateSource(item.source);
     await this.change(() => {
-      const onlyCleanup = item.status === 'completed';
       item.cleanupPending = false;
       if (!onlyCleanup) {
         item.status =

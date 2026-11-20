@@ -7,6 +7,7 @@ import {
   ChevronDown,
   Copy,
   FolderOpen,
+  FileText,
   Info,
   LoaderCircle,
   Play,
@@ -162,6 +163,7 @@ export function ActiveDownload({
   );
 }
 export function QueueRow({
+  onTranscribe,
   item,
   expanded,
   toggle,
@@ -173,6 +175,7 @@ export function QueueRow({
   formatSize,
   formatEta,
 }: {
+  onTranscribe?: (id: string) => void;
   item: QueueItem;
   expanded: boolean;
   toggle: () => void;
@@ -192,6 +195,16 @@ export function QueueRow({
         {item.status === 'completed' && item.result && (
           <>
             <span className="result-size">{formatSize(item.result.size)}</span>
+            {onTranscribe && (
+              <button
+                className="text-button"
+                disabled={working}
+                onClick={() => onTranscribe(item.id)}
+              >
+                <FileText size={13} />
+                Transcrever
+              </button>
+            )}
             <button
               className="text-button"
               disabled={working}
