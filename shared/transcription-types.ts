@@ -19,11 +19,13 @@ export interface ModelPaths {
   installed: string;
 }
 export interface ModelProgress {
+  message?: string;
   state: 'downloading' | 'verifying';
   receivedBytes: number;
   totalBytes: number;
 }
 export interface ModelInfo {
+  message?: string;
   spec: ModelSpec;
   state: 'missing' | 'partial' | 'downloading' | 'verifying' | 'installed' | 'error';
   bytesOnDisk: number;
