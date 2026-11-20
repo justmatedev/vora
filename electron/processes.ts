@@ -8,7 +8,7 @@ export class CancelledError extends Error {
 }
 export interface RunOptions {
   signal?: AbortSignal;
-  timeout?: number;
+  timeout?: number | null;
   onLine?: (line: string) => void;
   maxOutput?: number;
   onSpawn?: (pid: number) => Promise<void> | void;
@@ -83,10 +83,13 @@ export function runProcess(
             stop();
           })
       : Promise.resolve();
-    const timeout = setTimeout(() => {
-      timedOut = true;
-      stop();
-    }, options.timeout ?? 120_000);
+    const timeout =
+      options.timeout === null
+        ? undefined
+        : setTimeout(() => {
+            timedOut = true;
+            stop();
+          }, options.timeout ?? 120_000);
     const buffers = { stdout: '', stderr: '' };
     const dispatch = (line: string) => {
       if (callbackError) return;
