@@ -1,9 +1,50 @@
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
-import { mkdtemp, writeFile, readFile, rm, symlink, rename, mkdir } from 'node:fs/promises';
+import {
+  mkdtemp,
+  writeFile,
+  readFile,
+  rm,
+  symlink,
+  rename,
+  mkdir,
+  copyFile,
+  chmod,
+  unlink,
+} from 'node:fs/promises';
+import { spawn } from 'node:child_process';
+import { once } from 'node:events';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
-import { TranscriptionSessions } from '../electron/transcription-sessions';
+import { TranscriptionSessions, processIdentity } from '../electron/transcription-sessions';
+test(
+  'processo Linux continua identificável após remoção do executável extraído',
+  { skip: process.platform !== 'linux' },
+  async () => {
+    const root = await mkdtemp(join(tmpdir(), 'vora-deleted-runtime-'));
+    let child: ReturnType<typeof spawn> | undefined;
+    try {
+      const runtime = join(root, 'runtime');
+      await copyFile(process.execPath, runtime);
+      await chmod(runtime, 0o755);
+      child = spawn(runtime, ['-e', 'setInterval(()=>{},1000)'], {
+        stdio: 'ignore',
+        env: { ...process.env, ELECTRON_RUN_AS_NODE: '1' },
+      });
+      await once(child, 'spawn');
+      const before = await processIdentity(child.pid!);
+      assert.ok(before);
+      await unlink(runtime);
+      assert.deepEqual(await processIdentity(child.pid!), before);
+    } finally {
+      if (child) {
+        child.kill('SIGKILL');
+        await once(child, 'close');
+      }
+      await rm(root, { recursive: true, force: true });
+    }
+  },
+);
 test('limpeza só remove sessão identificada e não toca saídas publicadas', async () => {
   const root = await mkdtemp(join(tmpdir(), 'vora-session-'));
   try {

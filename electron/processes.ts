@@ -11,10 +11,28 @@ export interface RunOptions {
   timeout?: number | null;
   onLine?: (line: string) => void;
   maxOutput?: number;
-  onSpawn?: (pid: number) => Promise<void> | void;
+  onSpawn?: (pid: number, executable?: string) => Promise<void> | void;
+  registrationGate?: boolean;
   captureOutput?: boolean;
   env?: NodeJS.ProcessEnv;
 }
+
+// This supervisor does no filesystem work and cannot launch the tool until its
+// own identity has been durably registered by the parent. If the parent dies
+// before granting permission, stdin closes and the supervisor exits harmlessly.
+const PROCESS_GATE = `
+const { spawn } = require('node:child_process');
+let permission = '';
+process.stdin.setEncoding('utf8');
+process.stdin.on('data', chunk => { permission += chunk; if (permission.length > 16) process.exit(1); });
+process.stdin.on('end', () => {
+  if (permission !== 'GO\\n') return;
+  const env = { ...process.env }; delete env.ELECTRON_RUN_AS_NODE;
+  const child = spawn(process.argv[1], process.argv.slice(2), { shell: false, windowsHide: true, stdio: ['ignore', 'inherit', 'inherit'], env });
+  child.on('error', error => { console.error(error.message); process.exitCode = 1; });
+  child.on('close', code => { process.exitCode = code === null ? 1 : code; });
+});
+`;
 
 /** Resolves only after the child and its process tree have stopped. */
 export function runProcess(
@@ -27,12 +45,26 @@ export function runProcess(
       reject(new CancelledError());
       return;
     }
-    const child = spawn(executable, args, {
-      windowsHide: true,
-      detached: process.platform !== 'win32',
-      stdio: ['ignore', 'pipe', 'pipe'],
-      shell: false,
-      env: options.env,
+    if (options.registrationGate && !options.onSpawn) {
+      reject(new Error('O lançamento protegido exige registro do processo.'));
+      return;
+    }
+    const program = options.registrationGate ? process.execPath : executable;
+    const child = spawn(
+      program,
+      options.registrationGate ? ['-e', PROCESS_GATE, '--', executable, ...args] : args,
+      {
+        windowsHide: true,
+        detached: process.platform !== 'win32',
+        stdio: [options.registrationGate ? 'pipe' : 'ignore', 'pipe', 'pipe'],
+        shell: false,
+        env: options.registrationGate
+          ? { ...process.env, ...options.env, ELECTRON_RUN_AS_NODE: '1' }
+          : options.env,
+      },
+    );
+    child.stdin?.on('error', () => {
+      /* a cancelled supervisor may already have closed */
     });
     let output = '',
       errors = '',
@@ -77,7 +109,11 @@ export function runProcess(
     let callbackError: unknown;
     const registered = child.pid
       ? Promise.resolve()
-          .then(() => options.onSpawn?.(child.pid!))
+          .then(() => options.onSpawn?.(child.pid!, program))
+          .then(() => {
+            if (options.registrationGate)
+              child.stdin?.end(!stopped && !options.signal?.aborted ? 'GO\n' : '');
+          })
           .catch((error) => {
             registrationError = error;
             stop();
@@ -118,8 +154,8 @@ export function runProcess(
         stop();
       }
     };
-    child.stdout.setEncoding('utf8').on('data', (chunk) => read('stdout', chunk));
-    child.stderr.setEncoding('utf8').on('data', (chunk) => read('stderr', chunk));
+    child.stdout!.setEncoding('utf8').on('data', (chunk) => read('stdout', chunk));
+    child.stderr!.setEncoding('utf8').on('data', (chunk) => read('stderr', chunk));
     const cleanup = () => {
       clearTimeout(timeout);
       if (hardKill) clearTimeout(hardKill);

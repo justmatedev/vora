@@ -39,9 +39,11 @@ test(
       delete env.ELECTRON_RUN_AS_NODE;
       delete env.VORA_DEV_URL;
       app = await _electron.launch({
-        executablePath: electron,
+        executablePath: process.env.VORA_TEST_PACKAGED
+          ? resolve(process.env.VORA_TEST_PACKAGED)
+          : electron,
         args: [
-          '.',
+          ...(process.env.VORA_TEST_PACKAGED ? [] : ['.']),
           `--user-data-dir=${profile}`,
           '--no-sandbox',
           '--disable-gpu',

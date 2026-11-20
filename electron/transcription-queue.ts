@@ -143,8 +143,15 @@ export class TranscriptionQueue {
           for (const output of recovered.outputs)
             if (!item.outputs.some((o) => o.path === output.path)) item.outputs.push(output);
         if (!recovered.running && !recovered.cleanupPending) {
-          await this.deps.sessions.cleanup(recovered.id);
-          if (item) item.cleanupPending = false;
+          try {
+            await this.deps.sessions.cleanup(recovered.id);
+            if (item) item.cleanupPending = false;
+          } catch (error) {
+            if (item) {
+              item.cleanupPending = true;
+              item.error = `Temporários pendentes: ${(error as Error).message}`;
+            }
+          }
         } else if (item) item.cleanupPending = true;
       }
       for (const item of this.state.items)
@@ -271,9 +278,23 @@ export class TranscriptionQueue {
     const session = await this.deps.sessions.forItem(id);
     if (session) await this.deps.sessions.cleanup(session.id);
     const onlyCleanup = item.status === 'completed';
-    if (!onlyCleanup) await revalidateSource(item.source);
+    if (item.cleanupPending)
+      await this.change(() => {
+        item.cleanupPending = false;
+      });
+    if (!onlyCleanup) {
+      try {
+        await revalidateSource(item.source);
+      } catch (error) {
+        await this.change(() => {
+          item.error = (error as Error).message;
+        });
+        throw error;
+      }
+    }
     await this.change(() => {
       item.cleanupPending = false;
+      if (onlyCleanup) delete item.error;
       if (!onlyCleanup) {
         item.status =
           this.deps.models.snapshot()[item.options.modelId].state === 'installed'

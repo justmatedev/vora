@@ -64,6 +64,7 @@ export class Transcriber {
     let language = item.options.language;
     for (let index = 0; index < chunks.length; index++) {
       signal.throwIfAborted();
+      await revalidateSource(item.source);
       const chunk = chunks[index],
         audio = join(session.path, `chunk-${index}.wav`),
         output = join(session.path, `chunk-${index}`);
@@ -80,10 +81,13 @@ export class Transcriber {
           signal,
           timeout: null,
           captureOutput: false,
-          onSpawn: (pid) => this.sessions.registerProcess(session.id, pid, this.tools.ffmpeg),
+          registrationGate: true,
+          onSpawn: (pid, executable) =>
+            this.sessions.registerProcess(session.id, pid, executable ?? this.tools.ffmpeg),
         },
         this.execute,
       );
+      await revalidateSource(item.source);
       emit({
         stage: 'transcribing',
         percent: Math.floor((chunk.coreStartMs / item.source.durationMs) * 100),
@@ -110,7 +114,9 @@ export class Transcriber {
             signal,
             timeout: null,
             captureOutput: false,
-            onSpawn: (pid) => this.sessions.registerProcess(session.id, pid, this.tools.whisper),
+            registrationGate: true,
+            onSpawn: (pid, executable) =>
+              this.sessions.registerProcess(session.id, pid, executable ?? this.tools.whisper),
             onLine: (line) => {
               const match = /progress\s*=\s*(\d+)%/.exec(line);
               if (match) {
@@ -145,6 +151,7 @@ export class Transcriber {
       }
     }
     const segments = mergeSegments(results, item.source.durationMs);
+    await revalidateSource(item.source);
     if (!segments.length) throw new Error('Nenhum trecho de fala foi detectado neste arquivo.');
     return {
       language: language === 'auto' ? (results[0]?.language ?? 'auto') : language,

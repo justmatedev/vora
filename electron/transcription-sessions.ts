@@ -1,5 +1,15 @@
 import { randomUUID } from 'node:crypto';
-import { mkdtemp, mkdir, readFile, writeFile, rename, rm, lstat, realpath } from 'node:fs/promises';
+import {
+  mkdtemp,
+  mkdir,
+  readFile,
+  writeFile,
+  rename,
+  rm,
+  lstat,
+  realpath,
+  readlink,
+} from 'node:fs/promises';
 import { dirname, basename, isAbsolute, join, resolve } from 'node:path';
 import { execFile } from 'node:child_process';
 import { promisify } from 'node:util';
@@ -36,7 +46,9 @@ export async function processIdentity(pid: number): Promise<ProcessIdentity | nu
     try {
       const raw = await readFile(`/proc/${pid}/stat`, 'utf8');
       const started = raw.slice(raw.lastIndexOf(')') + 2).split(' ')[19];
-      const executable = await realpath(`/proc/${pid}/exe`);
+      // /proc remains authoritative even when an extracted AppImage runtime
+      // has been unlinked. realpath would incorrectly report that PID as gone.
+      const executable = (await readlink(`/proc/${pid}/exe`)).replace(/ \(deleted\)$/, '');
       if (!started || !executable) throw new Error('Não foi possível verificar o processo.');
       return { pid, started, executable };
     } catch (error) {

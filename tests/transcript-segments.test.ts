@@ -2,6 +2,52 @@ import { test } from 'node:test';
 import assert from 'node:assert/strict';
 import { readFile } from 'node:fs/promises';
 import { planAudioChunks, mergeSegments, parseWhisperJson } from '../electron/transcript-segments';
+test('variação de tempo entre chunks não descarta a mesma frase dos dois núcleos', () => {
+  const chunks = planAudioChunks(312000);
+  const result = mergeSegments(
+    [
+      {
+        chunk: chunks[0],
+        language: 'pt',
+        segments: [{ startMs: 299500, endMs: 301000, text: 'Frase na borda.' }],
+      },
+      {
+        chunk: chunks[1],
+        language: 'pt',
+        segments: [{ startMs: 1000, endMs: 2500, text: 'Frase na borda.' }],
+      },
+    ],
+    312000,
+  );
+  assert.equal(result.length, 1);
+  assert.equal(result[0].text, 'Frase na borda.');
+});
+test('contexto truncado com palavras divergentes não repete fala já coberta pelo núcleo vizinho', () => {
+  const chunks = planAudioChunks(312000);
+  const result = mergeSegments(
+    [
+      {
+        chunk: chunks[0],
+        language: 'en',
+        segments: [
+          { startMs: 299000, endMs: 302000, text: 'A sentence crosses the five-minute hour.' },
+        ],
+      },
+      {
+        chunk: chunks[1],
+        language: 'en',
+        segments: [
+          { startMs: 0, endMs: 6520, text: 'A sentence crosses the five minute boundary.' },
+        ],
+      },
+    ],
+    312000,
+  );
+  assert.deepEqual(
+    result.map((s) => s.text),
+    ['A sentence crosses the five minute boundary.'],
+  );
+});
 test('áudio longo usa cores de cinco minutos e contexto limitado', () => {
   const chunks = planAudioChunks(3600000);
   assert.equal(chunks.length, 12);

@@ -45,54 +45,98 @@ export function parseWhisperJson(value: unknown, chunk: AudioChunk): ChunkTransc
   return { chunk, language: raw.result.language, segments };
 }
 export function mergeSegments(chunks: ChunkTranscript[], durationMs: number): TranscriptSegment[] {
-  const result: TranscriptSegment[] = [];
-  let previousOwner = -1;
+  type Candidate = TranscriptSegment & { owner: number; inCore: boolean };
   const segmenter = new Intl.Segmenter(undefined, { granularity: 'word' });
   const words = (text: string) => [...segmenter.segment(text)].filter((part) => part.isWordLike);
+  const normalized = (text: string) =>
+    words(text)
+      .map((part) => part.segment.normalize('NFKC').toLowerCase())
+      .join(' ');
+  const candidates: Candidate[] = [];
   for (const { chunk, segments } of chunks)
     for (const segment of segments) {
-      const midpoint = chunk.startMs + (segment.startMs + segment.endMs) / 2;
-      if (
-        midpoint < chunk.coreStartMs ||
-        midpoint > chunk.coreEndMs ||
-        (midpoint === chunk.coreEndMs && chunk.coreEndMs !== durationMs)
-      )
-        continue;
-      let startMs = Math.max(0, Math.min(durationMs, chunk.startMs + segment.startMs));
-      const endMs = Math.max(0, Math.min(durationMs, chunk.startMs + segment.endMs));
-      let text = segment.text.trim();
-      const previous = result.at(-1);
-      // Independently decoded context can end one segment mid-sentence and start
-      // the next with the same words. Only trim matching text in actual time
-      // overlap between different chunks; repetitions within a chunk are kept.
-      if (
-        previous &&
-        previousOwner !== chunk.coreStartMs &&
-        startMs < previous.endMs &&
-        endMs > previous.startMs
-      ) {
-        const before = words(previous.text),
-          after = words(text);
-        for (let count = Math.min(before.length, after.length, 64); count >= 2; count--) {
-          if (
-            after
-              .slice(0, count)
-              .every(
-                (part, index) =>
-                  part.segment.normalize('NFKC').toLowerCase() ===
-                  before[before.length - count + index].segment.normalize('NFKC').toLowerCase(),
-              )
-          ) {
-            text = count === after.length ? '' : text.slice(after[count].index).trim();
-            startMs = Math.max(startMs, previous.endMs);
-            break;
-          }
+      const startMs = Math.max(0, Math.min(durationMs, chunk.startMs + segment.startMs));
+      const endMs = Math.max(0, Math.min(durationMs, chunk.endMs, chunk.startMs + segment.endMs));
+      if (endMs <= startMs || !segment.text.trim()) continue;
+      const midpoint = (startMs + endMs) / 2;
+      candidates.push({
+        startMs,
+        endMs,
+        text: segment.text.trim(),
+        owner: chunk.coreStartMs,
+        inCore:
+          midpoint >= chunk.coreStartMs && (midpoint < chunk.coreEndMs || midpoint === durationMs),
+      });
+    }
+  const retained: Candidate[] = [];
+  const byOwner = new Map<number, Candidate[]>();
+  const keep = (candidate: Candidate) => {
+    retained.push(candidate);
+    const list = byOwner.get(candidate.owner) ?? [];
+    list.push(candidate);
+    byOwner.set(candidate.owner, list);
+  };
+  for (const candidate of candidates) if (candidate.inCore) keep(candidate);
+  // Midpoints vary between independent recognitions. Do not discard both
+  // versions of boundary speech merely because each points into its neighbour.
+  for (const candidate of candidates)
+    if (!candidate.inCore) {
+      const neighbour =
+        byOwner.get(
+          candidate.startMs < candidate.owner ? candidate.owner - 300000 : candidate.owner + 300000,
+        ) ?? [];
+      const text = normalized(candidate.text);
+      const covered = neighbour.some((other) => {
+        if (candidate.startMs >= other.endMs || candidate.endMs <= other.startMs) return false;
+        const midpoint = (candidate.startMs + candidate.endMs) / 2;
+        if (midpoint >= other.startMs && midpoint <= other.endMs) return true;
+        const otherText = normalized(other.text);
+        return (
+          text &&
+          otherText &&
+          (` ${text} `.includes(` ${otherText} `) || ` ${otherText} `.includes(` ${text} `))
+        );
+      });
+      if (!covered) keep(candidate);
+    }
+  retained.sort((a, b) => a.startMs - b.startMs || a.endMs - b.endMs);
+  const result: TranscriptSegment[] = [];
+  let previousOwner = -1;
+  for (const candidate of retained) {
+    let { startMs, text } = candidate;
+    const { endMs, owner } = candidate;
+    const previous = result.at(-1);
+    // Trim only matching text in actual overlap between different chunks.
+    // Repetitions within a chunk or without temporal overlap are preserved.
+    if (
+      previous &&
+      previousOwner !== owner &&
+      startMs < previous.endMs &&
+      endMs > previous.startMs
+    ) {
+      const before = words(previous.text),
+        after = words(text);
+      if (normalized(previous.text) === normalized(text)) continue;
+      for (let count = Math.min(before.length, after.length, 64); count >= 2; count--) {
+        if (
+          after
+            .slice(0, count)
+            .every(
+              (part, index) =>
+                part.segment.normalize('NFKC').toLowerCase() ===
+                before[before.length - count + index].segment.normalize('NFKC').toLowerCase(),
+            )
+        ) {
+          text = count === after.length ? '' : text.slice(after[count].index).trim();
+          startMs = Math.max(startMs, previous.endMs);
+          break;
         }
       }
-      if (endMs > startMs && text) {
-        result.push({ startMs, endMs, text });
-        previousOwner = chunk.coreStartMs;
-      }
     }
-  return result.sort((a, b) => a.startMs - b.startMs || a.endMs - b.endMs);
+    if (endMs > startMs && text) {
+      result.push({ startMs, endMs, text });
+      previousOwner = owner;
+    }
+  }
+  return result;
 }

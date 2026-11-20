@@ -97,9 +97,9 @@ export async function downloadModel(
         const changedValidator =
           offset &&
           response.status === 206 &&
-          meta.etag &&
-          response.headers.get('etag') &&
-          meta.etag !== response.headers.get('etag');
+          (meta.etag
+            ? meta.etag !== response.headers.get('etag')
+            : meta.modified && meta.modified !== response.headers.get('last-modified'));
         if ((response.status === 416 || changedValidator) && attempt === 0) {
           await response.body?.cancel();
           offset = 0;

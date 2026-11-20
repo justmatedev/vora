@@ -1,12 +1,85 @@
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
-import { mkdtemp, writeFile, rm, stat } from 'node:fs/promises';
+import { mkdtemp, writeFile, rm, stat, rename } from 'node:fs/promises';
 import { createHash } from 'node:crypto';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 import { Transcriber } from '../electron/transcriber';
 import { TranscriptionSessions } from '../electron/transcription-sessions';
 import type { TranscriptionWork, ModelSpec } from '../shared/transcription-types';
+test('substituição da origem entre chunks falha antes de ler a segunda gravação', async () => {
+  const root = await mkdtemp(join(tmpdir(), 'vora-source-replaced-'));
+  const sessions = new TranscriptionSessions(join(root, 'sessions.json'));
+  try {
+    const sourcePath = join(root, 'source.wav'),
+      model = join(root, 'model');
+    await writeFile(sourcePath, 'first');
+    await writeFile(model, 'weights');
+    const info = await stat(sourcePath);
+    const spec = {
+      id: 'small',
+      revision: 'fixed',
+      bytes: 7,
+      sha256: createHash('sha256').update('weights').digest('hex'),
+      url: 'https://example.test/model',
+    };
+    const item: TranscriptionWork = {
+      id: 'job',
+      destination: root,
+      modelRevision: 'fixed',
+      options: { modelId: 'small', language: 'auto', formats: ['txt'] },
+      source: {
+        id: 'source',
+        name: 'source.wav',
+        path: sourcePath,
+        origin: 'local',
+        size: info.size,
+        mtimeMs: info.mtimeMs,
+        device: String(info.dev),
+        inode: String(info.ino),
+        durationMs: 320000,
+        audioStreamIndex: 0,
+      },
+    };
+    let reads = 0,
+      recognitions = 0;
+    const run = async (exe: string, args: string[]) => {
+      if (exe === 'ffmpeg') {
+        reads++;
+        await writeFile(args.at(-1)!, 'wav');
+      } else {
+        recognitions++;
+        await writeFile(
+          args[args.indexOf('-of') + 1] + '.json',
+          JSON.stringify({
+            result: { language: 'pt' },
+            transcription: [{ offsets: { from: 0, to: 1000 }, text: 'Primeira gravação.' }],
+          }),
+        );
+        if (recognitions === 1) {
+          await rename(sourcePath, sourcePath + '.original');
+          await writeFile(sourcePath, 'second');
+        }
+      }
+      return '';
+    };
+    const worker = new Transcriber(
+      { ffmpeg: 'ffmpeg', ffprobe: 'ffprobe', whisper: 'whisper' },
+      { path: () => model, snapshot: () => ({ small: { spec } }) } as never,
+      sessions,
+      run,
+    );
+    await assert.rejects(
+      worker.run(item, new AbortController().signal, () => {}),
+      /movido|alterado/i,
+    );
+    assert.equal(reads, 1);
+  } finally {
+    const session = await sessions.forItem('job');
+    if (session) await sessions.cleanup(session.id);
+    await rm(root, { recursive: true, force: true });
+  }
+});
 test('motor prepara áudio local e usa JSON sem GPU ou tradução', async () => {
   const root = await mkdtemp(join(tmpdir(), 'vora-transcriber-'));
   try {

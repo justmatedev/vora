@@ -9,7 +9,7 @@ import { downloadModel } from '../electron/model-download';
 import { ModelManager } from '../electron/whisper-models';
 import type { ModelSpec, ModelPaths } from '../shared/transcription-types';
 
-for (const scenario of ['416', 'changed-etag', 'cancel', 'space'] as const)
+for (const scenario of ['416', 'changed-etag', 'changed-last-modified', 'cancel', 'space'] as const)
   test(`download de modelo: ${scenario}`, async () => {
     const bytes = Buffer.from('abcdefgh');
     let requests = 0;
@@ -28,7 +28,9 @@ for (const scenario of ['416', 'changed-etag', 'cancel', 'space'] as const)
       const start = req.headers.range ? 4 : 0;
       res.writeHead(start ? 206 : 200, {
         'content-length': 8 - start,
-        etag: '"new"',
+        ...(scenario === 'changed-last-modified'
+          ? { 'last-modified': 'Fri, 20 Nov 2026 12:00:00 GMT' }
+          : { etag: '"new"' }),
         ...(start ? { 'content-range': 'bytes 4-7/8' } : {}),
       });
       res.end(bytes.subarray(start));
@@ -50,11 +52,21 @@ for (const scenario of ['416', 'changed-etag', 'cancel', 'space'] as const)
     };
     const controller = new AbortController();
     try {
-      if (scenario === '416' || scenario === 'changed-etag') {
+      if (
+        scenario === '416' ||
+        scenario === 'changed-etag' ||
+        scenario === 'changed-last-modified'
+      ) {
         await writeFile(paths.partial, 'abcd');
         await writeFile(
           paths.partialMeta,
-          JSON.stringify({ url: spec.url, revision: 'one', etag: '"old"' }),
+          JSON.stringify({
+            url: spec.url,
+            revision: 'one',
+            ...(scenario === 'changed-last-modified'
+              ? { modified: 'Thu, 19 Nov 2026 12:00:00 GMT' }
+              : { etag: '"old"' }),
+          }),
         );
       }
       const promise = downloadModel(spec, paths, {
