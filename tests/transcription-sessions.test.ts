@@ -72,3 +72,15 @@ test('temporário já removido permite limpar somente seu registro do diário', 
     await rm(root, { recursive: true, force: true });
   }
 });
+test('consulta de processo vivo não confunde marcador inválido com processo em execução', async () => {
+  const root = await mkdtemp(join(tmpdir(), 'vora-session-status-'));
+  try {
+    const sessions = new TranscriptionSessions(join(root, 'journal.json'));
+    const session = await sessions.create('item', root);
+    await writeFile(join(session.path, '.vora-transcription.json'), '{}');
+    assert.equal(await sessions.running(), false);
+    await assert.rejects(sessions.cleanup(session.id), /propriedade|verific/i);
+  } finally {
+    await rm(root, { recursive: true, force: true });
+  }
+});

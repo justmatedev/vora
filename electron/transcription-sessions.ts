@@ -235,7 +235,9 @@ export class TranscriptionSessions {
     return results;
   }
   async running() {
-    return (await this.recover()).some((s) => s.running);
+    await this.load();
+    for (const session of this.entries.values()) if (await this.alive(session)) return true;
+    return false;
   }
   async cleanup(id: string) {
     const s = await this.entry(id);

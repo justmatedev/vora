@@ -40,6 +40,7 @@ test('fila executa um por vez e reinicia pausada sem repetir o interrompido auto
   const models = { snapshot: () => structuredClone(snapshot), install: async () => {} };
   const sessions = new TranscriptionSessions(join(root, 'sessions.json'));
   const options = { modelId: 'small' as const, language: 'pt', formats: ['txt' as const] };
+  let queue: TranscriptionQueue | undefined, restored: TranscriptionQueue | undefined;
   try {
     const sources: SourceRecord[] = [];
     for (const name of ['one.mp4', 'two.mp4']) {
@@ -77,14 +78,14 @@ test('fila executa um por vez e reinicia pausada sem repetir o interrompido auto
       },
     };
     const path = join(root, 'transcriptions.json');
-    const queue = new TranscriptionQueue(path, { models, sessions, transcriber: worker }, () => {});
+    queue = new TranscriptionQueue(path, { models, sessions, transcriber: worker }, () => {});
     await queue.load();
     const ids = await queue.add({ sources, options, downloadModel: false, start: true });
     await eventually(() => entered.length === 1);
     assert.equal(peak, 1);
     await queue.shutdown();
     const completed: string[] = [];
-    const restored = new TranscriptionQueue(
+    restored = new TranscriptionQueue(
       path,
       {
         models,
@@ -99,19 +100,21 @@ test('fila executa um por vez e reinicia pausada sem repetir o interrompido auto
       () => {},
     );
     await restored.load();
-    assert.equal(restored.snapshot().mode, 'paused');
-    assert.equal(restored.snapshot().items[0].status, 'interrupted');
+    assert.equal(restored!.snapshot().mode, 'paused');
+    assert.equal(restored!.snapshot().items[0].status, 'interrupted');
     assert.deepEqual(completed, []);
     await restored.start();
-    await eventually(() => restored.snapshot().items[1].status === 'completed');
+    await eventually(() => restored!.snapshot().items[1].status === 'completed');
     assert.deepEqual(completed, [ids[1]]);
     await restored.retry(ids[0]);
     await restored.start();
-    await eventually(() => restored.snapshot().items[0].status === 'completed');
+    await eventually(() => restored!.snapshot().items[0].status === 'completed');
     assert.deepEqual(completed, [ids[1], ids[0]]);
     assert.equal(await readFile(sources[0].path, 'utf8'), 'media');
     await restored.shutdown();
   } finally {
+    await queue?.shutdown().catch(() => {});
+    await restored?.shutdown().catch(() => {});
     await rm(root, { recursive: true, force: true });
   }
 });
@@ -173,12 +176,12 @@ test('falha de origem não bloqueia o próximo item e não altera queue.json', a
     });
     await writeFile(sources[0].path, 'changed');
     await queue.start();
-    await eventually(() => queue.snapshot().items[1].status === 'completed');
-    assert.equal(queue.snapshot().items[0].status, 'failed');
+    await eventually(() => queue!.snapshot().items[1].status === 'completed');
+    assert.equal(queue!.snapshot().items[0].status, 'failed');
     assert.deepEqual(entered, ['two.mp4']);
     await queue.shutdown();
     await queue.clearCompleted();
-    assert.equal(queue.snapshot().items.length, 1);
+    assert.equal(queue!.snapshot().items.length, 1);
     assert.equal(await readFile(legacy, 'utf8'), 'legacy queue');
   } finally {
     await rm(root, { recursive: true, force: true });
