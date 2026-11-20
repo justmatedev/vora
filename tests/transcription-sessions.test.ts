@@ -60,3 +60,15 @@ test('sessão substituída por symlink não apaga o destino externo', async () =
     await rm(root, { recursive: true, force: true });
   }
 });
+test('temporário já removido permite limpar somente seu registro do diário', async () => {
+  const root = await mkdtemp(join(tmpdir(), 'vora-session-gone-'));
+  try {
+    const sessions = new TranscriptionSessions(join(root, 'journal.json'));
+    const session = await sessions.create('item', root);
+    await rm(session.path, { recursive: true });
+    await sessions.cleanup(session.id);
+    assert.deepEqual(await sessions.recover(), []);
+  } finally {
+    await rm(root, { recursive: true, force: true });
+  }
+});

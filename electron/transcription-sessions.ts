@@ -207,6 +207,18 @@ export class TranscriptionSessions {
     const results: SessionRecovery[] = [];
     for (const s of this.entries.values()) {
       try {
+        const exists = await lstat(s.path)
+          .then(() => true)
+          .catch((error) => {
+            if (error.code === 'ENOENT') return false;
+            throw error;
+          });
+        if (!exists) {
+          const running = await this.alive(s);
+          this.pending.delete(s.id);
+          results.push({ ...structuredClone(s), running, cleanupPending: false });
+          continue;
+        }
         await this.verify(s);
         const running = await this.alive(s);
         results.push({ ...structuredClone(s), running, cleanupPending: this.pending.has(s.id) });
@@ -228,6 +240,20 @@ export class TranscriptionSessions {
   async cleanup(id: string) {
     const s = await this.entry(id);
     try {
+      const exists = await lstat(s.path)
+        .then(() => true)
+        .catch((error) => {
+          if (error.code === 'ENOENT') return false;
+          throw error;
+        });
+      if (!exists) {
+        if (await this.alive(s))
+          throw new Error('O processo da transcrição ainda está em execução.');
+        this.entries.delete(id);
+        this.pending.delete(id);
+        await this.persist();
+        return;
+      }
       await this.verify(s);
       if (await this.alive(s)) throw new Error('O processo da transcrição ainda está em execução.');
       await rm(s.path, { recursive: true });
