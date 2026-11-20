@@ -29,6 +29,8 @@ export function prepareAudioChunk(
       '-vn',
       '-sn',
       '-dn',
+      '-af',
+      'aresample=16000:async=1:first_pts=0,apad',
       '-ar',
       '16000',
       '-ac',

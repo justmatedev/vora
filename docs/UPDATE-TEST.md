@@ -44,3 +44,15 @@ node scripts/test-update-cycle.mjs
 ```
 
 Ela usa cópia do AppImage, perfil e cache temporários. Confere consulta sem download automático, download por clique, SHA-512, substituição no mesmo caminho, reinício real em 0.6.1, fila pausada, preferências e arquivo concluído preservados. Relatório e capturas ficam em `test-results/update-cycle`. A porta de depuração existe somente na cópia gerada para o teste automatizado e não é habilitada pelo iniciador manual.
+
+## Perfil com transcrições e modelo instalado (Linux)
+
+Depois de gerar o kit, é possível acrescentar à validação um modelo Small de revisão fixa e um arquivo local de 20 segundos:
+
+```sh
+VORA_CYCLE_MODELS_ROOT=/caminho/models/whisper \
+VORA_CYCLE_TRANSCRIPTION_SOURCE=/caminho/amostra-20s.wav \
+node scripts/test-update-cycle.mjs
+```
+
+O executor copia esses arquivos para seu perfil isolado; não altera o perfil original. Confere modelo instalado antes/depois, hashes dos pesos/resultados e fila de transcrições pendente/concluída preservada e pausada após **Reiniciar e atualizar**. O campo `transcriptionProfilePreserved` do relatório distingue esse ensaio do ciclo básico sem pesos. Nenhum modelo entra no instalador ou no feed.

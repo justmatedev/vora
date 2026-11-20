@@ -92,3 +92,20 @@ O ciclo completo com instalador/reinício deve ser validado em ambiente nativo a
 ### Teste opcional de Reels públicos
 
 `npm run test:instagram` fica ignorado por padrão. Para executar o teste de rede dos três Reels de referência, use `VORA_TEST_INSTAGRAM=1 npm run test:instagram` (no PowerShell, defina `$env:VORA_TEST_INSTAGRAM="1"` antes do comando). Ele usa os serviços de metadados, fila, download e recuperação reais, baixa vídeo original, áudio original e MP3 e verifica os nove arquivos com ffprobe e decodificação FFmpeg. Não importa cookies nem usa login. O conteúdo temporário é removido ao terminar; `VORA_KEEP_INSTAGRAM_TEST=1` preserva os resultados para inspeção. A disponibilidade depende do Instagram e não faz parte da suíte offline.
+
+## Integração real de transcrição
+
+```sh
+npm run test:transcription  # skip explícito: não baixa modelos
+VORA_TEST_TRANSCRIPTION=1 \
+VORA_TRANSCRIPTION_INPUT=/caminho/amostra.wav \
+VORA_WHISPER_MODELS=/caminho/pesos \
+npm run test:transcription
+node scripts/check-packaged-whisper.mjs linux
+```
+
+A pasta de pesos deve conter `ggml-small.bin` e `ggml-medium.bin` da revisão fixada em `shared/whisper-models.ts`. Os hashes são verificados pelo serviço real. `VORA_TRANSCRIPTION_MODELS=small` restringe o ensaio; `VORA_TRANSCRIPTION_TOOLS` aponta a pasta com FFmpeg, ffprobe e o subdiretório `whisper`. Sem opt-in ou fixtures, o resultado é **skip**, sem alegar execução do motor. Use somente mídia autorizada. Os resultados e perfis temporários ficam em `.cache` e são removidos ao fim.
+
+O teste percorre inspeção, modelo, sessão, preparação de áudio, motor nativo, fila, publicação e recuperação; inclui também o fluxo pelo Electron real, substituindo somente a seleção no diálogo nativo; bloqueia HTTP no serviço depois da instalação. Confere UTF-8, limites dos tempos, preservação do original/resultados e cancelamento sem processos próprios. Não mede precisão por igualdade de texto. A interface tem testes separados com a ponte simulada; o teste desktop usa Electron real e IPC isolado.
+
+`check-packaged-whisper.mjs` confere o manifesto e executa uma cópia das bibliotecas/CLI do pacote fora das árvores de build e instalação, sem caminhos de compilador. O workflow de pacotes executa essa checagem nativamente em Linux e Windows. O ensaio real de reconhecimento exige os pesos opcionais; `--help` sozinho só verifica inicialização do runtime.

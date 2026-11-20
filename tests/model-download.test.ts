@@ -59,6 +59,13 @@ test('retoma bytes locais e só publica o modelo depois de conferir hash', async
       /integridade|checksum/i,
     );
     await assert.rejects(readFile(paths.installed));
+    await writeFile(paths.partial, 'abcd');
+    await writeFile(paths.partialMeta, 'null');
+    await downloadModel(spec, paths, {
+      signal: new AbortController().signal,
+      onProgress: () => {},
+    });
+    assert.equal(await readFile(paths.installed, 'utf8'), 'abcdefgh');
   } finally {
     server.closeAllConnections();
     await new Promise<void>((resolve) => server.close(() => resolve()));

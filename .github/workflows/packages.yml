@@ -44,6 +44,8 @@ jobs:
         run: node scripts/verify-packaged-dependencies.mjs ${{ matrix.target }}
       - name: Verificar runtime empacotado
         run: node scripts/check-packaged-runtime.mjs ${{ matrix.target }}
+      - name: Verificar Whisper nativo fora da árvore de build
+        run: node scripts/check-packaged-whisper.mjs ${{ matrix.target }}
       - name: Verificar metadados de atualização
         run: node scripts/verify-update-metadata.mjs ${{ matrix.target }}
       - name: Calcular checksum

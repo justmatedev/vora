@@ -1,5 +1,12 @@
 # Histórico de mudanças
 
+## Em desenvolvimento
+
+- Aba Transcrições com arquivos locais e ação nos downloads concluídos.
+- Whisper.cpp 1.8.2 local, modelos multilíngues Small e Medium opcionais, download verificado e armazenamento persistente separado do aplicativo.
+- Fila independente, idioma automático ou manual, TXT/SRT, cancelamento e recuperação pausada de interrupções.
+- Gerenciamento de modelos, proteção contra sobrescrita e bloqueio de atualização enquanto houver trabalho ativo.
+
 ## 0.7.0 — 2026-11-18
 
 - Reels públicos do Instagram na análise e na fila, com vídeo original, áudio original e MP3, sem login ou cookies.

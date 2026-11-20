@@ -1,6 +1,17 @@
 // Real AppImage replacement and relaunch, isolated from the maintainer's app/profile.
 import assert from 'node:assert/strict';
-import { mkdtemp, mkdir, cp, readFile, writeFile, rm, chmod } from 'node:fs/promises';
+import {
+  mkdtemp,
+  mkdir,
+  cp,
+  readFile,
+  writeFile,
+  rm,
+  chmod,
+  readdir,
+  stat,
+} from 'node:fs/promises';
+import { createReadStream } from 'node:fs';
 import { createHash } from 'node:crypto';
 import { createServer } from 'node:net';
 import { spawn } from 'node:child_process';
@@ -21,12 +32,19 @@ await mkdir(profile);
 await mkdir(cache);
 await cp(join(kit, 'initial/VoraUpdateTest-0.6.0-linux-x86_64.AppImage'), current);
 await chmod(current, 0o755);
-const hash = async (path) =>
-  createHash('sha512')
-    .update(await readFile(path))
-    .digest('hex');
+const hash = async (path) => {
+  const value = createHash('sha512');
+  for await (const chunk of createReadStream(path)) value.update(chunk);
+  return value.digest('hex');
+};
 const preferences = { kind: 'audio', videoMode: 'original', audioMode: 'mp3' };
-const settings = { destination: directory, notificationsEnabled: false, preferences };
+const transcriptionPreferences = { modelId: 'small', language: 'auto', formats: ['txt', 'srt'] };
+const settings = {
+  destination: directory,
+  notificationsEnabled: false,
+  preferences,
+  transcriptionPreferences,
+};
 await writeFile(join(profile, 'settings.json'), JSON.stringify(settings));
 const completed = join(directory, 'arquivo preservado.mp3');
 await writeFile(completed, 'Conteúdo anterior à atualização.');
@@ -63,6 +81,66 @@ await writeFile(
   join(profile, 'queue.json'),
   JSON.stringify({ groups: [group], items, mode: 'paused' }),
 );
+const modelHashes = new Map();
+let initialTranscriptions;
+if (process.env.VORA_CYCLE_MODELS_ROOT) {
+  if (!process.env.VORA_CYCLE_TRANSCRIPTION_SOURCE)
+    throw new Error(
+      'Defina VORA_CYCLE_TRANSCRIPTION_SOURCE para testar a preservação de transcrições.',
+    );
+  const modelRoot = join(profile, 'models/whisper');
+  await cp(resolve(process.env.VORA_CYCLE_MODELS_ROOT), modelRoot, { recursive: true });
+  async function collect(path) {
+    for (const entry of await readdir(path, { withFileTypes: true })) {
+      const child = join(path, entry.name);
+      if (entry.isDirectory()) await collect(child);
+      else if (entry.isFile()) modelHashes.set(child, await hash(child));
+      else throw new Error('A fixture de modelo não pode conter links.');
+    }
+  }
+  await collect(modelRoot);
+  const [revision] = await readdir(join(modelRoot, 'small'));
+  const sourcePath = join(directory, 'transcription-source.wav');
+  await cp(resolve(process.env.VORA_CYCLE_TRANSCRIPTION_SOURCE), sourcePath);
+  const sourceStat = await stat(sourcePath);
+  const transcript = join(directory, 'preservado.transcricao.txt');
+  await writeFile(transcript, 'Transcrição anterior à atualização.');
+  modelHashes.set(transcript, await hash(transcript));
+  const source = {
+    id: 'cycle-source',
+    name: 'transcription-source.wav',
+    path: sourcePath,
+    origin: 'local',
+    size: sourceStat.size,
+    mtimeMs: sourceStat.mtimeMs,
+    device: String(sourceStat.dev),
+    inode: String(sourceStat.ino),
+    durationMs: 20000,
+    audioStreamIndex: 0,
+  };
+  const transcripts = ['waiting', 'completed'].map((status, index) => ({
+    id: `cycle-transcription-${index}`,
+    source,
+    destination: directory,
+    options: transcriptionPreferences,
+    modelRevision: revision,
+    status,
+    outputs:
+      status === 'completed'
+        ? [
+            {
+              format: 'txt',
+              path: transcript,
+              size: Buffer.byteLength('Transcrição anterior à atualização.'),
+            },
+          ]
+        : [],
+  }));
+  await writeFile(
+    join(profile, 'transcriptions.json'),
+    JSON.stringify({ schemaVersion: 1, mode: 'paused', items: transcripts }),
+  );
+}
 const portProbe = createServer();
 await new Promise((accept) => portProbe.listen(0, '127.0.0.1', accept));
 const port = portProbe.address().port;
@@ -135,6 +213,18 @@ try {
   const initialQueue = await page.evaluate(() => window.vora.queue());
   assert.equal(initialQueue.items.length, 2);
   assert.equal(initialQueue.mode, 'paused');
+  if (modelHashes.size) {
+    assert.equal(
+      (await page.evaluate(() => window.vora.models.snapshot())).small.state,
+      'installed',
+    );
+    initialTranscriptions = await page.evaluate(() => window.vora.transcriptions.snapshot());
+    assert.equal(initialTranscriptions.mode, 'paused');
+    assert.deepEqual(
+      initialTranscriptions.items.map((item) => item.status),
+      ['waiting', 'completed'],
+    );
+  }
   await page.evaluate(() => window.vora.checkForUpdates());
   await until(
     async () => (await page.evaluate(() => window.vora.updates())).status === 'available',
@@ -169,6 +259,17 @@ try {
   assert.equal(nextQueue.mode, 'paused');
   assert.deepEqual(await updated.evaluate(() => window.vora.settings()), settings);
   assert.equal(await hash(completed), savedFileHash);
+  if (initialTranscriptions) {
+    assert.deepEqual(
+      await updated.evaluate(() => window.vora.transcriptions.snapshot()),
+      initialTranscriptions,
+    );
+    assert.equal(
+      (await updated.evaluate(() => window.vora.models.snapshot())).small.state,
+      'installed',
+    );
+    for (const [path, before] of modelHashes) assert.equal(await hash(path), before);
+  }
   assert.equal(
     await hash(current),
     await hash(join(kit, 'updates/VoraUpdateTest-0.6.1-linux-x86_64.AppImage')),
@@ -195,6 +296,7 @@ try {
     completedFileUnchanged: true,
     noAutomaticDownload: true,
     noPublicRelease: true,
+    transcriptionProfilePreserved: !!initialTranscriptions,
     requests,
   };
   await writeFile(join(output, 'report.json'), JSON.stringify(report, null, 2));

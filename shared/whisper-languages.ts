@@ -1,4 +1,6 @@
-// Language codes from whisper.cpp v1.8.2. Labels localized by Intl.
+// Small/Medium fixed vocabularies: 51865 tokens, 99 language tokens.
+// whisper.cpp v1.8.2 also lists yue for Large-v3, which these models do not contain.
+// Labels are localized by Intl.
 const codes = [
   'en',
   'zh',
@@ -99,7 +101,6 @@ const codes = [
   'ba',
   'jw',
   'su',
-  'yue',
 ];
 const names = new Intl.DisplayNames(['pt-BR'], { type: 'language' });
 export const LANGUAGES = codes

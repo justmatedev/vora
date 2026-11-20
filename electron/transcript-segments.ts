@@ -37,11 +37,18 @@ export function parseWhisperJson(value: unknown, chunk: AudioChunk): ChunkTransc
         throw new Error('Resultado de transcrição contém tempos inválidos.');
       return { startMs: Math.round(from), endMs: Math.round(to), text: segment.text.trim() };
     })
-    .filter((s) => s.text && !/^\[(?:_?BLANK_AUDIO_?|SILENCE|NO_SPEECH|MUSIC)\]$/i.test(s.text));
+    .filter(
+      (s) =>
+        s.text &&
+        !/^\[\s*_?(?:BLANK[ _]AUDIO|NO[ _](?:AUDIO|SPEECH)|SILENCE|MUSIC)_?\s*\]$/i.test(s.text),
+    );
   return { chunk, language: raw.result.language, segments };
 }
 export function mergeSegments(chunks: ChunkTranscript[], durationMs: number): TranscriptSegment[] {
   const result: TranscriptSegment[] = [];
+  let previousOwner = -1;
+  const segmenter = new Intl.Segmenter(undefined, { granularity: 'word' });
+  const words = (text: string) => [...segmenter.segment(text)].filter((part) => part.isWordLike);
   for (const { chunk, segments } of chunks)
     for (const segment of segments) {
       const midpoint = chunk.startMs + (segment.startMs + segment.endMs) / 2;
@@ -51,10 +58,41 @@ export function mergeSegments(chunks: ChunkTranscript[], durationMs: number): Tr
         (midpoint === chunk.coreEndMs && chunk.coreEndMs !== durationMs)
       )
         continue;
-      const startMs = Math.max(0, Math.min(durationMs, chunk.startMs + segment.startMs)),
-        endMs = Math.max(0, Math.min(durationMs, chunk.startMs + segment.endMs));
-      if (endMs > startMs && segment.text.trim())
-        result.push({ startMs, endMs, text: segment.text.trim() });
+      let startMs = Math.max(0, Math.min(durationMs, chunk.startMs + segment.startMs));
+      const endMs = Math.max(0, Math.min(durationMs, chunk.startMs + segment.endMs));
+      let text = segment.text.trim();
+      const previous = result.at(-1);
+      // Independently decoded context can end one segment mid-sentence and start
+      // the next with the same words. Only trim matching text in actual time
+      // overlap between different chunks; repetitions within a chunk are kept.
+      if (
+        previous &&
+        previousOwner !== chunk.coreStartMs &&
+        startMs < previous.endMs &&
+        endMs > previous.startMs
+      ) {
+        const before = words(previous.text),
+          after = words(text);
+        for (let count = Math.min(before.length, after.length, 64); count >= 2; count--) {
+          if (
+            after
+              .slice(0, count)
+              .every(
+                (part, index) =>
+                  part.segment.normalize('NFKC').toLowerCase() ===
+                  before[before.length - count + index].segment.normalize('NFKC').toLowerCase(),
+              )
+          ) {
+            text = count === after.length ? '' : text.slice(after[count].index).trim();
+            startMs = Math.max(startMs, previous.endMs);
+            break;
+          }
+        }
+      }
+      if (endMs > startMs && text) {
+        result.push({ startMs, endMs, text });
+        previousOwner = chunk.coreStartMs;
+      }
     }
   return result.sort((a, b) => a.startMs - b.startMs || a.endMs - b.endMs);
 }

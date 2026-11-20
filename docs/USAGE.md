@@ -10,6 +10,24 @@
 
 O layout permanece compacto desde a abertura, com o campo de link no topo e a área da fila ocupando o espaço restante. Sem itens, a fila mostra “Adicione um link para começar”; filtros e controles de execução aparecem quando houver itens. A busca abre automaticamente a partir de 10 itens na lista, sem contar o download ativo. Em filas menores, use a lupa no cabeçalho. O campo permanece aberto durante a pesquisa, mesmo que a fila diminua; fechar pela opção **Fechar busca** ou pela tecla **Esc** no campo limpa a pesquisa e conserva o filtro selecionado. Toda análise individual abre em um modal, inclusive a do primeiro vídeo. Adicionar fecha o modal; cancelar conserva a fila. **Rever opções** reabre os dados já analisados sem nova consulta. Confirmações de adição e duplicatas são compactas, dispensáveis e somem após seis segundos, suspendendo a contagem enquanto houver foco ou mouse sobre o aviso. Erros e avisos que exigem decisão continuam visíveis.
 
+## Transcrições locais
+
+Na aba **Transcrições**, use **Selecionar arquivo** para escolher áudio ou vídeo do computador. Também há **Transcrever** nos downloads concluídos. A análise de links e a fila de downloads continuam na aba **Downloads**.
+
+Escolha **Small** (recomendado, cerca de 488 MB) ou **Medium** (cerca de 1,53 GB). Medium costuma reconhecer melhor, mas exige mais memória e tempo. A primeira utilização pede o download do modelo escolhido. Isso não é obrigatório para baixar vídeos. O Vora verifica tamanho e SHA-256; cancelar conserva a parte válida para uma nova tentativa. Se o servidor não aceitar retomada ou o arquivo tiver mudado, o download recomeça. **Modelos** permite baixar, cancelar, retomar, remover e abrir a pasta. Um modelo usado por itens ativos ou pendentes não pode ser removido.
+
+Os modelos ficam em `userData/models/whisper/<modelo>/<revisão>/`, separados do instalador. Em instalações padrão: Linux `~/.config/Vora/models/whisper/`; Windows `%APPDATA%/Vora/models/whisper/`. O caminho real aparece no gerenciamento, pois o sistema ou o perfil pode alterá-lo. Atualizar o aplicativo preserva essa pasta. Remover um modelo libera seus pesos sem apagar originais ou transcrições.
+
+O reconhecimento roda na CPU local, sem conta ou API, com pesos e motor de versões fixadas. Após instalar o modelo, o serviço de transcrição não precisa de internet nem envia o áudio. Consultas de atualização e downloads do Vora têm seus próprios acessos à rede. A licença MIT dos componentes distribuídos acompanha o aplicativo; manter a versão instalada não cria uma cobrança de API. A disponibilidade futura dos servidores de download não é garantida.
+
+Deixe **Idioma automático** ou selecione o idioma falado. Os dois modelos são multilíngues; a qualidade varia entre idiomas, sotaques, ruído e gravações. O resultado mantém o idioma, sem tradução. Revise nomes, números e trechos importantes antes de usar o texto.
+
+Selecione **TXT**, **SRT** ou ambos. Por padrão, a saída fica junto ao arquivo de origem; uma pasta alternativa vale apenas para a transcrição. Os nomes usam `.transcricao` e um sufixo numérico quando já existem. O original e os resultados anteriores são preservados. Em falha parcial, os arquivos já salvos continuam disponíveis no item.
+
+A fila de transcrição executa um arquivo por vez e pode coexistir com downloads. **Pausar após o atual** conclui o atual; **Cancelar** interrompe o processo. Ao fechar com trabalho ativo, o Vora pede confirmação e aguarda os processos terminarem. Ao reabrir, a fila fica pausada; itens interrompidos exigem nova tentativa desde o início. Não há retomada de uma transcrição no meio do áudio. Uma limpeza pendente deve ser resolvida antes de continuar. Atualizar também exige ausência de trabalho ativo nas duas filas e no instalador de modelos.
+
+Arquivos longos são preparados em trechos de até aproximadamente cinco minutos, com contexto nas bordas, para limitar os temporários. Ainda é necessário espaço livre na pasta de saída e memória para o modelo. A velocidade depende da CPU e do conteúdo; não há promessa de tempo real. Silêncio e música podem produzir texto incorreto; reconhecimento automático não substitui revisão.
+
 ### Reels do Instagram
 
 Aceita links `https://www.instagram.com/reel/ID/` e `/reels/ID/`, inclusive com parâmetros de compartilhamento. Somente Reels públicos acessíveis sem login; fotos, carrosséis, Stories e perfis não são suportados. Não é necessário conectar uma conta, e o Vora não importa cookies do navegador.

@@ -45,7 +45,17 @@ export async function downloadModel(
   let meta: { url?: string; revision?: string; etag?: string; modified?: string } = {};
   try {
     await regularSize(paths.partialMeta);
-    meta = JSON.parse(await readFile(paths.partialMeta, 'utf8'));
+    const parsed = JSON.parse(await readFile(paths.partialMeta, 'utf8'));
+    if (
+      parsed &&
+      typeof parsed === 'object' &&
+      !Array.isArray(parsed) &&
+      typeof parsed.url === 'string' &&
+      typeof parsed.revision === 'string' &&
+      (parsed.etag == null || typeof parsed.etag === 'string') &&
+      (parsed.modified == null || typeof parsed.modified === 'string')
+    )
+      meta = parsed;
   } catch {
     /* unknown partial cannot be resumed */
   }

@@ -19,6 +19,7 @@ test('formatos são normalizados e opções desconhecidas são recusadas', () =>
     { formats: [] },
     { formats: ['pdf'] },
     { language: 'invalid' },
+    { language: 'yue' }, // The fixed Small/Medium vocabularies have 99 languages, not Large-v3's 100.
     { modelId: 'https://bad.test/model' },
   ]) {
     assert.throws(() =>

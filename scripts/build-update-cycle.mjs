@@ -33,6 +33,7 @@ for (const name of (await readdir(root)).filter((name) =>
 ))
   await cp(join(root, name), join(project, name));
 await cp(join(root, 'resources/tools.lock.json'), join(project, 'resources/tools.lock.json'));
+await cp(join(root, 'resources/whisper.lock.json'), join(project, 'resources/whisper.lock.json'));
 const tools = platform === 'linux' ? 'linux-x64' : 'win-x64';
 await cp(join(root, 'resources/tools', tools), join(project, 'resources/tools', tools), {
   recursive: true,
