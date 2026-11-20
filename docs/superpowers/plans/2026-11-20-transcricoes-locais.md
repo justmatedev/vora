@@ -79,7 +79,7 @@ As tarefas 1–3 entregam catálogo/motor/instalação testáveis; 4–8 entrega
 
 Em cada ciclo, demonstrar a falha do teste antes de implementar e executar o comando de verificação indicado depois. Os trechos de teste abaixo fixam as asserções mínimas; montar os arranjos e dependências injetadas no próprio arquivo de teste, sem downloads grandes nas verificações comuns. Commitar somente os arquivos da tarefa concluída.
 
-### Tarefa 1: Contratos, catálogo e preferências independentes
+### Task 1: Contratos, catálogo e preferências independentes
 
 **Files:** criar os cinco arquivos `shared/`/`resources/` correspondentes do mapa e `tests/transcription-options.test.ts`; modificar `shared/types.ts`, `electron/settings.ts`, `tests/preferences.test.ts`.
 
@@ -97,7 +97,7 @@ Em cada ciclo, demonstrar a falha do teste antes de implementar e executar o com
 - [ ] Reexecutar o comando e `npm run typecheck`; exigir sucesso e manutenção dos defaults de download.
 - [ ] Commit: `feat: define local transcription contracts and preferences`.
 
-### Tarefa 2: Motor CPU portátil e cadeia de empacotamento
+### Task 2: Motor CPU portátil e cadeia de empacotamento
 
 **Files:** criar os dois scripts do motor e `tests/whisper-packaging.test.ts`; modificar `scripts/fetch-tools.mjs`, `scripts/verify-tools.mjs`, `scripts/check-packaged-runtime.mjs`, `resources/notices/sources.json`, `THIRD_PARTY.md`, `.github/workflows/packages.yml`, `docs/DEVELOPMENT.md`. Adicionar textos de licença em `resources/notices/` com seus hashes.
 
@@ -114,7 +114,7 @@ Em cada ciclo, demonstrar a falha do teste antes de implementar e executar o com
 - [ ] Executar teste, `npm run tools:fetch -- linux`/`win32` no respectivo sistema, `npm run tools:verify`, e inicialização `whisper-cli --help` fora da árvore de build. Pacote nativo precisa passar em `check-packaged-runtime.mjs`; preparação cruzada não equivale a execução Windows.
 - [ ] Commit: `build: package pinned portable whisper cpu runtime`.
 
-### Tarefa 3: Download retomável e gerenciamento dos modelos
+### Task 3: Download retomável e gerenciamento dos modelos
 
 **Files:** criar os dois módulos de instalação do mapa, `tests/model-download.test.ts`, `tests/whisper-models.test.ts` e `tests/model-download.integration.test.mjs`.
 
@@ -135,7 +135,7 @@ Em cada ciclo, demonstrar a falha do teste antes de implementar e executar o com
 - [ ] Reexecutar o comando; provar que arquivos de resultados e originais não são removidos na remoção/limpeza de modelo.
 - [ ] Commit: `feat: manage verified resumable whisper model downloads`.
 
-### Tarefa 4: Seleção e validação de arquivos/destinos locais
+### Task 4: Seleção e validação de arquivos/destinos locais
 
 **Files:** criar `electron/transcription-sources.ts` e `tests/transcription-sources.test.ts`.
 
@@ -153,7 +153,7 @@ Em cada ciclo, demonstrar a falha do teste antes de implementar e executar o com
 - [ ] Reexecutar os testes. Para lote com inválidos, recusar a inclusão inteira com nomes e motivos, sem adicionar parcialmente em silêncio.
 - [ ] Commit: `feat: validate selected local transcription sources`.
 
-### Tarefa 5: Sessões temporárias e propriedade dos processos
+### Task 5: Sessões temporárias e propriedade dos processos
 
 **Files:** criar `electron/transcription-sessions.ts` e `tests/transcription-sessions.test.ts`; modificar `electron/processes.ts` e adicionar `tests/processes.test.ts`.
 
@@ -171,7 +171,7 @@ Em cada ciclo, demonstrar a falha do teste antes de implementar e executar o com
 - [ ] Reexecutar o comando nos dois sistemas, incluindo arquivos bloqueados no Windows. Erro de limpeza mantém `cleanupPending` e bloqueia retomada/atualização até resolver.
 - [ ] Commit: `feat: track and recover transcription process sessions`.
 
-### Tarefa 6: Processamento limitado em memória e segmentos globais
+### Task 6: Processamento limitado em memória e segmentos globais
 
 **Files:** criar os três módulos de execução/segmentos do mapa, `tests/transcriber.test.ts`, `tests/transcript-segments.test.ts` e `tests/fixtures/whisper-small-output.json` com a estrutura real do CLI fixado.
 
@@ -193,7 +193,7 @@ Em cada ciclo, demonstrar a falha do teste antes de implementar e executar o com
 - [ ] Reexecutar testes e `npm run typecheck`.
 - [ ] Commit: `feat: transcribe local audio with bounded whisper chunks`.
 
-### Tarefa 7: Exportação TXT/SRT sem sobrescrita
+### Task 7: Exportação TXT/SRT sem sobrescrita
 
 **Files:** criar `electron/transcription-output.ts`, `tests/transcription-output.test.ts`; reutilizar ou extrair primitivas de `electron/files.ts` sem mudar o contrato de `publishUnique`.
 
@@ -211,7 +211,7 @@ Em cada ciclo, demonstrar a falha do teste antes de implementar e executar o com
 - [ ] Reexecutar os testes, incluindo permissão/espaço alterados depois da pré-validação e falha do diário durante publicação.
 - [ ] Commit: `feat: export transcript sets without replacing existing files`.
 
-### Tarefa 8: Fila persistente de transcrições
+### Task 8: Fila persistente de transcrições
 
 **Files:** criar `electron/transcription-queue.ts`, `tests/transcription-queue.test.ts`.
 
@@ -231,7 +231,7 @@ Em cada ciclo, demonstrar a falha do teste antes de implementar e executar o com
 - [ ] Reexecutar os testes; verificar que `queue.json` e preferências de download permanecem byte a byte intactos.
 - [ ] Commit: `feat: persist and schedule a separate transcription queue`.
 
-### Tarefa 9: IPC, encerramento, notificações e atualizações
+### Task 9: IPC, encerramento, notificações e atualizações
 
 **Files:** criar `electron/transcription-ipc.ts`, `electron/work-activity.ts`, `tests/transcription-ipc.test.ts`, `tests/work-activity.test.ts`; modificar `shared/types.ts`, `electron/preload.ts`, `electron/main.ts`, `electron/notifications.ts`, `tests/notifications.test.ts`, `tests/desktop.test.mjs`, `tests/updates.test.ts`.
 
@@ -252,7 +252,7 @@ Em cada ciclo, demonstrar a falha do teste antes de implementar e executar o com
 - [ ] Reexecutar o comando, `npm run build` e `npm run test:desktop` no ambiente gráfico suportado; não simular credenciais, URLs de atualização ou caminhos arbitrários para contornar guardas.
 - [ ] Commit: `feat: connect transcription services to secure desktop lifecycle`.
 
-### Tarefa 10: Interface aprovada e fluxos reais
+### Task 10: Interface aprovada e fluxos reais
 
 **Files:** criar os cinco arquivos `src/` do mapa, `tests/transcription-ui-fixture.mjs`, `tests/transcription-ui.test.mjs`; modificar `src/App.tsx`, `src/QueuePanel.tsx`, `src/QueueItemView.tsx`, `src/queue-client.ts`, `tests/ui-fixture.mjs`, `package.json` (incluir a nova suíte em `test:ui`).
 
@@ -273,7 +273,7 @@ Em cada ciclo, demonstrar a falha do teste antes de implementar e executar o com
 - [ ] Executar `npm run build`, `npm run test:ui`, inspecionar capturas em 960×720 e 620×600, incluindo títulos/caminhos longos, diálogo, fila ativa e aba Downloads com transcrição em execução. Os testes UI verificam interação; não contam como teste de Whisper real.
 - [ ] Commit: `feat: add transcription workspace and model management ui`.
 
-### Tarefa 11: Integração real, pacotes e documentação
+### Task 11: Integração real, pacotes e documentação
 
 **Files:** criar `tests/transcription.integration.test.mjs`, `scripts/check-packaged-whisper.mjs`; modificar `package.json`, `.github/workflows/packages.yml`, `README.md`, `docs/USAGE.md`, `docs/DEVELOPMENT.md`, `docs/VALIDATION.md`, `CHANGELOG.md` e `THIRD_PARTY.md` se necessário.
 

@@ -149,6 +149,7 @@ export interface PlaylistPage extends PlaylistSummary {
 }
 
 export interface AppSettings {
+  transcriptionPreferences: import('./transcription-types').TranscriptionOptions;
   notificationsEnabled: boolean;
   destination: string;
   preferences: DownloadPreferences;

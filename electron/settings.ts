@@ -2,6 +2,10 @@ import { mkdir, readFile, rename, writeFile } from 'node:fs/promises';
 import { dirname, isAbsolute } from 'node:path';
 import type { AppSettings } from '../shared/types';
 import { DEFAULT_PREFERENCES, validPreferences } from '../shared/preferences';
+import {
+  DEFAULT_TRANSCRIPTION_OPTIONS,
+  parseTranscriptionOptions,
+} from '../shared/transcription-options';
 
 export class SettingsStore {
   private value: AppSettings;
@@ -11,6 +15,7 @@ export class SettingsStore {
     destination: string,
   ) {
     this.value = {
+      transcriptionPreferences: structuredClone(DEFAULT_TRANSCRIPTION_OPTIONS),
       destination,
       notificationsEnabled: true,
       preferences: { ...DEFAULT_PREFERENCES },
@@ -19,6 +24,13 @@ export class SettingsStore {
   async load() {
     try {
       const saved = JSON.parse(await readFile(this.path, 'utf8'));
+      try {
+        this.value.transcriptionPreferences = parseTranscriptionOptions(
+          saved.transcriptionPreferences,
+        );
+      } catch {
+        /* default for older profiles */
+      }
       if (typeof saved.notificationsEnabled === 'boolean')
         this.value.notificationsEnabled = saved.notificationsEnabled;
       if (typeof saved.destination === 'string' && isAbsolute(saved.destination))
@@ -52,6 +64,11 @@ export class SettingsStore {
     if (typeof enabled !== 'boolean') throw new Error('Preferência de notificações inválida.');
     return (await this.update((settings) => ({ ...settings, notificationsEnabled: enabled })))
       .notificationsEnabled;
+  }
+  async setTranscriptionPreferences(input: unknown) {
+    const transcriptionPreferences = parseTranscriptionOptions(input);
+    return (await this.update((settings) => ({ ...settings, transcriptionPreferences })))
+      .transcriptionPreferences;
   }
   async setPreferences(input: unknown) {
     const preferences = validPreferences(input);
