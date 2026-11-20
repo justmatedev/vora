@@ -138,8 +138,11 @@ export async function downloadModel(
       // Refuse pre-existing symlinks before opening any writable model file.
       await regularSize(paths.partial);
       const file = await open(paths.partial, offset ? 'a' : 'w');
+      const reader = response.body.getReader();
       try {
-        for await (const data of response.body) {
+        while (true) {
+          const { done, value: data } = await reader.read();
+          if (done) break;
           signal.throwIfAborted();
           heartbeat();
           if (offset + data.length > spec.bytes)
@@ -154,6 +157,7 @@ export async function downloadModel(
         }
         await file.sync();
       } finally {
+        reader.releaseLock();
         await file.close();
       }
     }
