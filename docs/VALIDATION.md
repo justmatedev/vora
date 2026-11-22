@@ -2,7 +2,12 @@
 
 - Inclui transcrição local e os ajustes de interface/remoção das duas filas. A versão estável publicada continua 0.7.0 durante a preparação.
 - O CI inicial revelou fixtures com caminhos temporários abreviados no Windows. As fixtures foram ajustadas para usar `realpath`, respeitando o mesmo contrato de caminhos canônicos da seleção de arquivos; as verificações do aplicativo foram preservadas.
-- CI, geração dos pacotes e validação dos artefatos desta versão: em andamento. Teste manual do instalador Windows e da atualização nativa: pendente.
+- Validação local da 0.8.0 no Linux: 163 testes do núcleo, 11 cenários de interface, build TypeScript/Vite/Electron, cinco testes de mídia real, um teste desktop Electron, dois do atualizador e três de empacotamento passaram. Small e Medium repetiram a integração offline de 120 segundos com TXT/SRT, preservação, recuperação e cancelamento; o fluxo Electron real com Small também passou (três cenários, nenhum skip).
+- O CI detectou também a corrida Linux em que `/proc/<pid>/stat` deixa de existir durante a leitura. O caso ESRCH foi reproduzido por teste e tratado como processo encerrado, junto de ENOENT.
+- [CI do commit 1c51f65](https://github.com/justmatedev/vora/actions/runs/45059789415) aprovado: núcleo/build Linux, núcleo/build Windows e interface Linux. [Geração nativa dos pacotes](https://github.com/justmatedev/vora/actions/runs/45059791444) aprovada em Linux e Windows, no mesmo commit. Os jobs conferiram dependências de produção, Node embutido, Whisper nativo fora da árvore de build, canal GitHub e metadados de atualização. Os manifestos SHA256SUMS dos dois artefatos foram conferidos após o download. Versão 0.8.0, nomes, tamanhos e SHA-512 dos YAMLs conferem com os instaladores; manifesto único gerado em `release/0.8.0/SHA256SUMS`.
+- O AppImage exato do CI passou no teste Electron/IPC, ferramentas e restauração com perfil temporário. Repetiu também a transcrição offline pela interface com Small e a amostra autorizada de 120 segundos, gerando TXT/SRT sem alteração da origem. Logs locais: `/tmp/vora-release-official-desktop.log` e `/tmp/vora-release-official-transcription.log`. Isso não valida o ciclo de atualização 0.7.0→0.8.0 nem o instalador Windows.
+- [Rascunho 0.8.0](https://github.com/justmatedev/vora/releases/tag/untagged-1a5d45063fa189b6f12f) completo com seis anexos. Os tamanhos e SHA-256 dos seis arquivos recebidos pelo GitHub conferem com os arquivos locais. A versão permanece em rascunho e ainda não é oferecida aos clientes pelo atualizador.
+- Teste manual do instalador Windows, transcrição offline Small/Medium e ciclo de atualização nativo no Windows: pendentes. Não foram substituídos pelos testes automatizados nem pelos ensaios históricos Linux.
 
 ---
 

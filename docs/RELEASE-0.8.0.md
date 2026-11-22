@@ -1,6 +1,6 @@
 # Lançamento 0.8.0
 
-Estado: em preparação. A versão estável publicada continua sendo a 0.7.0 até a conclusão da validação e publicação desta release.
+Estado: release 0.8.0 em rascunho, com pacotes Linux e Windows gerados e validação automatizada concluída. A versão estável publicada continua sendo a 0.7.0 enquanto a revisão nativa estiver pendente.
 
 ## Notas de versão
 
@@ -23,6 +23,10 @@ Linux e Windows x64. O instalador Windows não possui assinatura digital. As fer
 
 ## Validação e anexos
 
-Os resultados de CI, empacotamento e testes dos artefatos exatos serão registrados em [VALIDATION.md](VALIDATION.md). A validação manual do instalador e da atualização no Windows continua pendente; os ensaios históricos de transcrição e atualização no Linux não substituem o teste dos novos pacotes.
+Código dos pacotes: commit `1c51f65`. [CI Linux/Windows e interface](https://github.com/justmatedev/vora/actions/runs/45059789415) e [empacotamento nativo nos dois sistemas](https://github.com/justmatedev/vora/actions/runs/45059791444) aprovados. Conferidos dependências de produção, Node embutido, Whisper nativo fora da árvore de build, canal GitHub e metadados de atualização.
 
-Anexos previstos: AppImage, instalador NSIS, blockmap Windows, `latest-linux.yml`, `latest.yml` e manifesto único `SHA256SUMS`. A release permanecerá em rascunho enquanto os pacotes e sua validação estiverem incompletos.
+Validação local Linux: 163 testes do núcleo, 11 de interface, cinco de mídia, dois do atualizador, três de empacotamento, build e Electron real aprovados. Small e Medium passaram na integração offline de 120 segundos. O AppImage exato do CI também passou no teste Electron/IPC e na transcrição offline com Small pela interface. Detalhes em [VALIDATION.md](VALIDATION.md).
+
+Anexos: AppImage, instalador NSIS, blockmap Windows, `latest-linux.yml`, `latest.yml` e manifesto único `SHA256SUMS`. Os hashes originais dos dois jobs foram conferidos e os YAMLs correspondem à versão, nomes, tamanhos e SHA-512 dos instaladores. Os arquivos não foram alterados após a geração. Os seis anexos recebidos pelo GitHub tiveram tamanho e SHA-256 comparados com os arquivos locais, sem divergências.
+
+Pendente: instalação e uso nativo no Windows, transcrição offline com Small/Medium e ciclo de atualização nativo preservando perfil/modelos. A validação histórica do ciclo Linux não substitui um salto entre os pacotes oficiais 0.7.0→0.8.0. A release permanece em rascunho até a conclusão da revisão; testes automatizados não equivalem ao uso do instalador NSIS real.
