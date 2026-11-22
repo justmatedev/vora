@@ -167,10 +167,6 @@ export function WhisperModelsDialog({
                   )}
                   {inUse && !active && <small>Em uso por itens da fila.</small>}
                 </div>
-                <details className="whisper-model-path">
-                  <summary>Caminho do modelo</summary>
-                  <p>{model.path}</p>
-                </details>
                 {model.message && <p>{model.message}</p>}
                 {model.error && (
                   <p className="queue-error" role="alert">

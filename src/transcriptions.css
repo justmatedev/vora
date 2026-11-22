@@ -279,16 +279,14 @@
   line-height: 1.6;
   flex: none;
 }
-.transcription-result-path,
-.whisper-model-path {
+.transcription-result-path {
   font-size: var(--font-caption);
   color: var(--subtle);
   margin-top: var(--space-3);
   line-height: 1.7;
   overflow-wrap: anywhere;
 }
-.transcription-result-path summary,
-.whisper-model-path summary {
+.transcription-result-path summary {
   cursor: pointer;
   color: var(--muted);
 }
