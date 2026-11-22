@@ -2,7 +2,7 @@
 
 ## Preparar o repositório
 
-Autor: **justmatedev**. Repositório: [justmatedev/vora](https://github.com/justmatedev/vora). Os campos `repository`, `homepage` e `bugs` do `package.json` apontam para esse endereço. Os instaladores atuais estão na [Release 0.7.0](https://github.com/justmatedev/vora/releases/tag/v0.7.0).
+Autor: **justmatedev**. Repositório: [justmatedev/vora](https://github.com/justmatedev/vora). Os campos `repository`, `homepage` e `bugs` do `package.json` apontam para esse endereço. Os instaladores atuais estão na [Release 0.8.0](https://github.com/justmatedev/vora/releases/tag/v0.8.0).
 
 O código do Vora usa MIT, registrada em `LICENSE`, `package.json` e `package-lock.json`; o aviso é incluído no empacotamento. Não altere as licenças dos componentes de terceiros. Preserve os materiais de terceiros descritos em [THIRD_PARTY.md](../THIRD_PARTY.md).
 
@@ -22,7 +22,7 @@ Os workflows seguem a [documentação de CI Node.js do GitHub](https://docs.gith
 
 ## Preparar uma versão
 
-A versão 0.8.0 está em rascunho, com transcrição local e refinamentos das filas. Pacotes e resultados em [RELEASE-0.8.0.md](RELEASE-0.8.0.md) e [VALIDATION.md](VALIDATION.md). A revisão nativa pendente deve ser concluída antes de promovê-la a estável.
+A versão 0.8.0 foi publicada como estável em 22 de novembro de 2026, após confirmação do mantenedor, com transcrição local e refinamentos das filas. Pacotes e resultados em [RELEASE-0.8.0.md](RELEASE-0.8.0.md) e [VALIDATION.md](VALIDATION.md).
 
 A versão 0.7.0 foi publicada como estável em 18 de novembro de 2026; notas e validações em [RELEASE-0.7.0.md](RELEASE-0.7.0.md) e [VALIDATION.md](VALIDATION.md).
 

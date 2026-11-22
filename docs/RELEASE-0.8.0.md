@@ -1,6 +1,6 @@
 # Lançamento 0.8.0
 
-Estado: release 0.8.0 em rascunho, com pacotes Linux e Windows gerados e validação automatizada concluída. A versão estável publicada continua sendo a 0.7.0 enquanto a revisão nativa estiver pendente.
+Estado: [release 0.8.0 publicada](https://github.com/justmatedev/vora/releases/tag/v0.8.0) como estável e mais recente em 22 de novembro de 2026, após confirmação do mantenedor. Os seis anexos conferidos foram preservados na publicação.
 
 ## Notas de versão
 
@@ -29,4 +29,4 @@ Validação local Linux: 163 testes do núcleo, 11 de interface, cinco de mídia
 
 Anexos: AppImage, instalador NSIS, blockmap Windows, `latest-linux.yml`, `latest.yml` e manifesto único `SHA256SUMS`. Os hashes originais dos dois jobs foram conferidos e os YAMLs correspondem à versão, nomes, tamanhos e SHA-512 dos instaladores. Os arquivos não foram alterados após a geração. Os seis anexos recebidos pelo GitHub tiveram tamanho e SHA-256 comparados com os arquivos locais, sem divergências.
 
-Pendente: instalação e uso nativo no Windows, transcrição offline com Small/Medium e ciclo de atualização nativo preservando perfil/modelos. A validação histórica do ciclo Linux não substitui um salto entre os pacotes oficiais 0.7.0→0.8.0. A release permanece em rascunho até a conclusão da revisão; testes automatizados não equivalem ao uso do instalador NSIS real.
+Em 22 de novembro de 2026, após a apresentação dos pacotes e das pendências nativas no Windows, o mantenedor confirmou que estava tudo certo e autorizou a publicação estável. Os cenários individuais de instalação, transcrição offline e atualização no Windows não foram detalhados. Essa confirmação é um relato do mantenedor, distinto das verificações automatizadas registradas acima; não foi executado nesta sessão um salto entre os pacotes oficiais 0.7.0→0.8.0.

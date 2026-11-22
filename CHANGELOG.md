@@ -1,6 +1,6 @@
 # Histórico de mudanças
 
-## 0.8.0 — em preparação
+## 0.8.0 — 2026-11-22
 
 - Aba Transcrições com arquivos locais e ação nos downloads concluídos.
 - Whisper.cpp 1.8.2 local, modelos multilíngues Small e Medium opcionais, download verificado e armazenamento persistente separado do aplicativo.

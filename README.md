@@ -18,7 +18,7 @@ Aplicativo desktop de código aberto desenvolvido por **justmatedev** para baixa
 - Progresso da faixa ativa, cancelamento e novas tentativas para falhas temporárias.
 - Fila persistente, recuperação de interrupções e proteção contra sobrescrita.
 - Notificações do sistema e ações para abrir ou localizar arquivos concluídos.
-- Transcrição local opcional com Whisper Small ou Medium, em uma aba própria, para downloads concluídos e arquivos do computador; exportação TXT e SRT. Preparada para a versão 0.8.0; veja as [notas de lançamento](docs/RELEASE-0.8.0.md).
+- Transcrição local opcional com Whisper Small ou Medium, em uma aba própria, para downloads concluídos e arquivos do computador; exportação TXT e SRT. Disponível desde a versão 0.8.0; veja as [notas de lançamento](docs/RELEASE-0.8.0.md).
 
 ![Fila e progresso do Vora com dados demonstrativos](docs/images/fila.png)
 
@@ -26,16 +26,16 @@ A captura da fila usa dados de teste.
 
 ## Download
 
-A versão estável publicada é **0.7.0**, para **Linux e Windows x64**. Baixe os instaladores na [Release 0.7.0](https://github.com/justmatedev/vora/releases/tag/v0.7.0):
+A versão estável publicada é **0.8.0**, para **Linux e Windows x64**. Baixe os instaladores na [Release 0.8.0](https://github.com/justmatedev/vora/releases/tag/v0.8.0):
 
 | Sistema | Arquivo                                                                                                             |
 | ------- | ------------------------------------------------------------------------------------------------------------------- |
-| Linux   | [AppImage Linux](https://github.com/justmatedev/vora/releases/download/v0.7.0/Vora-0.7.0-linux-x86_64.AppImage)     |
-| Windows | [Instalador Windows](https://github.com/justmatedev/vora/releases/download/v0.7.0/Vora-0.7.0-windows-x64-setup.exe) |
+| Linux   | [AppImage Linux](https://github.com/justmatedev/vora/releases/download/v0.8.0/Vora-0.8.0-linux-x86_64.AppImage)     |
+| Windows | [Instalador Windows](https://github.com/justmatedev/vora/releases/download/v0.8.0/Vora-0.8.0-windows-x64-setup.exe) |
 
-Os pacotes incluem yt-dlp e FFmpeg/ffprobe, usando o Node.js incluído no Electron. O usuário final não precisa instalar essas ferramentas ou Node.js separadamente. O AppImage pode exigir FUSE ou a opção `--appimage-extract-and-run`. O instalador Windows não possui assinatura digital.
+Os pacotes incluem yt-dlp, FFmpeg/ffprobe e o motor Whisper, usando o Node.js incluído no Electron. Os modelos Small e Medium são opcionais e baixados separadamente pelo aplicativo. O usuário final não precisa instalar essas ferramentas ou Node.js separadamente. O AppImage pode exigir FUSE ou a opção `--appimage-extract-and-run`. O instalador Windows não possui assinatura digital.
 
-O AppImage oficial passou na validação automatizada no Linux. Em 18 de novembro de 2026, o mantenedor confirmou as validações pendentes da 0.7.0. Veja os detalhes e a distinção entre testes automatizados e relato do mantenedor em [VALIDATION.md](docs/VALIDATION.md).
+O AppImage oficial passou na validação automatizada no Linux. Em 22 de novembro de 2026, o mantenedor confirmou a revisão e autorizou a publicação da 0.8.0. Veja os detalhes e a distinção entre testes automatizados e relato do mantenedor em [VALIDATION.md](docs/VALIDATION.md).
 
 ## Atualizações no aplicativo
 
