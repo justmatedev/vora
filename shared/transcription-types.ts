@@ -132,6 +132,7 @@ export interface TranscriptionsAPI {
   start(): Promise<void>;
   pause(): Promise<void>;
   cancel(id: string): Promise<void>;
+  remove(id: string): Promise<void>;
   retry(id: string): Promise<void>;
   clearCompleted(): Promise<void>;
   openOutput(id: string, format: TranscriptFormat): Promise<void>;

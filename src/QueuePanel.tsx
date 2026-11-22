@@ -174,7 +174,7 @@ export function QueuePanel({
               <Pause size={14} />
               Pausar após o atual
             </button>
-          ) : (
+          ) : pending.length > 0 || active ? (
             <button
               className="primary"
               disabled={working || (!pending.length && !active)}
@@ -185,7 +185,7 @@ export function QueuePanel({
                 ? 'Continuar fila'
                 : 'Iniciar fila'}
             </button>
-          )}
+          ) : null}
         </div>
       </div>
       {snapshot.pauseReason && (

@@ -271,6 +271,18 @@ export class TranscriptionQueue {
       item.status = 'cancelled';
     });
   }
+  async remove(id: string) {
+    const removable = (item: TranscriptionItem) =>
+      ['model', 'waiting', 'failed', 'cancelled', 'interrupted'].includes(item.status) &&
+      this.state.activeId !== item.id;
+    if (!removable(this.item(id))) throw new Error('Esta transcrição não pode ser removida agora.');
+    const session = await this.deps.sessions.forItem(id);
+    if (session) await this.deps.sessions.cleanup(session.id);
+    await this.change(() => {
+      if (!removable(this.item(id))) throw new Error('O estado desta transcrição mudou.');
+      this.state.items = this.state.items.filter((item) => item.id !== id);
+    });
+  }
   async retry(id: string) {
     const item = this.item(id);
     if (!['failed', 'cancelled', 'interrupted'].includes(item.status) && !item.cleanupPending)

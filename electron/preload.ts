@@ -17,6 +17,7 @@ const api: VoraAPI = {
     start: () => ipcRenderer.invoke('vora:transcription-start'),
     pause: () => ipcRenderer.invoke('vora:transcription-pause'),
     cancel: (id) => ipcRenderer.invoke('vora:transcription-cancel', id),
+    remove: (id) => ipcRenderer.invoke('vora:transcription-remove', id),
     retry: (id) => ipcRenderer.invoke('vora:transcription-retry', id),
     clearCompleted: () => ipcRenderer.invoke('vora:transcription-clear'),
     openOutput: (id, format) => ipcRenderer.invoke('vora:transcription-open-output', id, format),

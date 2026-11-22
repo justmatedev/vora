@@ -1152,3 +1152,84 @@ test('preparar atualização suspende e drena as prévias; falha permite retomá
     await s.close();
   }
 });
+
+for (const cleanupFails of [false, true]) {
+  test(`remover cancelado ${cleanupFails ? 'preserva registro se a limpeza falhar' : 'limpa temporários e persiste a remoção'}`, async () => {
+    const s = await setup({
+      download: async () => ({ type: 'cancelled', cleanupPending: true }),
+      cleanItem: async () => {
+        if (cleanupFails) throw new Error('Falha na limpeza');
+        await rm(join(s.root, 'temporario.part'));
+      },
+    });
+    try {
+      await s.manager.add([{ url: urls[0] }], DEFAULT_PREFERENCES, s.root);
+      await s.manager.start();
+      await until(
+        () =>
+          s.manager.snapshot().items[0].status === 'cancelled' && !s.manager.snapshot().activeId,
+      );
+      const id = s.manager.snapshot().items[0].id;
+      await writeFile(join(s.root, 'temporario.part'), 'parcial');
+      await s.manager.add([{ url: urls[1] }], DEFAULT_PREFERENCES, s.root);
+      if (cleanupFails) {
+        await assert.rejects(s.manager.remove(id), /Falha na limpeza/);
+        assert.equal(s.manager.snapshot().items[0].status, 'cancelled');
+        assert.equal(await readFile(join(s.root, 'temporario.part'), 'utf8'), 'parcial');
+      } else {
+        await s.manager.remove(id);
+        assert.equal(s.manager.snapshot().items.length, 1);
+        assert.equal(s.manager.snapshot().items[0].url, urls[1]);
+        assert.equal(s.manager.snapshot().groups.length, 1);
+        await assert.rejects(readFile(join(s.root, 'temporario.part')), { code: 'ENOENT' });
+        const saved = JSON.parse(await readFile(join(s.root, 'queue.json'), 'utf8'));
+        assert.equal(
+          saved.items.some((item: { id: string }) => item.id === id),
+          false,
+        );
+      }
+    } finally {
+      await s.close();
+    }
+  });
+}
+
+for (const status of ['failed', 'interrupted'] as const) {
+  test(`remover download ${status} limpa temporários e preserva outros itens`, async () => {
+    const s = await setup();
+    let restored: QueueManager | undefined;
+    try {
+      await s.manager.add(
+        urls.slice(0, 2).map((url) => ({ url })),
+        DEFAULT_PREFERENCES,
+        s.root,
+      );
+      await s.manager.shutdown();
+      const saved = s.manager.snapshot();
+      saved.items[0].status = status;
+      const id = saved.items[0].id;
+      await writeFile(join(s.root, 'queue.json'), JSON.stringify(saved));
+      const temporary = join(s.root, 'unfinished.part');
+      await writeFile(temporary, 'partial');
+      restored = new QueueManager(
+        join(s.root, 'queue.json'),
+        {
+          ...s.deps,
+          cleanItem: async () => {
+            await rm(temporary);
+          },
+        },
+        () => {},
+        () => {},
+      );
+      await restored.load();
+      await restored.remove(id);
+      assert.equal(restored.snapshot().items.length, 1);
+      assert.equal(restored.snapshot().items[0].url, urls[1]);
+      await assert.rejects(readFile(temporary), { code: 'ENOENT' });
+    } finally {
+      await restored?.shutdown();
+      await s.close();
+    }
+  });
+}

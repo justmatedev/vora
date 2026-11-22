@@ -74,6 +74,7 @@ export function registerTranscriptionIPC(handle: Register, deps: Dependencies) {
   handle('vora:transcription-start', () => queue.start());
   handle('vora:transcription-pause', () => queue.pause());
   handle('vora:transcription-cancel', (id) => queue.cancel(identifier(id)));
+  handle('vora:transcription-remove', (id) => queue.remove(identifier(id)));
   handle('vora:transcription-retry', (id) => queue.retry(identifier(id)));
   handle('vora:transcription-clear', () => queue.clearCompleted());
   async function outputPath(id: unknown, format: unknown) {

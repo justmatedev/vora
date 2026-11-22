@@ -256,28 +256,32 @@ export function QueueRow({
               {item.result.path}
             </p>
           )}
-          {item.status === 'waiting' && (
+          {(item.status === 'waiting' || retryable) && (
             <>
-              {reorderDisabled && (
+              {item.status === 'waiting' && reorderDisabled && (
                 <p className="reorder-hint">Limpe a busca e selecione Todos para reordenar.</p>
               )}
               <div className="queue-row-actions">
-                <button
-                  className="icon-button"
-                  aria-label={`Mover para cima: ${item.title}`}
-                  disabled={working || reorderDisabled || !canMoveUp}
-                  onClick={() => void command(() => desktop().moveItem(item.id, 'up'))}
-                >
-                  <ArrowUp size={15} />
-                </button>
-                <button
-                  className="icon-button"
-                  aria-label={`Mover para baixo: ${item.title}`}
-                  disabled={working || reorderDisabled || !canMoveDown}
-                  onClick={() => void command(() => desktop().moveItem(item.id, 'down'))}
-                >
-                  <ArrowDown size={15} />
-                </button>
+                {item.status === 'waiting' && (
+                  <>
+                    <button
+                      className="icon-button"
+                      aria-label={`Mover para cima: ${item.title}`}
+                      disabled={working || reorderDisabled || !canMoveUp}
+                      onClick={() => void command(() => desktop().moveItem(item.id, 'up'))}
+                    >
+                      <ArrowUp size={15} />
+                    </button>
+                    <button
+                      className="icon-button"
+                      aria-label={`Mover para baixo: ${item.title}`}
+                      disabled={working || reorderDisabled || !canMoveDown}
+                      onClick={() => void command(() => desktop().moveItem(item.id, 'down'))}
+                    >
+                      <ArrowDown size={15} />
+                    </button>
+                  </>
+                )}
                 <button
                   className="text-button"
                   disabled={working}

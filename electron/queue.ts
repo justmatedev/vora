@@ -435,10 +435,14 @@ export class QueueManager {
     await this.deps.cancelDownload();
   }
   async remove(id: string) {
+    const removable = (item: QueueItem) =>
+      ['waiting', 'failed', 'cancelled', 'interrupted'].includes(item.status) &&
+      this.state.activeId !== item.id;
+    const item = this.item(id);
+    if (!removable(item)) throw new Error('Este item não pode ser removido agora.');
+    if (item.status !== 'waiting') await this.deps.cleanItem(id);
     await this.change(() => {
-      const item = this.item(id);
-      if (item.status !== 'waiting')
-        throw new Error('Somente itens aguardando podem ser removidos.');
+      if (!removable(this.item(id))) throw new Error('O estado deste item mudou.');
       this.state.items = this.state.items.filter((item) => item.id !== id);
       this.pruneGroups();
     });

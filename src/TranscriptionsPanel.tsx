@@ -153,7 +153,10 @@ export function TranscriptionsPanel({
           ) : (
             snapshot.items.map((item) => {
               const active = item.id === snapshot.activeId,
-                canCancel = active || ['model', 'waiting'].includes(item.status),
+                pending = ['model', 'waiting'].includes(item.status),
+                canRemove =
+                  !active &&
+                  ['model', 'waiting', 'failed', 'cancelled', 'interrupted'].includes(item.status),
                 canRetry =
                   ['failed', 'cancelled', 'interrupted'].includes(item.status) ||
                   item.cleanupPending;
@@ -245,7 +248,7 @@ export function TranscriptionsPanel({
                         {item.status === 'completed' ? 'Limpar temporários' : 'Tentar novamente'}
                       </button>
                     )}
-                    {canCancel && (
+                    {active && (
                       <button
                         className="text-button"
                         disabled={working === item.id}
@@ -254,7 +257,19 @@ export function TranscriptionsPanel({
                         }
                       >
                         <X size={14} />
-                        {active ? 'Cancelar' : 'Remover da fila'}
+                        Cancelar
+                      </button>
+                    )}
+                    {canRemove && (
+                      <button
+                        className="text-button"
+                        disabled={!!working}
+                        onClick={() =>
+                          void command(item.id, () => desktop().transcriptions.remove(item.id))
+                        }
+                      >
+                        <X size={14} />
+                        {pending ? 'Remover da fila' : 'Remover'}
                       </button>
                     )}
                   </div>

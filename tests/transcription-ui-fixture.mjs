@@ -71,6 +71,10 @@ export function transcriptionFixture() {
       state.items.find((item) => item.id === id).status = 'cancelled';
       changed();
     },
+    remove: async (id) => {
+      state.items = state.items.filter((item) => item.id !== id);
+      changed();
+    },
     retry: async (id) => {
       state.items.find((item) => item.id === id).status = 'waiting';
       changed();

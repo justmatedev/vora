@@ -154,10 +154,93 @@ test(
       assert.equal(request.downloadModel, true);
       await page.getByText('Aguardando modelo', { exact: true }).waitFor();
       await page.getByRole('button', { name: 'Remover da fila', exact: true }).click();
-      await page.getByText('Cancelada', { exact: true }).waitFor();
+      await page
+        .getByRole('heading', { name: 'Suas transcrições aparecem aqui', exact: true })
+        .waitFor();
+      assert.equal((await page.evaluate(() => window.__transcription.state())).items.length, 0);
     } finally {
       await browser?.close();
       server.httpServer?.close();
+    }
+  },
+);
+
+test(
+  'remoção consistente nas duas filas e controles sem trabalho pendente',
+  { timeout: 30000 },
+  async () => {
+    const server = await preview({ preview: { host: '127.0.0.1', port: 4178, strictPort: true } });
+    let browser;
+    try {
+      browser = await chromium.launch({
+        executablePath: process.env.VORA_TEST_BROWSER || undefined,
+        headless: true,
+        args: ['--no-sandbox', '--disable-dev-shm-usage'],
+      });
+      const page = await browser.newPage({ viewport: { width: 960, height: 720 } });
+      page.setDefaultTimeout(3000);
+      await page.addInitScript(queueFixture);
+      await page.addInitScript(transcriptionFixture);
+      await page.goto('http://127.0.0.1:4178');
+      const downloads = page.getByRole('region', { name: 'Fila de downloads' });
+      for (const status of ['failed', 'interrupted', 'cancelled', 'completed']) {
+        await page.evaluate((status) => {
+          window.__test.replaceQueue({
+            mode: 'paused',
+            groups: [],
+            items: [
+              {
+                id: 'terminal',
+                groupId: 'group',
+                title: 'Download encerrado',
+                url: 'https://www.youtube.com/watch?v=BaW_jenozKc',
+                destination: '/home/teste/Downloads',
+                preferences: { kind: 'video', videoMode: 'original', audioMode: 'original' },
+                status,
+              },
+            ],
+          });
+        }, status);
+        await downloads.getByRole('heading', { name: 'Download encerrado', exact: true }).waitFor();
+        assert.equal(
+          await downloads.getByRole('button', { name: 'Continuar fila', exact: true }).count(),
+          0,
+        );
+        if (status !== 'completed') {
+          await downloads
+            .getByRole('button', { name: 'Detalhes: Download encerrado', exact: true })
+            .click();
+          await downloads.getByRole('button', { name: 'Remover', exact: true }).click();
+          await downloads.getByRole('heading', { name: 'Adicione um link para começar' }).waitFor();
+        }
+      }
+      await page.getByRole('tab', { name: 'Transcrições', exact: true }).click();
+      for (const status of ['model', 'waiting', 'cancelled', 'failed', 'interrupted']) {
+        await page.evaluate(async (status) => {
+          const ids = await window.vora.transcriptions.add({
+            sourceIds: ['selected-file'],
+            options: { modelId: 'small', language: 'pt', formats: ['txt'] },
+            start: false,
+            downloadModel: false,
+          });
+          window.__transcription.setStatus(ids[0], status);
+        }, status);
+        const row = page.getByRole('article', { name: 'entrevista.mp4', exact: true });
+        await row.waitFor();
+        await row
+          .getByRole('button', {
+            name: ['model', 'waiting'].includes(status) ? 'Remover da fila' : 'Remover',
+            exact: true,
+          })
+          .click();
+        await page
+          .getByRole('heading', { name: 'Suas transcrições aparecem aqui', exact: true })
+          .waitFor();
+        assert.equal((await page.evaluate(() => window.__transcription.state())).items.length, 0);
+      }
+    } finally {
+      await browser?.close();
+      await new Promise((resolve) => server.httpServer.close(resolve));
     }
   },
 );

@@ -83,6 +83,7 @@ test('fila executa um por vez e reinicia pausada sem repetir o interrompido auto
     const ids = await queue.add({ sources, options, downloadModel: false, start: true });
     await eventually(() => entered.length === 1);
     assert.equal(peak, 1);
+    await assert.rejects(queue.remove(ids[0]), /remov|execução/i);
     await queue.shutdown();
     const completed: string[] = [];
     restored = new TranscriptionQueue(
@@ -187,3 +188,84 @@ test('falha de origem não bloqueia o próximo item e não altera queue.json', a
     await rm(root, { recursive: true, force: true });
   }
 });
+
+for (const [status, cleanupFails] of [
+  ['model', false],
+  ['waiting', false],
+  ['failed', false],
+  ['cancelled', false],
+  ['interrupted', false],
+  ['completed', false],
+  ['failed', true],
+] as const) {
+  test(`remoção de transcrição ${status}${cleanupFails ? ' com falha de limpeza' : ''} preserva origem e resultados publicados`, async () => {
+    const root = await mkdtemp(join(tmpdir(), 'vora-transcription-remove-'));
+    let queue: TranscriptionQueue | undefined;
+    try {
+      const sourcePath = join(root, 'original.mp4'),
+        outputPath = join(root, 'partial.txt');
+      await writeFile(sourcePath, 'original');
+      await writeFile(outputPath, 'published');
+      const sourceStat = await stat(sourcePath);
+      const file = join(root, 'transcriptions.json');
+      const item = {
+        id: 'remove-me',
+        status,
+        modelRevision: 'fixed',
+        destination: root,
+        options: { modelId: 'small', language: 'pt', formats: ['txt'] },
+        source: {
+          id: 'source',
+          name: 'original.mp4',
+          path: sourcePath,
+          origin: 'local',
+          size: sourceStat.size,
+          mtimeMs: sourceStat.mtimeMs,
+          device: String(sourceStat.dev),
+          inode: String(sourceStat.ino),
+          durationMs: 1000,
+          audioStreamIndex: 0,
+        },
+        outputs: [{ format: 'txt', path: outputPath, size: 9 }],
+      };
+      await writeFile(file, JSON.stringify({ schemaVersion: 1, mode: 'paused', items: [item] }));
+      const models = {
+        snapshot: () => ({ small: { state: 'installed' } }) as ModelSnapshot,
+        install: async () => {},
+      };
+      const sessions = new TranscriptionSessions(join(root, 'sessions.json'));
+      queue = new TranscriptionQueue(
+        file,
+        { models, sessions, transcriber: { run: async () => doc } },
+        () => {},
+      );
+      await queue.load();
+      const session = await sessions.create(item.id, root);
+      if (cleanupFails) {
+        const marker = join(session.path, '.vora-transcription.json');
+        const originalMarker = await readFile(marker, 'utf8');
+        await writeFile(marker, '{}');
+        await assert.rejects(queue.remove(item.id), /propriedade/i);
+        assert.equal(queue.snapshot().items.length, 1);
+        assert.equal(JSON.parse(await readFile(file, 'utf8')).items.length, 1);
+        assert.equal((await stat(session.path)).isDirectory(), true);
+        await writeFile(marker, originalMarker);
+        await queue.remove(item.id);
+        assert.equal(queue.snapshot().items.length, 0);
+      } else if (status === 'completed') {
+        await assert.rejects(queue.remove(item.id), /remov/i);
+        assert.equal(queue.snapshot().items.length, 1);
+      } else {
+        await queue.remove(item.id);
+        assert.equal(queue.snapshot().items.length, 0);
+        assert.equal(JSON.parse(await readFile(file, 'utf8')).items.length, 0);
+        await assert.rejects(stat(session.path), { code: 'ENOENT' });
+      }
+      assert.equal(await readFile(sourcePath, 'utf8'), 'original');
+      assert.equal(await readFile(outputPath, 'utf8'), 'published');
+    } finally {
+      await queue?.shutdown();
+      await rm(root, { recursive: true, force: true });
+    }
+  });
+}

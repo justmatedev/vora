@@ -298,8 +298,8 @@ test(
       await queue.getByRole('button', { name: 'Cancelar item', exact: true }).click();
       const cancelled = queue.getByRole('article', { name: 'Link M7lc1UVf-VE', exact: true });
       await cancelled.getByText('Cancelado', { exact: true }).waitFor();
-      await cancelled.getByRole('button', { name: 'Tentar novamente', exact: true }).click();
       await cancelled.getByRole('button', { name: /Detalhes: Link M7/ }).click();
+      assert.equal(await cancelled.getByRole('button', { name: /Mover para/ }).count(), 0);
       await cancelled.getByRole('button', { name: 'Remover', exact: true }).click();
       assert.equal((await page.evaluate(() => window.__test.state())).items.length, 2);
       await page.reload();
