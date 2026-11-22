@@ -1534,6 +1534,10 @@ footer > span:first-child {
   line-height: 1.5;
   margin-top: var(--space-fine);
 }
+.queue-layout .queue-item-details .queue-metadata {
+  white-space: normal;
+  overflow: visible;
+}
 .queue-layout .queue-metadata > svg {
   vertical-align: -2px;
   margin-right: var(--space-1);
@@ -1693,7 +1697,7 @@ summary:focus-visible {
   margin-top: var(--space-1);
   padding-left: calc(var(--queue-thumbnail-width) + var(--space-3));
 }
-.queue-item-quick-actions .result-size {
+.queue-file-actions .result-size {
   font-size: var(--font-caption);
   color: var(--muted);
 }

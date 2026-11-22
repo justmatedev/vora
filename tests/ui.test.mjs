@@ -152,7 +152,7 @@ test(
       await page.getByText('1 link repetido ignorado.', { exact: false }).waitFor();
       assert.equal((await page.evaluate(() => window.__test.state())).items.length, 1);
       const firstId = await page.evaluate(() => window.__test.state().items[0].id);
-      await queue.getByText('Carregando informações…', { exact: true }).waitFor();
+      assert.equal(await queue.getByText('Carregando informações…', { exact: true }).count(), 0);
       await page.evaluate(() => window.__test.setPreview(0, 'error'));
       await queue.getByText(/Não foi possível carregar a prévia/).waitFor();
       await page.route('https://i.ytimg.com/**', (route) =>
@@ -172,7 +172,15 @@ test(
           thumbnail: 'https://i.ytimg.com/vi/test/default.jpg',
         }),
       );
+      const detailsToggle = queue.getByRole('button', {
+        name: 'Detalhes: Vídeo individual de teste',
+        exact: true,
+      });
+      assert.equal(await queue.getByRole('group', { name: 'Filtros da fila' }).count(), 0);
+      assert.equal(await queue.getByText('Canal da prévia · 2:05', { exact: true }).count(), 0);
+      await detailsToggle.click();
       await queue.getByText('Canal da prévia · 2:05', { exact: true }).waitFor();
+      await detailsToggle.click();
       assert.equal(await queue.locator('.queue-thumbnail').count(), 1);
       assert.equal(await queue.getByText('Carregando informações…', { exact: true }).count(), 0);
       await queue.getByRole('button', { name: 'Iniciar fila', exact: true }).click();
@@ -279,7 +287,7 @@ test(
       await queue.getByRole('button', { name: 'Continuar fila', exact: true }).click();
       await queue.getByText('Baixando áudio', { exact: true }).waitFor();
       await page.evaluate(() => window.__test.retrying());
-      await queue.getByText('Nova tentativa', { exact: true }).waitFor();
+      assert.equal(await queue.locator('.active-download .queue-status').count(), 0);
       await queue.getByText(/Tentativa 2 de 3 · nova tentativa em/).waitFor();
       assert.equal(await queue.getByRole('progressbar').count(), 0);
       await page.screenshot({
@@ -1149,7 +1157,8 @@ test(
       await page.getByRole('heading', { name: 'Adicione um link para começar' }).waitFor();
       assert.equal(await toggle.count(), 0);
       await seed(1, false);
-      await queue.getByText('1 de 1 itens na lista', { exact: true }).waitFor();
+      await rows.first().waitFor();
+      assert.equal(await queue.getByRole('group', { name: 'Filtros da fila' }).count(), 0);
       assert.equal(await search.count(), 0);
       await toggle.click();
       assert.equal(await search.isVisible(), true);

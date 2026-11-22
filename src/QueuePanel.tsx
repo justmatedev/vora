@@ -55,6 +55,7 @@ export function QueuePanel({
   const active = snapshot.items.find((item) => item.id === snapshot.activeId);
   const view = useMemo(() => queueView(snapshot, query, filter), [snapshot, query, filter]);
   const searchVisible = !!query || (searchOpen ?? view.total >= SEARCH_ITEM_THRESHOLD);
+  const filtersVisible = view.total >= 5 || searchVisible || filter !== 'all';
   useEffect(() => {
     if (open && searchVisible && focusSearch.current) {
       searchInput.current?.focus();
@@ -141,15 +142,16 @@ export function QueuePanel({
           <ChevronDown size={15} className={open ? 'expanded' : ''} />
         </button>
         <span className="queue-summary">
-          {active ? '1 em andamento · ' : ''}
-          {pending.length} aguardando · {completed} concluído{completed === 1 ? '' : 's'}
-          <span className="queue-run-status" role="status">
-            {snapshot.mode === 'pausing'
-              ? 'Pausando após o atual'
-              : snapshot.mode === 'running'
-                ? 'Fila em execução'
-                : 'Fila pausada'}
-          </span>
+          {pending.length > 0
+            ? `${pending.length} aguardando`
+            : completed > 0 && !active
+              ? `${completed} concluído${completed === 1 ? '' : 's'}`
+              : null}
+          {snapshot.mode !== 'running' && (
+            <span className="queue-run-status" role="status">
+              {snapshot.mode === 'pausing' ? 'Pausando após o atual' : 'Fila pausada'}
+            </span>
+          )}
         </span>
         <div className="queue-controls">
           <button
@@ -209,79 +211,81 @@ export function QueuePanel({
       )}
       {open && (
         <>
-          <div className="queue-filters">
-            {searchVisible && (
-              <div className="queue-search" id="queue-search-field">
-                <Search size={15} />
-                <input
-                  ref={searchInput}
-                  aria-label="Buscar na fila"
-                  placeholder="Buscar título, canal ou link"
-                  value={query}
-                  onFocus={() => setSearchOpen(true)}
-                  onKeyDown={(event) => {
-                    if (event.key === 'Escape') {
-                      event.preventDefault();
-                      closeSearch();
-                    }
-                  }}
-                  onChange={(event) => {
-                    setQuery(event.target.value);
-                    setPage(0);
-                  }}
-                />
-                {query && (
-                  <button
-                    className="icon-button"
-                    aria-label="Limpar busca"
-                    onClick={() => {
-                      setQuery('');
+          {filtersVisible && (
+            <div className="queue-filters">
+              {searchVisible && (
+                <div className="queue-search" id="queue-search-field">
+                  <Search size={15} />
+                  <input
+                    ref={searchInput}
+                    aria-label="Buscar na fila"
+                    placeholder="Buscar título, canal ou link"
+                    value={query}
+                    onFocus={() => setSearchOpen(true)}
+                    onKeyDown={(event) => {
+                      if (event.key === 'Escape') {
+                        event.preventDefault();
+                        closeSearch();
+                      }
+                    }}
+                    onChange={(event) => {
+                      setQuery(event.target.value);
                       setPage(0);
-                      searchInput.current?.focus();
+                    }}
+                  />
+                  {query && (
+                    <button
+                      className="icon-button"
+                      aria-label="Limpar busca"
+                      onClick={() => {
+                        setQuery('');
+                        setPage(0);
+                        searchInput.current?.focus();
+                      }}
+                    >
+                      <X size={13} />
+                    </button>
+                  )}
+                </div>
+              )}
+              <div className="queue-filter-buttons" role="group" aria-label="Filtros da fila">
+                {(
+                  [
+                    ['all', 'Todos'],
+                    ['waiting', 'Aguardando'],
+                    ['completed', 'Concluídos'],
+                    ['failed', 'Com erro'],
+                  ] as const
+                ).map(([value, label]) => (
+                  <button
+                    key={value}
+                    className="text-button"
+                    aria-pressed={filter === value}
+                    onClick={() => {
+                      setFilter(value);
+                      setPage(0);
                     }}
                   >
-                    <X size={13} />
+                    {label}
                   </button>
-                )}
+                ))}
               </div>
-            )}
-            <div className="queue-filter-buttons" role="group" aria-label="Filtros da fila">
-              {(
-                [
-                  ['all', 'Todos'],
-                  ['waiting', 'Aguardando'],
-                  ['completed', 'Concluídos'],
-                  ['failed', 'Com erro'],
-                ] as const
-              ).map(([value, label]) => (
-                <button
-                  key={value}
-                  className="text-button"
-                  aria-pressed={filter === value}
-                  onClick={() => {
-                    setFilter(value);
-                    setPage(0);
-                  }}
-                >
-                  {label}
-                </button>
-              ))}
             </div>
-          </div>
-          <div className="queue-results-bar">
-            <span>
-              {view.rows.length} de {view.total} itens na lista
-            </span>
-            {completed > 0 && (
-              <button
-                className="text-button"
-                disabled={working}
-                onClick={() => void command(() => desktop().clearCompleted())}
-              >
-                Limpar concluídos
-              </button>
-            )}
-          </div>
+          )}
+          {(filtersVisible || completed > 0) && (
+            <div className="queue-results-bar">
+              <span>{filtersVisible && `${view.rows.length} de ${view.total} itens na lista`}</span>
+              {completed > 0 && (
+                <button
+                  className="text-button"
+                  disabled={working}
+                  onClick={() => void command(() => desktop().clearCompleted())}
+                >
+                  Limpar concluídos
+                </button>
+              )}
+            </div>
+          )}
           <div className="queue-items" ref={listRef} aria-label="Itens da fila" tabIndex={0}>
             {!visible.length && (
               <div className="queue-no-results">

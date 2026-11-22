@@ -18,18 +18,10 @@ import {
 import type { QueueItem } from '../shared/types';
 import { desktop } from './queue-client';
 import { configurationLabel } from './QueueGroupHeader';
-import { folderLabel, statusLabel } from './queue-view';
+import { statusLabel } from './queue-view';
 import { TransferPanel } from './TransferPanel';
 
-export function ItemSummary({
-  item,
-  formatEta,
-  details,
-}: {
-  item: QueueItem;
-  formatEta: (value: number) => string;
-  details?: () => void;
-}) {
+export function ItemSummary({ item, details }: { item: QueueItem; details?: () => void }) {
   const [brokenImage, setBrokenImage] = useState(false);
   useEffect(() => setBrokenImage(false), [item.preview?.thumbnail]);
   return (
@@ -49,32 +41,13 @@ export function ItemSummary({
       </div>
       <div className="queue-video-details">
         <h3 title={item.title}>{item.title}</h3>
-        <p className="queue-metadata">
-          {item.preview ? (
-            [
-              ...(mediaSource(item.url).platform === 'instagram' ? ['Instagram'] : []),
-              item.preview.channel,
-              item.preview.duration ? formatEta(item.preview.duration) : undefined,
-            ]
-              .filter(Boolean)
-              .join(' · ') || 'Informações do vídeo'
-          ) : item.previewState === 'error' ? (
-            'Prévia indisponível'
-          ) : item.status === 'waiting' ? (
-            <>
-              <LoaderCircle size={12} className="spin" /> Carregando informações…
-            </>
-          ) : mediaSource(item.url).platform === 'instagram' ? (
-            'Instagram'
-          ) : (
-            'YouTube'
-          )}
-        </p>
       </div>
-      <span className={`queue-status ${item.status}`}>
-        {item.status === 'completed' && <CheckCircle2 size={12} />}
-        {statusLabel(item)}
-      </span>
+      {!details && (
+        <span className={`queue-status ${item.status}`}>
+          {item.status === 'completed' && <CheckCircle2 size={12} />}
+          {statusLabel(item)}
+        </span>
+      )}
       {details && (
         <button
           className="icon-button active-info-button"
@@ -86,6 +59,37 @@ export function ItemSummary({
         </button>
       )}
     </div>
+  );
+}
+function ItemMetadata({
+  item,
+  formatEta,
+}: {
+  item: QueueItem;
+  formatEta: (value: number) => string;
+}) {
+  return (
+    <p className="queue-metadata">
+      {item.preview ? (
+        [
+          ...(mediaSource(item.url).platform === 'instagram' ? ['Instagram'] : []),
+          item.preview.channel,
+          item.preview.duration ? formatEta(item.preview.duration) : undefined,
+        ]
+          .filter(Boolean)
+          .join(' · ') || 'Informações do vídeo'
+      ) : item.previewState === 'error' ? (
+        'Prévia indisponível'
+      ) : item.status === 'waiting' ? (
+        <>
+          <LoaderCircle size={12} className="spin" /> Carregando informações…
+        </>
+      ) : mediaSource(item.url).platform === 'instagram' ? (
+        'Instagram'
+      ) : (
+        'YouTube'
+      )}
+    </p>
   );
 }
 function ItemWarnings({ item }: { item: QueueItem }) {
@@ -123,10 +127,7 @@ export function ActiveDownload({
   const [detailsOpen, setDetailsOpen] = useState(false);
   return (
     <article className="active-download" aria-label={item.title}>
-      <ItemSummary item={item} formatEta={formatEta} details={() => setDetailsOpen(true)} />
-      <p className="active-config" title={item.destination}>
-        {configurationLabel(item.preferences)} · {folderLabel(item.destination)}
-      </p>
+      <ItemSummary item={item} details={() => setDetailsOpen(true)} />
       {item.progress ? (
         <TransferPanel
           progress={item.progress}
@@ -158,7 +159,13 @@ export function ActiveDownload({
         <p className="queue-metadata">Tentativa {item.attempt} de 3</p>
       )}
       <ItemWarnings item={item} />
-      {detailsOpen && <ActiveDetailsDialog item={item} onClose={() => setDetailsOpen(false)} />}
+      {detailsOpen && (
+        <ActiveDetailsDialog
+          item={item}
+          formatEta={formatEta}
+          onClose={() => setDetailsOpen(false)}
+        />
+      )}
     </article>
   );
 }
@@ -190,21 +197,10 @@ export function QueueRow({
   const retryable = ['failed', 'cancelled', 'interrupted'].includes(item.status);
   return (
     <article className="queue-item queue-compact-row" aria-label={item.title}>
-      <ItemSummary item={item} formatEta={formatEta} />
+      <ItemSummary item={item} />
       <div className="queue-item-quick-actions">
         {item.status === 'completed' && item.result && (
           <>
-            <span className="result-size">{formatSize(item.result.size)}</span>
-            {onTranscribe && (
-              <button
-                className="text-button"
-                disabled={working}
-                onClick={() => onTranscribe(item.id)}
-              >
-                <FileText size={13} />
-                Transcrever
-              </button>
-            )}
             <button
               className="text-button"
               disabled={working}
@@ -241,6 +237,11 @@ export function QueueRow({
       {expanded && (
         <div className="queue-item-details">
           <p className="detail-title">{item.title}</p>
+          <ItemMetadata item={item} formatEta={formatEta} />
+          <p>
+            <span>Formato</span>
+            {configurationLabel(item.preferences)}
+          </p>
           <p>
             <span>Link</span>
             {item.url}
@@ -290,6 +291,18 @@ export function QueueRow({
           )}
           {item.status === 'completed' && item.result && (
             <div className="queue-file-actions">
+              <span className="result-size">{formatSize(item.result.size)}</span>
+              {onTranscribe && (
+                <button
+                  className="text-button"
+                  disabled={working}
+                  onClick={() => onTranscribe(item.id)}
+                >
+                  <FileText size={13} />
+                  Transcrever
+                </button>
+              )}
+
               <button
                 className="text-button"
                 disabled={working}
@@ -329,7 +342,15 @@ function RetryCountdown({ retryAt, attempt }: { retryAt?: number; attempt: numbe
   );
 }
 
-function ActiveDetailsDialog({ item, onClose }: { item: QueueItem; onClose: () => void }) {
+function ActiveDetailsDialog({
+  item,
+  formatEta,
+  onClose,
+}: {
+  item: QueueItem;
+  formatEta: (value: number) => string;
+  onClose: () => void;
+}) {
   const ref = useRef<HTMLDialogElement>(null);
   useEffect(() => {
     const element = ref.current;
@@ -351,7 +372,11 @@ function ActiveDetailsDialog({ item, onClose }: { item: QueueItem; onClose: () =
       </div>
       <div className="queue-item-details">
         <p className="detail-title">{item.title}</p>
-        <p>{configurationLabel(item.preferences)}</p>
+        <ItemMetadata item={item} formatEta={formatEta} />
+        <p>
+          <span>Formato</span>
+          {configurationLabel(item.preferences)}
+        </p>
         <p>
           <span>Link</span>
           {item.url}

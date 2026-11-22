@@ -143,6 +143,7 @@ test(
           ],
         }),
       );
+      await page.getByRole('button', { name: 'Detalhes: Vídeo baixado', exact: true }).click();
       await page.getByRole('button', { name: 'Transcrever', exact: true }).click();
       const dialog = page.getByRole('dialog', { name: 'Nova transcrição', exact: true });
       await dialog.getByRole('radio', { name: /Medium/ }).check();

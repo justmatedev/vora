@@ -76,12 +76,13 @@ export function TransferPanel({
       </div>
       <div className="progress-bottom">
         <span>
-          {downloading && progress?.speed
-            ? `${formatSpeed(progress.speed)}/s`
-            : 'Processando no seu computador'}
-          {downloading && progress?.eta !== undefined
-            ? ` · ${formatEta(progress.eta)} restantes`
-            : ''}
+          {downloading &&
+            [
+              progress?.speed ? `${formatSpeed(progress.speed)}/s` : undefined,
+              progress?.eta !== undefined ? `${formatEta(progress.eta)} restantes` : undefined,
+            ]
+              .filter(Boolean)
+              .join(' · ')}
         </span>
         <button className="text-button" onClick={cancel} disabled={cancelling || disabled}>
           {cancelLabel}
