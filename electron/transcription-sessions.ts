@@ -52,7 +52,7 @@ export async function processIdentity(pid: number): Promise<ProcessIdentity | nu
       if (!started || !executable) throw new Error('Não foi possível verificar o processo.');
       return { pid, started, executable };
     } catch (error) {
-      if ((error as NodeJS.ErrnoException).code === 'ENOENT') return null;
+      if (['ENOENT', 'ESRCH'].includes((error as NodeJS.ErrnoException).code ?? '')) return null;
       throw error;
     }
   }

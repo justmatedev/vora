@@ -1,5 +1,7 @@
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
+import fs from 'node:fs/promises';
+import { syncBuiltinESMExports } from 'node:module';
 import {
   realpath,
   mkdtemp,
@@ -126,3 +128,25 @@ test('consulta de processo vivo não confunde marcador inválido com processo em
     await rm(root, { recursive: true, force: true });
   }
 });
+
+for (const code of ['ENOENT', 'ESRCH']) {
+  test(
+    `processo encerrado durante leitura de /proc (${code}) é tratado como ausente`,
+    { skip: process.platform !== 'linux' },
+    async (t) => {
+      const originalReadFile = fs.readFile;
+      t.mock.method(fs, 'readFile', async (...args: Parameters<typeof fs.readFile>) => {
+        if (args[0] === `/proc/${process.pid}/stat`)
+          throw Object.assign(new Error('process exited'), { code });
+        return originalReadFile(...args);
+      });
+      syncBuiltinESMExports();
+      try {
+        assert.equal(await processIdentity(process.pid), null);
+      } finally {
+        t.mock.restoreAll();
+        syncBuiltinESMExports();
+      }
+    },
+  );
+}
