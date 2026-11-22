@@ -2,7 +2,7 @@ import { test } from 'node:test';
 import assert from 'node:assert/strict';
 import { createServer } from 'node:http';
 import { createHash } from 'node:crypto';
-import { mkdtemp, readFile, writeFile, rm } from 'node:fs/promises';
+import { realpath, mkdtemp, readFile, writeFile, rm } from 'node:fs/promises';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 import { downloadModel } from '../electron/model-download';
@@ -23,7 +23,7 @@ test('retoma bytes locais e só publica o modelo depois de conferir hash', async
     res.end(bytes.subarray(start));
   });
   await new Promise<void>((resolve) => server.listen(0, '127.0.0.1', resolve));
-  const root = await mkdtemp(join(tmpdir(), 'vora-model-'));
+  const root = await realpath(await mkdtemp(join(tmpdir(), 'vora-model-')));
   const paths: ModelPaths = {
     directory: root,
     partial: join(root, 'm.part'),
@@ -81,7 +81,7 @@ test('servidor que ignora Range não é concatenado ao parcial e modelo em uso n
     res.end(bytes);
   });
   await new Promise<void>((resolve) => server.listen(0, '127.0.0.1', resolve));
-  const root = await mkdtemp(join(tmpdir(), 'vora-model-manager-'));
+  const root = await realpath(await mkdtemp(join(tmpdir(), 'vora-model-manager-')));
   const address = server.address() as { port: number };
   const spec: ModelSpec = {
     id: 'small',

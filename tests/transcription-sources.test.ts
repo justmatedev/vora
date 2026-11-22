@@ -1,11 +1,11 @@
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
-import { mkdtemp, writeFile, rm } from 'node:fs/promises';
+import { realpath, mkdtemp, writeFile, rm } from 'node:fs/promises';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 import { SourceRegistry, inspectLocalMedia } from '../electron/transcription-sources';
 test('seleção mantém identidade e recusa arquivo substituído ou id desconhecido', async () => {
-  const root = await mkdtemp(join(tmpdir(), 'vora-source-'));
+  const root = await realpath(await mkdtemp(join(tmpdir(), 'vora-source-')));
   try {
     const file = join(root, "áudio 'especial'.mp4");
     await writeFile(file, 'media');
@@ -57,7 +57,7 @@ test('inspeção exige áudio, recusa playlists disfarçadas e restringe protoco
   );
 });
 test('encerramento da seleção cancela e drena uma inspeção ainda em andamento', async () => {
-  const root = await mkdtemp(join(tmpdir(), 'vora-source-close-'));
+  const root = await realpath(await mkdtemp(join(tmpdir(), 'vora-source-close-')));
   let entered!: () => void;
   const started = new Promise<void>((resolve) => {
     entered = resolve;

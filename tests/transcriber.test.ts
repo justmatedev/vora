@@ -1,6 +1,6 @@
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
-import { mkdtemp, writeFile, rm, stat, rename } from 'node:fs/promises';
+import { realpath, mkdtemp, writeFile, rm, stat, rename } from 'node:fs/promises';
 import { createHash } from 'node:crypto';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
@@ -8,7 +8,7 @@ import { Transcriber } from '../electron/transcriber';
 import { TranscriptionSessions } from '../electron/transcription-sessions';
 import type { TranscriptionWork, ModelSpec } from '../shared/transcription-types';
 test('substituição da origem entre chunks falha antes de ler a segunda gravação', async () => {
-  const root = await mkdtemp(join(tmpdir(), 'vora-source-replaced-'));
+  const root = await realpath(await mkdtemp(join(tmpdir(), 'vora-source-replaced-')));
   const sessions = new TranscriptionSessions(join(root, 'sessions.json'));
   try {
     const sourcePath = join(root, 'source.wav'),
@@ -81,7 +81,7 @@ test('substituição da origem entre chunks falha antes de ler a segunda gravaç
   }
 });
 test('motor prepara áudio local e usa JSON sem GPU ou tradução', async () => {
-  const root = await mkdtemp(join(tmpdir(), 'vora-transcriber-'));
+  const root = await realpath(await mkdtemp(join(tmpdir(), 'vora-transcriber-')));
   try {
     const source = join(root, 'origem.mp4'),
       model = join(root, 'model');
@@ -152,7 +152,7 @@ test('motor prepara áudio local e usa JSON sem GPU ou tradução', async () => 
   }
 });
 test('resultado sem fala não é declarado concluído', async () => {
-  const root = await mkdtemp(join(tmpdir(), 'vora-transcriber-empty-'));
+  const root = await realpath(await mkdtemp(join(tmpdir(), 'vora-transcriber-empty-')));
   try {
     const source = join(root, 'source.wav'),
       model = join(root, 'model');

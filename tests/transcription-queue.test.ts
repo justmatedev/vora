@@ -1,6 +1,6 @@
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
-import { mkdtemp, writeFile, readFile, rm, stat } from 'node:fs/promises';
+import { realpath, mkdtemp, writeFile, readFile, rm, stat } from 'node:fs/promises';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 import { TranscriptionQueue } from '../electron/transcription-queue';
@@ -25,7 +25,7 @@ async function eventually(fn: () => boolean) {
   }
 }
 test('fila executa um por vez e reinicia pausada sem repetir o interrompido automaticamente', async () => {
-  const root = await mkdtemp(join(tmpdir(), 'vora-transcription-queue-'));
+  const root = await realpath(await mkdtemp(join(tmpdir(), 'vora-transcription-queue-')));
   const snapshot = Object.fromEntries(
     (['small', 'medium'] as const).map((id) => [
       id,
@@ -120,7 +120,7 @@ test('fila executa um por vez e reinicia pausada sem repetir o interrompido auto
   }
 });
 test('falha de origem não bloqueia o próximo item e não altera queue.json', async () => {
-  const root = await mkdtemp(join(tmpdir(), 'vora-transcription-failure-'));
+  const root = await realpath(await mkdtemp(join(tmpdir(), 'vora-transcription-failure-')));
   try {
     const legacy = join(root, 'queue.json');
     await writeFile(legacy, 'legacy queue');
@@ -199,7 +199,7 @@ for (const [status, cleanupFails] of [
   ['failed', true],
 ] as const) {
   test(`remoção de transcrição ${status}${cleanupFails ? ' com falha de limpeza' : ''} preserva origem e resultados publicados`, async () => {
-    const root = await mkdtemp(join(tmpdir(), 'vora-transcription-remove-'));
+    const root = await realpath(await mkdtemp(join(tmpdir(), 'vora-transcription-remove-')));
     let queue: TranscriptionQueue | undefined;
     try {
       const sourcePath = join(root, 'original.mp4'),

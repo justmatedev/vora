@@ -2,7 +2,7 @@ import { test } from 'node:test';
 import assert from 'node:assert/strict';
 import { createServer } from 'node:http';
 import { createHash } from 'node:crypto';
-import { mkdtemp, readFile, writeFile, rm } from 'node:fs/promises';
+import { realpath, mkdtemp, readFile, writeFile, rm } from 'node:fs/promises';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 import { downloadModel } from '../electron/model-download';
@@ -36,7 +36,7 @@ for (const scenario of ['416', 'changed-etag', 'changed-last-modified', 'cancel'
       res.end(bytes.subarray(start));
     });
     await new Promise<void>((resolve) => server.listen(0, '127.0.0.1', resolve));
-    const root = await mkdtemp(join(tmpdir(), 'vora-model-edge-'));
+    const root = await realpath(await mkdtemp(join(tmpdir(), 'vora-model-edge-')));
     const spec: ModelSpec = {
       id: 'small',
       revision: 'one',
@@ -97,7 +97,7 @@ for (const scenario of ['416', 'changed-etag', 'changed-last-modified', 'cancel'
   });
 
 test('modelo adulterado após instalação não é considerado disponível ao reabrir', async () => {
-  const root = await mkdtemp(join(tmpdir(), 'vora-model-tamper-'));
+  const root = await realpath(await mkdtemp(join(tmpdir(), 'vora-model-tamper-')));
   const spec: ModelSpec = {
     id: 'small',
     revision: 'one',

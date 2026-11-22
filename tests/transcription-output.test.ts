@@ -1,6 +1,6 @@
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
-import { mkdtemp, writeFile, readFile, rm } from 'node:fs/promises';
+import { realpath, mkdtemp, writeFile, readFile, rm } from 'node:fs/promises';
 import { tmpdir } from 'node:os';
 import { join, basename } from 'node:path';
 import {
@@ -15,7 +15,7 @@ const doc: TranscriptDocument = {
   segments: [{ startMs: 0, endMs: 120400, text: 'Olá, mundo.' }],
 };
 test('TXT e SRT usam o mesmo sufixo e preservam arquivo existente', async () => {
-  const root = await mkdtemp(join(tmpdir(), 'vora-output-'));
+  const root = await realpath(await mkdtemp(join(tmpdir(), 'vora-output-')));
   try {
     await writeFile(join(root, 'clovis.transcricao.txt'), 'anterior');
     const outputs = await publishTranscript(
@@ -37,7 +37,7 @@ test('TXT e SRT usam o mesmo sufixo e preservam arquivo existente', async () => 
   }
 });
 test('criação concorrente do segundo formato não sobrescreve e relata saída parcial', async () => {
-  const root = await mkdtemp(join(tmpdir(), 'vora-output-race-'));
+  const root = await realpath(await mkdtemp(join(tmpdir(), 'vora-output-race-')));
   try {
     await assert.rejects(
       publishTranscript(doc, ['txt', 'srt'], root, 'clovis.mp4', async (output) => {
@@ -64,7 +64,7 @@ test('SRT recorta tempos e recusa resultados sem fala útil', () => {
   assert.throws(() => serializeTranscript({ ...doc, segments: [] }, 'txt'), /fala/i);
 });
 test('falha de diário preserva o arquivo publicado e nomes de dispositivo são neutralizados', async () => {
-  const root = await mkdtemp(join(tmpdir(), 'vora-output-journal-'));
+  const root = await realpath(await mkdtemp(join(tmpdir(), 'vora-output-journal-')));
   try {
     await assert.rejects(
       publishTranscript(doc, ['txt', 'srt'], root, 'CON.mp4', async () => {
