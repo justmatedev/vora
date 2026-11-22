@@ -8,11 +8,11 @@
 4. Escolha a pasta e clique em **Adicionar à fila**.
 5. Na seção **Fila**, clique em **Iniciar fila**. Adicionar itens não inicia uma fila pausada.
 
-O layout permanece compacto desde a abertura, com o campo de link no topo e a área da fila ocupando o espaço restante. Sem itens, a fila mostra “Adicione um link para começar”; filtros e controles de execução aparecem quando houver itens. A busca abre automaticamente a partir de 10 itens na lista, sem contar o download ativo. Em filas menores, use a lupa no cabeçalho. O campo permanece aberto durante a pesquisa, mesmo que a fila diminua; fechar pela opção **Fechar busca** ou pela tecla **Esc** no campo limpa a pesquisa e conserva o filtro selecionado. Toda análise individual abre em um modal, inclusive a do primeiro vídeo. Adicionar fecha o modal; cancelar conserva a fila. **Rever opções** reabre os dados já analisados sem nova consulta. Confirmações de adição e duplicatas são compactas, dispensáveis e somem após seis segundos, suspendendo a contagem enquanto houver foco ou mouse sobre o aviso. Erros e avisos que exigem decisão continuam visíveis.
+O layout permanece compacto desde a abertura, com o campo de link no topo e a área da fila ocupando o espaço restante. Sem itens, a fila mostra “Adicione um link para começar”; os filtros aparecem a partir de cinco itens na lista ou ao abrir a busca; os controles de execução aparecem quando há trabalho para continuar. A busca abre automaticamente a partir de 10 itens na lista, sem contar o download ativo. Em filas menores, use a lupa no cabeçalho. O campo permanece aberto durante a pesquisa, mesmo que a fila diminua; fechar pela opção **Fechar busca** ou pela tecla **Esc** no campo limpa a pesquisa e conserva o filtro selecionado. Toda análise individual abre em um modal, inclusive a do primeiro vídeo. Adicionar fecha o modal; cancelar conserva a fila. **Rever opções** reabre os dados já analisados sem nova consulta. Confirmações de adição e duplicatas são compactas, dispensáveis e somem após seis segundos, suspendendo a contagem enquanto houver foco ou mouse sobre o aviso. Erros e avisos que exigem decisão continuam visíveis.
 
 ## Transcrições locais
 
-Na aba **Transcrições**, use **Selecionar arquivo** para escolher áudio ou vídeo do computador. Também há **Transcrever** nos downloads concluídos. A análise de links e a fila de downloads continuam na aba **Downloads**.
+Na aba **Transcrições**, use **Selecionar arquivo** para escolher áudio ou vídeo do computador. Nos downloads concluídos, use **Detalhes → Transcrever**. A análise de links e a fila de downloads continuam na aba **Downloads**.
 
 Escolha **Small** (recomendado, cerca de 488 MB) ou **Medium** (cerca de 1,53 GB). Medium costuma reconhecer melhor, mas exige mais memória e tempo. A primeira utilização pede o download do modelo escolhido. Isso não é obrigatório para baixar vídeos. O Vora verifica tamanho e SHA-256; cancelar conserva a parte válida para uma nova tentativa. Se o servidor não aceitar retomada ou o arquivo tiver mudado, o download recomeça. **Modelos** permite baixar, cancelar, retomar, remover e abrir a pasta. Um modelo usado por itens ativos ou pendentes não pode ser removido.
 
@@ -50,7 +50,7 @@ Os links adicionados carregam título, miniatura, canal e duração em segundo p
 
 O download ativo fica fixo acima da lista, com etapa, progresso, tentativas e cancelamento, inclusive ao recolher a fila ou filtrar os itens. Ele aparece uma única vez. A rolagem fica na lista; modais têm rolagem própria. O botão de informações do ativo mostra título completo, configuração, link e destino.
 
-Os demais itens usam linhas compactas. **Detalhes** mostra título completo, link, pasta e ações secundárias; abrir o arquivo concluído ou tentar novamente continua disponível na linha. Configuração e pasta ficam no cabeçalho do grupo. Grupos intercalados são apresentados em blocos com a indicação **continuação**, mantendo a ordem real da fila.
+Os demais itens usam linhas compactas. **Detalhes** mostra título completo, canal, duração, formato, link, pasta e ações secundárias; abrir o arquivo concluído ou tentar novamente continua disponível na linha. Configuração e pasta ficam no cabeçalho do grupo. Grupos intercalados são apresentados em blocos com a indicação **continuação**, mantendo a ordem real da fila.
 
 A busca aceita título, canal ou URL e ignora maiúsculas e acentos. Os filtros são **Todos**, **Aguardando**, **Concluídos** e **Com erro** (somente falhos). Cancelados e interrompidos aparecem em Todos. A busca combina com o filtro e precede a paginação de 100 itens. A troca do download ativo não altera busca, filtro ou página. Essas escolhas visuais não são salvas ao fechar.
 
@@ -102,3 +102,7 @@ Ao encontrar uma versão, o Vora avisa no topo. Abra as configurações para ler
 Quando estiver pronta, pause a fila, aguarde o item ativo e outras operações terminarem e clique em Reiniciar e atualizar. A fila pendente e suas configurações são salvas. No Windows, o instalador pode solicitar permissão do sistema conforme o tipo de instalação. No Linux, o AppImage é substituído no mesmo caminho, preservando atalhos; a cópia é preparada ao lado do arquivo antes da substituição. Se a pasta não permitir gravação, use Ver versões no GitHub e faça a troca manual.
 
 O recurso funciona no aplicativo empacotado: instalador NSIS no Windows e AppImage no Linux. Em npm run dev e na pasta Linux descompactada, utilize a página de versões. Quem está na versão 0.5.1 precisa instalar manualmente a primeira versão com esse recurso. A atualização não altera os arquivos de mídia já salvos.
+
+## Remover itens da fila
+
+Em Downloads, abra **Detalhes → Remover** para excluir um item aguardando, cancelado, com falha ou interrompido. Em Transcrições, use **Remover da fila** para pendentes e **Remover** para canceladas, falhas ou interrompidas. Itens ativos precisam ser cancelados primeiro. A remoção limpa somente temporários próprios: o arquivo original e os resultados já publicados são preservados. Se a limpeza falhar, o registro continua na fila e o erro é exibido.

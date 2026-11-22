@@ -1,3 +1,11 @@
+# Preparação da release 0.8.0 — 22 de novembro de 2026
+
+- Inclui transcrição local e os ajustes de interface/remoção das duas filas. A versão estável publicada continua 0.7.0 durante a preparação.
+- O CI inicial revelou fixtures com caminhos temporários abreviados no Windows. As fixtures foram ajustadas para usar `realpath`, respeitando o mesmo contrato de caminhos canônicos da seleção de arquivos; as verificações do aplicativo foram preservadas.
+- CI, geração dos pacotes e validação dos artefatos desta versão: em andamento. Teste manual do instalador Windows e da atualização nativa: pendente.
+
+---
+
 # Transcrição local — implementação em 20 de novembro de 2026
 
 Validação desta árvore de desenvolvimento; nenhuma nova Release foi publicada e a versão do aplicativo continua 0.7.0.

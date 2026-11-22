@@ -18,7 +18,7 @@ Aplicativo desktop de código aberto desenvolvido por **justmatedev** para baixa
 - Progresso da faixa ativa, cancelamento e novas tentativas para falhas temporárias.
 - Fila persistente, recuperação de interrupções e proteção contra sobrescrita.
 - Notificações do sistema e ações para abrir ou localizar arquivos concluídos.
-- Transcrição local opcional com Whisper Small ou Medium, em uma aba própria, para downloads concluídos e arquivos do computador; exportação TXT e SRT. Disponível nesta árvore de desenvolvimento, ainda sem nova Release.
+- Transcrição local opcional com Whisper Small ou Medium, em uma aba própria, para downloads concluídos e arquivos do computador; exportação TXT e SRT. Preparada para a versão 0.8.0; veja as [notas de lançamento](docs/RELEASE-0.8.0.md).
 
 ![Fila e progresso do Vora com dados demonstrativos](docs/images/fila.png)
 

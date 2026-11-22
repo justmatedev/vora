@@ -1,11 +1,16 @@
 # Histórico de mudanças
 
-## Em desenvolvimento
+## 0.8.0 — em preparação
 
 - Aba Transcrições com arquivos locais e ação nos downloads concluídos.
 - Whisper.cpp 1.8.2 local, modelos multilíngues Small e Medium opcionais, download verificado e armazenamento persistente separado do aplicativo.
 - Fila independente, idioma automático ou manual, TXT/SRT, cancelamento e recuperação pausada de interrupções.
 - Gerenciamento de modelos, proteção contra sobrescrita e bloqueio de atualização enquanto houver trabalho ativo.
+
+- Fila de downloads mais enxuta, com informações secundárias em Detalhes e filtros exibidos conforme o volume ou a busca.
+- Remoção de downloads cancelados, com falha ou interrompidos, com limpeza de temporários.
+- Remoção real de transcrições pendentes e encerradas; arquivos originais e resultados publicados preservados.
+- Controle Continuar fila oculto quando não há trabalho para continuar e gerenciamento de modelos simplificado.
 
 ## 0.7.0 — 2026-11-18
 
